@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { AppError, HttpStatus } from "@/errors/AppError.js";
 import { env } from "@/config/env.js";
+import { ValidationError } from "./validate.js";
 
 // the error handler middleware — always register this LAST in server.ts
 export const errorHandler = (
@@ -12,6 +13,15 @@ export const errorHandler = (
   if (env.NODE_ENV !== "staging") {
     console.error(`[ERROR] {${new Date().toISOString()}} ${req.method} ${req.url}:`);
     console.error(err);
+  }
+
+  // Validation error
+  if (err instanceof ValidationError) {
+    res.status(HttpStatus.BadRequest).json({
+      error: "Validation failed",
+      issues: err.issues,
+    });
+    return;
   }
 
   // EXPECTED ERRORS (AppError)

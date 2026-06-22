@@ -7,14 +7,14 @@ const envSchema = z.object({
   APP_URL: z.url(),
   API_VERSION: z.string().default("v1"),
 
-  // // Database
-  // DATABASE_URL: z.url(),
+  // Database
+  DATABASE_URL: z.url(),
 
   // // Auth
-  // JWT_SECRET: z.string().min(32),
-  // JWT_EXPIRES_IN: z.string().default("15m"),
-  // REFRESH_TOKEN_SECRET: z.string().min(32),
-  // REFRESH_TOKEN_EXPIRES_IN: z.string().default("7d"),
+  JWT_SECRET: z.string().min(32),
+  JWT_EXPIRES_IN: z.string().default("15m"),
+  REFRESH_TOKEN_SECRET: z.string().min(32),
+  REFRESH_TOKEN_EXPIRES_IN: z.string().default("7d"),
 
   // // Email
   // RESEND_API_KEY: z.string().startsWith("re_"),

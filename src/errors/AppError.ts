@@ -94,8 +94,8 @@ export class AppError extends Error {
     return err;
   }
 
-  static notFound(resource = "Resource"): AppError {
-    const err = new AppError(ErrorName.NotFound, HttpStatus.NotFound, `Can't find ${resource} on this server`);
+  static notFound(message: string): AppError {
+    const err = new AppError(ErrorName.NotFound, HttpStatus.NotFound, message);
     return err;
   }
 

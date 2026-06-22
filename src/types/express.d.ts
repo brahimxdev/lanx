@@ -1,9 +1,9 @@
-import type { User } from "@/store.ts";
+import type { SafeUser } from "@/index.js";
 
 declare global {
   namespace Express {
     interface Request {
-      user?: Omit<User, "password">;
+      user?: SafeUser;
     }
   }
 }

@@ -1,4 +1,5 @@
 import { env, isDev, isProd, isStaging } from "./env.js";
+import type { StringValue } from "ms";
 
 export { isDev, isProd, isStaging };
 
@@ -9,16 +10,16 @@ export const appConfig = {
   nodeEnv: env.NODE_ENV,
 } as const;
 
-// export const databaseConfig = {
-//   databaseUrl: env.DATABASE_URL,
-// } as const;
+export const databaseConfig = {
+  databaseUrl: env.DATABASE_URL,
+} as const;
 
-// export const authConfig = {
-//   jwtSecret: env.JWT_SECRET,
-//   jwtExpiresIn: env.JWT_EXPIRES_IN,
-//   refreshSecret: env.REFRESH_TOKEN_SECRET,
-//   refreshExpiresIn: env.REFRESH_TOKEN_EXPIRES_IN,
-// } as const;
+export const authConfig = {
+  jwtSecret: env.JWT_SECRET,
+  jwtExpiresIn: env.JWT_EXPIRES_IN as StringValue,
+  refreshSecret: env.REFRESH_TOKEN_SECRET,
+  refreshExpiresIn: env.REFRESH_TOKEN_EXPIRES_IN as StringValue,
+} as const;
 
 // export const emailConfig = {
 //   apiKey: env.RESEND_API_KEY,
