@@ -1,0 +1,52 @@
+{
+  "compilerOptions": {
+    // --- Output ---
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    // --- Module system (Node ESM) ---
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "es2022",
+    "lib": ["es2022"],
+
+    // --- Path aliases (paths resolves relative to this tsconfig in TS 6+) ---
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
+    // --- Strictness ---
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    // Express middleware often has unused params (req/res/next); leave to eslint
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+
+    // --- Module hygiene ---
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noUncheckedSideEffectImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+
+    // --- Types ---
+    "types": ["node"],
+
+    // --- Emit ---
+    "sourceMap": true,
+    "declaration": false,
+    "removeComments": true,
+
+    // --- Misc ---
+    "skipLibCheck": true
+  },
+
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
