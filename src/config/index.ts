@@ -1,33 +1,34 @@
-import { env, isDev, isProd, isStaging } from "./env.js";
 import type { StringValue } from "ms";
+import { dbEnv } from "./db-env.js";
+import { appEnv, isDev, isProd, isStaging } from "./app-env.js";
 
 export { isDev, isProd, isStaging };
 
 export const appConfig = {
-  port: env.PORT,
-  url: env.APP_URL,
-  apiVersion: env.API_VERSION,
-  nodeEnv: env.NODE_ENV,
+  port: appEnv.PORT,
+  url: appEnv.APP_URL,
+  apiVersion: appEnv.API_VERSION,
+  nodeEnv: appEnv.NODE_ENV,
 } as const;
 
-export const databaseConfig = {
-  databaseUrl: env.DATABASE_URL,
+export const dbConfig = {
+  dbUrl: dbEnv.DATABASE_URL,
 } as const;
 
 export const authConfig = {
-  jwtSecret: env.JWT_SECRET,
-  jwtExpiresIn: env.JWT_EXPIRES_IN as StringValue,
-  refreshSecret: env.REFRESH_TOKEN_SECRET,
-  refreshExpiresIn: env.REFRESH_TOKEN_EXPIRES_IN as StringValue,
+  jwtSecret: appEnv.JWT_SECRET,
+  jwtExpiresIn: appEnv.JWT_EXPIRES_IN as StringValue,
+  refreshSecret: appEnv.REFRESH_TOKEN_SECRET,
+  refreshExpiresIn: appEnv.REFRESH_TOKEN_EXPIRES_IN as StringValue,
 } as const;
 
 // export const emailConfig = {
-//   apiKey: env.RESEND_API_KEY,
-//   from: env.EMAIL_FROM,
+//   apiKey: appEnv.RESEND_API_KEY,
+//   from: appEnv.EMAIL_FROM,
 // } as const;
 
 // export const cloudinaryConfig = {
-//   cloudName: env.CLOUDINARY_CLOUD_NAME,
-//   apiKey: env.CLOUDINARY_API_KEY,
-//   apiSecret: env.CLOUDINARY_API_SECRET,
+//   cloudName: appEnv.CLOUDINARY_CLOUD_NAME,
+//   apiKey: appEnv.CLOUDINARY_API_KEY,
+//   apiSecret: appEnv.CLOUDINARY_API_SECRET,
 // } as const;

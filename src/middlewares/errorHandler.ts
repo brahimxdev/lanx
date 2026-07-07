@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { AppError, HttpStatus } from "@/errors/AppError.js";
-import { env } from "@/config/env.js";
 import { ValidationError } from "./validate.js";
+import { appEnv } from "../config/app-env.js";
 
 // the error handler middleware — always register this LAST in server.ts
 export const errorHandler = (
@@ -10,7 +10,7 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction
 ): void => {
-  if (env.NODE_ENV !== "staging") {
+  if (appEnv.NODE_ENV !== "staging") {
     console.error(`[ERROR] {${new Date().toISOString()}} ${req.method} ${req.url}:`);
     console.error(err);
   }

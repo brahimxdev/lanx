@@ -1,6 +1,9 @@
 import { z } from "zod";
+import { parseEnv } from "./env-parser.js";
 
-const envSchema = z.object({
+// Full application env schema — everything the running server needs.
+
+const appEnvSchema = z.object({
   // App
   NODE_ENV: z.enum(["development", "staging", "production"]).default("development"),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
@@ -10,7 +13,7 @@ const envSchema = z.object({
   // Database
   DATABASE_URL: z.url(),
 
-  // // Auth
+  // Auth
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN: z.string().default("15m"),
   REFRESH_TOKEN_SECRET: z.string().min(32),
@@ -26,25 +29,9 @@ const envSchema = z.object({
   // CLOUDINARY_API_SECRET: z.string().min(1),
 });
 
-const parsed = envSchema.safeParse(process.env);
-
-if (!parsed.success) {
-  console.error("❌ Invalid environment variables:\n");
-
-  const tree = z.treeifyError(parsed.error);
-  Object.entries(tree.properties ?? {}).forEach(([key, node]) => {
-    if (node.errors.length) {
-      console.error(`  ${key}: ${node.errors.join(", ")}`);
-    }
-  });
-
-  console.error("\nCheck your .env.development file against .env.example\n");
-  process.exit(1);
-}
-
-export const env = parsed.data;
+export const appEnv = parseEnv(appEnvSchema, "application");
 
 // Convenience booleans — use these instead of comparing strings everywhere
-export const isDev = env.NODE_ENV === "development";
-export const isStaging = env.NODE_ENV === "staging";
-export const isProd = env.NODE_ENV === "production";
+export const isDev = appEnv.NODE_ENV === "development";
+export const isStaging = appEnv.NODE_ENV === "staging";
+export const isProd = appEnv.NODE_ENV === "production";
