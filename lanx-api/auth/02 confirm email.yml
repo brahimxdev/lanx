@@ -5,7 +5,14 @@ info:
 
 http:
   method: POST
-  url: http://localhost:3000/api/v1/auth/sign-up
+  url: http://localhost:3000/api/v1/auth/confirm-email
+  body:
+    type: json
+    data: |-
+      {
+        "email": "ibrahim@gmail.com",
+        "confirmationCode": "34456"
+      }
   auth: inherit
 
 settings:

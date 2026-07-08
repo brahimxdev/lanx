@@ -4,8 +4,15 @@ info:
   seq: 8
 
 http:
-  method: PATCH
-  url: http://localhost:3000/api/v1/auth/change-password
+  method: POST
+  url: http://localhost:3000/api/v1/auth/change-email
+  body:
+    type: json
+    data: |-
+      {
+        "newEmail": "lekxyyusuf@gmail.com",
+        "currentPassword": "IBRahim123!!!"
+      }
   auth: inherit
 
 settings:

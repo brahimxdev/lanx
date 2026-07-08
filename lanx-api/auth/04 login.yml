@@ -5,7 +5,14 @@ info:
 
 http:
   method: POST
-  url: http://localhost:3000/api/v1/auth/resend-code
+  url: http://localhost:3000/api/v1/auth/login
+  body:
+    type: json
+    data: |-
+      {
+        "email": "ibrahim@gmail.com",
+        "password": "IBRahim123!!!"
+      }
   auth: inherit
 
 settings:
