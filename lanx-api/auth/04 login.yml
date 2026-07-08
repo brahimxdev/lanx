@@ -1,0 +1,15 @@
+info:
+  name: 04 login
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: http://localhost:3000/api/v1/auth/resend-code
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
