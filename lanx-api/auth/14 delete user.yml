@@ -1,16 +1,16 @@
 info:
-  name: 03 resend code
+  name: 14 delete user
   type: http
-  seq: 3
+  seq: 14
 
 http:
-  method: POST
-  url: http://localhost:3000/api/v1/auth/resend-code
+  method: DELETE
+  url: "{{baseUrl}}/users/me"
   body:
     type: json
     data: |-
       {
-        "email": "ibrahim@gmail.com"
+        "currentPassword": "IBRahim123!!!"
       }
   auth: inherit
 

@@ -1,11 +1,11 @@
 info:
-  name: 05 forget password
+  name: 03 resend confirmation code
   type: http
-  seq: 5
+  seq: 3
 
 http:
   method: POST
-  url: "{{baseUrl}}/auth/forgot-password"
+  url: "{{baseUrl}}/auth/resend-confirmation-code"
   body:
     type: json
     data: |-

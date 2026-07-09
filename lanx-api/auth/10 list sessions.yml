@@ -5,7 +5,23 @@ info:
 
 http:
   method: GET
-  url: http://localhost:3000/api/v1/auth/sessions
+  url: "{{baseUrl}}/auth/sessions?status=active&sortBy=lastUsedAt&sortOrder=desc&limit=10&page=1"
+  params:
+    - name: status
+      value: active
+      type: query
+    - name: sortBy
+      value: lastUsedAt
+      type: query
+    - name: sortOrder
+      value: desc
+      type: query
+    - name: limit
+      value: "10"
+      type: query
+    - name: page
+      value: "1"
+      type: query
   auth: inherit
 
 settings:

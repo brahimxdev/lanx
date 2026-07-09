@@ -5,12 +5,12 @@ info:
 
 http:
   method: POST
-  url: http://localhost:3000/api/v1/auth/sign-up
+  url: "{{baseUrl}}/auth/sign-up"
   body:
     type: json
     data: |-
       {
-        "email": "ibrahim.techresources@proton.me", 
+        "email": "ibrahim.techresources@proton.me",
         "password": "IBRahim123!!!"
       }
   auth: inherit
