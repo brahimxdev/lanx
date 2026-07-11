@@ -1,10 +1,10 @@
 import type { Request, Response, NextFunction } from "express";
 import { type ZodType } from "zod";
-import { AppError, ErrorName, HttpStatus } from "@/errors/AppError.js";
+import { AppError, ErrorName, HttpStatus, ErrorCode } from "@/errors/AppError.js";
 
 type RequestPart = "body" | "query" | "params";
 
-export const validate =
+export const validateRequest =
   (schema: ZodType, part: RequestPart = "body") =>
   (req: Request, res: Response, next: NextFunction): void => {
     const result = schema.safeParse(req[part]);
@@ -32,7 +32,7 @@ export const validate =
 // custom error class for validation - extends AppError so error handler picks it up
 export class ValidationError extends AppError {
   constructor(public issues: { field: string; message: string }[]) {
-    super(ErrorName.ValidationError, HttpStatus.BadRequest, "validation error");
+    super(ErrorName.ValidationError, HttpStatus.UnprocessableEntity, ErrorCode.VALIDATION_ERROR, "Validation failed", true, issues);
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }

@@ -1,70 +1,17 @@
-export const HttpStatus = {
-  // 2xx
-  OK: 200,
-  Created: 201,
-  Accepted: 202,
-  NoContent: 204,
-
-  // 3xx
-  MovedPermanently: 301,
-  Found: 302,
-  NotModified: 304,
-  TemporaryRedirect: 307,
-
-  // 4xx
-  BadRequest: 400,
-  Unauthorized: 401,
-  Forbidden: 403,
-  NotFound: 404,
-  Conflict: 409,
-  UnprocessableEntity: 422,
-  TooManyRequests: 429,
-
-  // 5xx
-  InternalServerError: 500,
-  BadGateway: 502,
-  ServiceUnavailable: 503,
-  GatewayTimeout: 504,
-} as const;
-
-/**
- * ERROR NAMES — string identifiers for 4xx and 5xx only.
- * (2xx and 3xx aren't errors, so they don't get names.)
- *
- *   if (err.name === ErrorName.Unauthorized) redirectToLogin();
- */
-export const ErrorName = {
-  // 4xx
-  BadRequest: "BadRequest",
-  Unauthorized: "Unauthorized",
-  Forbidden: "Forbidden",
-  NotFound: "NotFound",
-  Conflict: "Conflict",
-  UnprocessableEntity: "UnprocessableEntity",
-  TooManyRequests: "TooManyRequests",
-
-  // 5xx
-  InternalServerError: "InternalServerError",
-  BadGateway: "BadGateway",
-  ServiceUnavailable: "ServiceUnavailable",
-  GatewayTimeout: "GatewayTimeout",
-
-  // App Error
-  ValidationError: "Validation Error",
-} as const;
-
-export type HttpStatusCode = (typeof HttpStatus)[keyof typeof HttpStatus];
-export type ErrorNameType = (typeof ErrorName)[keyof typeof ErrorName];
+import { HttpStatus, type HttpStatusCode } from "./http-status.js";
+import { ErrorCode, ErrorName, type ErrorCodeType, type ErrorNameType } from "./error-codes.js";
 
 export class AppError extends Error {
   override name: ErrorNameType;
   readonly statusCode: HttpStatusCode;
+  readonly code: ErrorCodeType;
   readonly isOperational: boolean;
   readonly details?: unknown;
 
   constructor(
     name: ErrorNameType,
     statusCode: HttpStatusCode,
+    code: ErrorCodeType,
     message: string,
     isOperational = true,
     details?: unknown
@@ -72,6 +19,7 @@ export class AppError extends Error {
     super(message);
     this.name = name;
     this.statusCode = statusCode;
+    this.code = code;
     this.isOperational = isOperational;
     this.details = details;
     Object.setPrototypeOf(this, new.target.prototype);
@@ -79,77 +27,97 @@ export class AppError extends Error {
 
   // 4xx Client Errors
 
-  static badRequest(message: string, details?: unknown): AppError {
-    const err = new AppError(ErrorName.BadRequest, HttpStatus.BadRequest, message, true, details);
-    return err;
+  static badRequest(
+    message: string,
+    code: ErrorCodeType = ErrorCode.VALIDATION_ERROR,
+    details?: unknown
+  ): AppError {
+    return new AppError(ErrorName.BadRequest, HttpStatus.BadRequest, code, message, true, details);
   }
 
-  static unauthorized(message = "Authentication required"): AppError {
-    const err = new AppError(ErrorName.Unauthorized, HttpStatus.Unauthorized, message);
-    return err;
+  static unauthorized(
+    message = "Authentication required",
+    code: ErrorCodeType = ErrorCode.UNAUTHORIZED
+  ): AppError {
+    return new AppError(ErrorName.Unauthorized, HttpStatus.Unauthorized, code, message);
   }
 
-  static forbidden(message = "You do not have permission to perform this action"): AppError {
-    const err = new AppError(ErrorName.Forbidden, HttpStatus.Forbidden, message);
-    return err;
+  static forbidden(
+    message = "You do not have permission to perform this action",
+    code: ErrorCodeType = ErrorCode.FORBIDDEN
+  ): AppError {
+    return new AppError(ErrorName.Forbidden, HttpStatus.Forbidden, code, message);
   }
 
-  static notFound(message: string): AppError {
-    const err = new AppError(ErrorName.NotFound, HttpStatus.NotFound, message);
-    return err;
+  static notFound(message: string, code: ErrorCodeType = ErrorCode.NOT_FOUND): AppError {
+    return new AppError(ErrorName.NotFound, HttpStatus.NotFound, code, message);
   }
 
-  static conflict(message: string): AppError {
-    const err = new AppError(ErrorName.Conflict, HttpStatus.Conflict, message);
-    return err;
+  static conflict(message: string, code: ErrorCodeType = ErrorCode.ALREADY_EXISTS): AppError {
+    return new AppError(ErrorName.Conflict, HttpStatus.Conflict, code, message);
   }
 
-  static unprocessableEntity(message: string, details?: unknown): AppError {
-    const err = new AppError(
+  static unprocessableEntity(
+    message: string,
+    code: ErrorCodeType = ErrorCode.VALIDATION_ERROR,
+    details?: unknown
+  ): AppError {
+    return new AppError(
       ErrorName.UnprocessableEntity,
       HttpStatus.UnprocessableEntity,
+      code,
       message,
       true,
       details
     );
-    return err;
   }
 
-  static tooManyRequests(message = "Too many requests. Please try again later."): AppError {
-    const err = new AppError(ErrorName.TooManyRequests, HttpStatus.TooManyRequests, message);
-    return err;
+  static tooManyRequests(
+    message = "Too many requests. Please try again later.",
+    code: ErrorCodeType = ErrorCode.TOO_MANY_REQUESTS
+  ): AppError {
+    return new AppError(ErrorName.TooManyRequests, HttpStatus.TooManyRequests, code, message);
   }
 
-  // 5xx Server Errors
-  // isOperational = false → never expose these details to the client
+  // ─── 5xx ──────────────────────────────────────────────────────────────────
 
   static internalServerError(message = "Internal Server Error"): AppError {
-    const err = new AppError(
+    return new AppError(
       ErrorName.InternalServerError,
       HttpStatus.InternalServerError,
+      ErrorCode.INTERNAL_ERROR,
       message,
       false
     );
-    return err;
   }
 
   static badGateway(message = "Bad gateway"): AppError {
-    const err = new AppError(ErrorName.BadGateway, HttpStatus.BadGateway, message, false);
-    return err;
-  }
-
-  static serviceUnavailable(message = "Service temporarily unavailable"): AppError {
-    const err = new AppError(
-      ErrorName.ServiceUnavailable,
-      HttpStatus.ServiceUnavailable,
+    return new AppError(
+      ErrorName.BadGateway,
+      HttpStatus.BadGateway,
+      ErrorCode.INTERNAL_ERROR,
       message,
       false
     );
-    return err;
   }
 
-  static gatwayTimeOut(message = "Gateway timeout"): AppError {
-    const err = new AppError(ErrorName.GatewayTimeout, HttpStatus.GatewayTimeout, message, false);
-    return err;
+  static serviceUnavailable(message = "Service temporarily unavailable"): AppError {
+    return new AppError(
+      ErrorName.ServiceUnavailable,
+      HttpStatus.ServiceUnavailable,
+      ErrorCode.INTERNAL_ERROR,
+      message,
+      false
+    );
+  }
+
+  static gatewayTimeout(message = "Gateway timeout"): AppError {
+    return new AppError(
+      ErrorName.GatewayTimeout,
+      HttpStatus.GatewayTimeout,
+      ErrorCode.INTERNAL_ERROR,
+      message,
+      false
+    );
   }
 }

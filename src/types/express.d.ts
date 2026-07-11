@@ -1,9 +1,11 @@
-import type { SafeUser } from "@/index.js";
+import type { IAuthenticatedUser } from "@/modules/auth/auth.types.js";
 
 declare global {
   namespace Express {
     interface Request {
-      user?: SafeUser;
+      user?: IAuthenticatedUser;
     }
   }
 }
+
+export {};

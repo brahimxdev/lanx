@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { AppError, HttpStatus } from "@/errors/AppError.js";
-import { ValidationError } from "./validate.js";
+import { ValidationError } from "./validateRequest.js";
 import { appEnv } from "../config/app-env.js";
 
 // the error handler middleware — always register this LAST in server.ts
@@ -17,8 +17,11 @@ export const errorHandler = (
 
   // Validation error
   if (err instanceof ValidationError) {
-    res.status(HttpStatus.BadRequest).json({
-      error: "Validation failed",
+    res.status(err.statusCode).json({
+      status: false,
+      code: err.code,
+      name: err.name,
+      message: err.message,
       issues: err.issues,
     });
     return;
@@ -28,8 +31,9 @@ export const errorHandler = (
   // these are errors YOU threw on purpose - safe to send to client
   if (err instanceof AppError && err.isOperational) {
     const body: Record<string, unknown> = {
-      status: "error",
+      status: false,
       error: {
+        code: err.code,
         name: err.name,
         message: err.message,
         statusCode: err.statusCode,
