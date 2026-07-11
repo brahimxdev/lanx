@@ -1,6 +1,9 @@
+import { ErrorName } from './../errors/error-codes.js';
 import type { Request, Response, NextFunction } from "express";
 import { type ZodType } from "zod";
-import { AppError, ErrorName, HttpStatus, ErrorCode } from "@/errors/AppError.js";
+import { AppError, ErrorCode, HttpStatus } from "@/errors/index.js";
+
+
 
 type RequestPart = "body" | "query" | "params";
 

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { email, z } from "zod";
 
 // sign-up schema
 export const signUpSchema = z.object({
@@ -20,4 +20,14 @@ export const signUpSchema = z.object({
     }),
 });
 
+export const confirmEmailSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.email({ pattern: z.regexes.email })),
+  code: z.string().trim().length(6, "Code cannot be more than 6 characters"),
+});
+
 export type ISignupInput = z.infer<typeof signUpSchema>;
+export type IConfirmEmail = z.infer<typeof confirmEmailSchema>;

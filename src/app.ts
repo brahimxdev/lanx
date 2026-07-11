@@ -4,7 +4,7 @@ import type { Request, Response, NextFunction } from "express";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { AppError } from "@/errors/AppError.js";
 import { isDev } from "./config/app-env.js";
-import { router as authRouter } from "./routes/auth.routes.js";
+import { router as authRouter } from "@/modules/auth/auth.routes.js";
 import { router as userRouter } from "./routes/user.routes.js";
 
 const app = express();

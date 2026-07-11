@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { AppError, HttpStatus } from "@/errors/AppError.js";
+import { AppError } from "@/errors/index.js";
 import { ValidationError } from "./validateRequest.js";
 import { appEnv } from "../config/app-env.js";
 
@@ -51,6 +51,7 @@ export const errorHandler = (
   const fallback = AppError.internalServerError();
   res.status(fallback.statusCode).json({
     error: {
+      code: fallback.code,
       name: fallback.name,
       message: fallback.message,
       statusCode: fallback.statusCode,
