@@ -19,9 +19,9 @@ const appEnvSchema = z.object({
   REFRESH_TOKEN_SECRET: z.string().min(32),
   REFRESH_TOKEN_EXPIRES_IN: z.string().default("7d"),
 
-  // // Email
-  // RESEND_API_KEY: z.string().startsWith("re_"),
-  // EMAIL_FROM: z.email(),
+  // Email
+  RESEND_API_KEY: z.string().startsWith("re_"),
+  EMAIL_FROM: z.email(),
 
   // // Storage (Cloudinary)
   // CLOUDINARY_CLOUD_NAME: z.string().min(1),

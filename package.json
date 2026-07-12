@@ -23,7 +23,8 @@
     "test:run": "vitest --run",
     "test:ui": "vitest --ui",
     "coverage": "vitest run --coverage",
-    "prepare": "husky"
+    "prepare": "husky",
+    "email:dev": "email dev"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -56,14 +57,20 @@
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.11.0",
     "pg": "^8.22.0",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "react-email": "6.7.0",
+    "resend": "^6.17.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@react-email/ui": "6.7.0",
     "@types/express": "^5.0.6",
     "@types/morgan": "^1.9.10",
     "@types/node": "^25.8.0",
     "@types/pg": "^8.20.0",
+    "@types/react": "^19.2.17",
     "@vitest/coverage-v8": "^4.1.6",
     "@vitest/eslint-plugin": "^1.6.17",
     "@vitest/ui": "^4.1.6",

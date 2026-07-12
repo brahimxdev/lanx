@@ -9,7 +9,7 @@ export const router = Router();
 
 // base url - /api/v1/auth
 
-// Route for creating auth user
+// Route for creating user
 router.post("/sign-up", validateRequest(signUpSchema), asyncHandler(AuthController.signup));
 
 // // Route for confirming email, usable for only sign up to confirm email by code

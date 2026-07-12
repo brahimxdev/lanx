@@ -8,13 +8,15 @@ import type { Request, Response } from "express";
 export class AuthController {
   // sign-up - create new account on auth_users table
   static signup = async (req: Request<unknown, unknown, ISignupInput>, res: Response) => {
+    // Validation middleware already validated data!
+
     const { email, password } = req.body;
 
     const { newUser } = await AuthService.createUser({ email, password });
 
     res.status(HttpStatus.Created).json({
       status: "true",
-      data: newUser,
+      data: { user: newUser },
     });
   };
 }

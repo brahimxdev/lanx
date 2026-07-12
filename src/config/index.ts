@@ -22,10 +22,10 @@ export const authConfig = {
   refreshExpiresIn: appEnv.REFRESH_TOKEN_EXPIRES_IN as StringValue,
 } as const;
 
-// export const emailConfig = {
-//   apiKey: appEnv.RESEND_API_KEY,
-//   from: appEnv.EMAIL_FROM,
-// } as const;
+export const emailConfig = {
+  apiKey: appEnv.RESEND_API_KEY,
+  from: appEnv.EMAIL_FROM,
+} as const;
 
 // export const cloudinaryConfig = {
 //   cloudName: appEnv.CLOUDINARY_CLOUD_NAME,
