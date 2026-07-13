@@ -26,7 +26,7 @@ export const confirmEmailSchema = z.object({
     .trim()
     .toLowerCase()
     .pipe(z.email({ pattern: z.regexes.email })),
-  code: z.string().trim().length(6, "Code cannot be more than 6 characters"),
+  confirmationCode: z.string().trim().length(6, "Code must be 6 characters"),
 });
 
 export type ISignupInput = z.infer<typeof signUpSchema>;

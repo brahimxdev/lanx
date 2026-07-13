@@ -6,6 +6,7 @@ import { AppError } from "@/errors/AppError.js";
 import { isDev } from "./config/app-env.js";
 import { router as authRouter } from "@/modules/auth/auth.routes.js";
 import { router as userRouter } from "./routes/user.routes.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -15,6 +16,9 @@ if (isDev) {
 }
 // Deserialize all coming request data into json
 app.use(express.json());
+
+// cookie parser
+app.use(cookieParser());
 
 // Mouting Routes
 app.use("/api/v1/auth", authRouter);

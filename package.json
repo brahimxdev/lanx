@@ -51,6 +51,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "drizzle-orm": "^1.0.0-rc.4",
     "drizzle-seed": "^1.0.0-rc.4",
     "express": "^5.2.1",
@@ -66,6 +67,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@react-email/ui": "6.7.0",
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/morgan": "^1.9.10",
     "@types/node": "^25.8.0",

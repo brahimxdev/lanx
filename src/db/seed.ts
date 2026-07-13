@@ -33,7 +33,7 @@ const seedData = async (): Promise<void> => {
         }),
         usedAt: false,
         attemptCount: func.int({ minValue: 0, maxValue: 5 }),
-        createdAt: false
+        createdAt: false,
       },
     },
 
@@ -57,7 +57,7 @@ const seedData = async (): Promise<void> => {
         deviceType: func.valuesFromArray({ values: ["desktop", "mobile", "tablet"] }),
         deviceOs: func.valuesFromArray({ values: ["macOS", "windows", "linux", "iOS", "android"] }),
         deviceBrowser: func.valuesFromArray({ values: ["Opera Mini", "Chrome", "Safari", "Arc"] }),
-        lastUsedAt: func.date({minDate: new Date(), maxDate: new Date()}),
+        lastUsedAt: func.date({ minDate: new Date(), maxDate: new Date() }),
       },
     },
   }));

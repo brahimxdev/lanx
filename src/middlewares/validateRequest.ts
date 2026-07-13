@@ -1,9 +1,7 @@
-import { ErrorName } from './../errors/error-codes.js';
+import { ErrorName } from "./../errors/error-codes.js";
 import type { Request, Response, NextFunction } from "express";
 import { type ZodType } from "zod";
 import { AppError, ErrorCode, HttpStatus } from "@/errors/index.js";
-
-
 
 type RequestPart = "body" | "query" | "params";
 
@@ -35,7 +33,14 @@ export const validateRequest =
 // custom error class for validation - extends AppError so error handler picks it up
 export class ValidationError extends AppError {
   constructor(public issues: { field: string; message: string }[]) {
-    super(ErrorName.ValidationError, HttpStatus.UnprocessableEntity, ErrorCode.VALIDATION_ERROR, "Validation failed", true, issues);
+    super(
+      ErrorName.ValidationError,
+      HttpStatus.UnprocessableEntity,
+      ErrorCode.VALIDATION_ERROR,
+      "Validation failed",
+      true,
+      issues
+    );
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }

@@ -1,7 +1,5 @@
 import { resend } from "@/lib/resend.client.js";
-import {
-  ConfirmationCodeEmail,
-} from "@/emails/templates/ConfirmationCode.js";
+import { ConfirmationCodeEmail } from "@/emails/templates/ConfirmationCode.js";
 import { emailConfig } from "@/config/index.js";
 
 export class EmailService {

@@ -1,9 +1,8 @@
 import { Router } from "express";
 import { validateRequest } from "@/middlewares/validateRequest.js";
-import { signUpSchema } from './auth.validation.js';
+import { confirmEmailSchema, signUpSchema } from "./auth.validation.js";
 import { asyncHandler } from "@/utils/asyncHandler.js";
-import { AuthController } from './auth.controller.js';
-
+import { AuthController } from "./auth.controller.js";
 
 export const router = Router();
 
@@ -12,8 +11,12 @@ export const router = Router();
 // Route for creating user
 router.post("/sign-up", validateRequest(signUpSchema), asyncHandler(AuthController.signup));
 
-// // Route for confirming email, usable for only sign up to confirm email by code
-// router.post("/confirm-email");
+// Route for confirming email, usable for only sign up to confirm email by code
+router.post(
+  "/confirm-email",
+  validateRequest(confirmEmailSchema),
+  asyncHandler(AuthController.confirmEmail)
+);
 
 // // Route for resending confirmation code, usable for only sign up code
 // router.post("/resend-confirmation-code");
