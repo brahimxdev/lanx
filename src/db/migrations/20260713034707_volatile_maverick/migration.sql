@@ -34,7 +34,7 @@ CREATE TABLE "sessions" (
 	"device_os" text,
 	"device_browser" text,
 	"created_at" timestamp with time zone DEFAULT now(),
-	"last_used_at" timestamp with time zone
+	"last_used_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX "auth_users_email_unique_active" ON "auth_users" ("email") WHERE "deleted_at" IS NULL;--> statement-breakpoint

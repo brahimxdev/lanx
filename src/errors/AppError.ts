@@ -29,7 +29,7 @@ export class AppError extends Error {
 
   static badRequest(
     message: string,
-    code: ErrorCodeType = ErrorCode.VALIDATION_ERROR,
+    code: ErrorCodeType = ErrorCode.TOO_MANY_REQUESTS,
     details?: unknown
   ): AppError {
     return new AppError(ErrorName.BadRequest, HttpStatus.BadRequest, code, message, true, details);

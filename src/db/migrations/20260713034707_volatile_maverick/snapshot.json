@@ -1,11 +1,17 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "9db35599-ccca-41f5-b27b-6e37becd4364",
-  "prevIds": ["00000000-0000-0000-0000-000000000000"],
+  "id": "6cd8ea14-8efc-4ef7-aae0-cdaa5586f550",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
   "ddl": [
     {
-      "values": ["sign_up", "change_email", "password_reset"],
+      "values": [
+        "sign_up",
+        "change_email",
+        "password_reset"
+      ],
       "name": "confirmation_type",
       "entityType": "enums",
       "schema": "public"
@@ -382,9 +388,9 @@
     {
       "type": "timestamp with time zone",
       "typeSchema": null,
-      "notNull": false,
+      "notNull": true,
       "dimensions": 0,
-      "default": null,
+      "default": "now()",
       "generated": null,
       "identity": null,
       "name": "last_used_at",
@@ -548,10 +554,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["auth_user_id"],
+      "columns": [
+        "auth_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "auth_users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "email_confirmations_auth_user_id_auth_users_id_fkey",
@@ -561,10 +571,14 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["auth_user_id"],
+      "columns": [
+        "auth_user_id"
+      ],
       "schemaTo": "public",
       "tableTo": "auth_users",
-      "columnsTo": ["id"],
+      "columnsTo": [
+        "id"
+      ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "sessions_auth_user_id_auth_users_id_fkey",
@@ -573,7 +587,9 @@
       "table": "sessions"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "auth_users_pkey",
       "schema": "public",
@@ -581,7 +597,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "email_confirmations_pkey",
       "schema": "public",
@@ -589,7 +607,9 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": [
+        "id"
+      ],
       "nameExplicit": false,
       "name": "sessions_pkey",
       "schema": "public",

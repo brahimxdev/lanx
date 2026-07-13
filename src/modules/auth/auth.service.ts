@@ -34,6 +34,7 @@ export class AuthService {
     // 2. Hash password + Generate confirmation code
     const passwordHash = await bcrypt.hash(input.password, 12);
     const confirmationCode = generateConfirmationCode();
+    console.log(confirmationCode);
     const confirmationCodeHash = hashConfirmationCode(confirmationCode);
 
     // 3. Save unverified user
@@ -87,6 +88,7 @@ export class AuthService {
 
     // Look up latest unused confirmation code for the user
     const confirmationRecord = await emailConfirmationRepository.findLatestUnused(existingUser.id);
+    console.log("Your confirmation record is:", confirmationRecord);
 
     if (!confirmationRecord) {
       throw AppError.badRequest(
@@ -97,24 +99,22 @@ export class AuthService {
 
     // Attempt count check
     if (confirmationRecord.attemptCount >= 5) {
-      throw AppError.badRequest("Something went wrong, please resend a new code");
+      throw AppError.tooManyRequests("Something went wrong, please resend a new code");
     }
 
     // Expiry check
-    const isExpired = confirmationRecord.expiresAt.getTime() < Date.now();
+    const isExpired = confirmationRecord.expiresAt <= new Date();
     if (isExpired) {
       await emailConfirmationRepository.incrementAttemptCount(confirmationRecord.id);
-      throw AppError.unauthorized(
+      throw AppError.badRequest(
         "This code has expired, please request a new one",
         ErrorCode.EXPIRED_CODE
       );
     }
 
-    // Hash submitted code and compare against stored hased code
-    const confirmationCodeHash = hashConfirmationCode(input.confirmationCode);
-
+    // compare inputed code against stored hased code
     const isPlainEqualHashed = verifyConfirmationCode(
-      confirmationCodeHash,
+      input.confirmationCode,
       confirmationRecord.codeHash
     );
 
@@ -188,6 +188,7 @@ export class AuthService {
       createdAt: updatedUser.createdAt,
     };
 
+    await EmailService.sendWelcomeEmailPro("brahimxdev@gmail.com", { firstName: newUser.email });
     return { newUser, accessToken, refreshToken };
   }
 }

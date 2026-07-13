@@ -85,7 +85,7 @@ export const sessions = pgTable(
     deviceOs: text("device_os"),
     deviceBrowser: text("device_browser"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-    lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true }).notNull().defaultNow(),
   },
   // columns constraints and indexes
   (pgTable) => [

@@ -22,12 +22,3 @@ export const verifyConfirmationCode = (code: string, hashedCode: string): boolea
   const isPlainEqualHashed = hashConfirmationCode(code) === hashedCode;
   return isPlainEqualHashed;
 };
-
-// const code = generateConfirmationCode();
-// console.log("Your code is:", code);
-
-// const hashedCode = hashConfirmationCode(code);
-// console.log("Your hashed code is:", hashedCode);
-
-// const isPlainEqualHashed = verifyConfirmationCode(code, hashedCode);
-// console.log("Is plain equal hash?", isPlainEqualHashed);
