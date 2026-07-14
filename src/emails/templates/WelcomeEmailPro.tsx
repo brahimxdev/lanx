@@ -1,7 +1,7 @@
 import { Html, Head, Body, Preview, Container, Heading, Text, Section, Button, Hr } from "react-email";
 
 export interface IWelcomeEmailProProps {
-  firstName: string;
+  email: string;
   dashboardUrl?: string;
   connectStripeUrl?: string;
 }
@@ -9,7 +9,7 @@ export interface IWelcomeEmailProProps {
 /**
  * Sent once after a freelancer completes email confirmation / signup.
  */
-export const WelcomeEmailPro = ({ firstName, dashboardUrl, connectStripeUrl }: IWelcomeEmailProProps) => {
+export const WelcomeEmailPro = ({ email, dashboardUrl, connectStripeUrl }: IWelcomeEmailProProps) => {
   return (
     <Html lang="en" dir="ltr">
       <Head />
@@ -18,7 +18,7 @@ export const WelcomeEmailPro = ({ firstName, dashboardUrl, connectStripeUrl }: I
         <Container style={container}>
           <Heading style={heading}>Lanx</Heading>
 
-          <Text style={paragraph}>Hi {firstName},</Text>
+          <Text style={paragraph}>Hi {email},</Text>
 
           <Text style={paragraph}>
             Your account is set up. Lanx takes you from proposal to paid invoice without

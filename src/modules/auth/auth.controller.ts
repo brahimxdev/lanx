@@ -3,7 +3,7 @@ import type { IConfirmEmail, ISignupInput } from "./auth.validation.js";
 import { AuthService } from "./auth.service.js";
 import type { Request, Response } from "express";
 import type { IRequestMeta } from "./auth.types.js";
-import { setRefreshTokenCookie } from "@/utils/cookie.js";
+import { TokenService } from "./token.service.js";
 
 // POST - /api/v1/auth/sign-up
 
@@ -33,7 +33,7 @@ export class AuthController {
     );
 
     // set refresh token to cookie
-    setRefreshTokenCookie(res, refreshToken);
+    TokenService.setRefreshTokenCookie(res, refreshToken);
 
     res.status(HttpStatus.Created).json({
       status: "true",

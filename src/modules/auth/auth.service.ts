@@ -11,12 +11,11 @@ import {
   authUserRepository,
   emailConfirmationRepository,
   sessionRespository,
-} from "./auth.repository.js";
+} from "./repo/index.js";
 import type { IAuthenticatedUser, IRequestMeta } from "./auth.types.js";
 import { EmailService } from "../email/email.service.js";
-import { generateRefreshToken, hashRefreshToken, signAccessToken } from "@/utils/tokens.util.js";
 import { authConfig } from "@/config/index.js";
-// import { EmailService } from "../email/email.service.js";
+import { TokenService } from "./token.service.js";
 
 export class AuthService {
   // Create new user
@@ -34,7 +33,6 @@ export class AuthService {
     // 2. Hash password + Generate confirmation code
     const passwordHash = await bcrypt.hash(input.password, 12);
     const confirmationCode = generateConfirmationCode();
-    console.log(confirmationCode);
     const confirmationCodeHash = hashConfirmationCode(confirmationCode);
 
     // 3. Save unverified user
@@ -70,7 +68,6 @@ export class AuthService {
   }
 
   // Confirm email for user signing up
-
   static async confirmEmail(input: IConfirmEmail, meta: IRequestMeta) {
     // 1. Check if account exist by email
     const existingUser = await authUserRepository.findByEmail(input.email);
@@ -88,7 +85,6 @@ export class AuthService {
 
     // Look up latest unused confirmation code for the user
     const confirmationRecord = await emailConfirmationRepository.findLatestUnused(existingUser.id);
-    console.log("Your confirmation record is:", confirmationRecord);
 
     if (!confirmationRecord) {
       throw AppError.badRequest(
@@ -127,8 +123,8 @@ export class AuthService {
     }
 
     // Generate + hash refresh Token
-    const refreshToken = generateRefreshToken();
-    const refreshTokenHash = hashRefreshToken(refreshToken);
+    const refreshToken = TokenService.generateRefreshToken();
+    const refreshTokenHash = TokenService.hashRefreshToken(refreshToken);
 
     // db transactions
     const { updatedUser, newSessionRecord } = await db.transaction(async (tx) => {
@@ -157,7 +153,7 @@ export class AuthService {
       // tx 3 - invalidate all existing sessions for the user
       await sessionRespository.revokeAllActive(existingUser.id);
 
-      // tx -4 Issue new session
+      // tx 4 - Issue new session
       const newSessionRecord = await sessionRespository.createSession(
         {
           authUserId: existingUser.id,
@@ -176,11 +172,12 @@ export class AuthService {
     });
 
     // sign access Token
-    const accessToken = signAccessToken({
+    const accessToken = TokenService.signAccessToken({
       userId: existingUser.id,
       sessionId: newSessionRecord.id,
     });
 
+    // Sanitized user to return to client
     const newUser: IAuthenticatedUser = {
       id: updatedUser.id,
       email: updatedUser.email,
@@ -188,7 +185,7 @@ export class AuthService {
       createdAt: updatedUser.createdAt,
     };
 
-    await EmailService.sendWelcomeEmailPro("brahimxdev@gmail.com", { firstName: newUser.email });
+    await EmailService.sendWelcomeEmailPro("brahimxdev@gmail.com", { email: newUser.email });
     return { newUser, accessToken, refreshToken };
   }
 }

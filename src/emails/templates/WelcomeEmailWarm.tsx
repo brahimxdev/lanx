@@ -1,7 +1,7 @@
 import { Html, Head, Body, Preview, Container, Heading, Text, Section, Button, Hr } from "react-email";
 
 export interface IWelcomeEmailWarmProps {
-  firstName: string;
+  email: string;
   dashboardUrl?: string;
   connectStripeUrl?: string;
 }
@@ -10,16 +10,16 @@ export interface IWelcomeEmailWarmProps {
  * Sent once after a freelancer completes email confirmation / signup.
  * Tone: warm, personal, indie/solo-builder feel.
  */
-export const WelcomeEmailWarm = ({ firstName, dashboardUrl, connectStripeUrl }: IWelcomeEmailWarmProps) => {
+export const WelcomeEmailWarm = ({ email, dashboardUrl, connectStripeUrl }: IWelcomeEmailWarmProps) => {
   return (
     <Html lang="en" dir="ltr">
       <Head />
-      <Preview>You're in, {firstName} - let's get your first client set up</Preview>
+      <Preview>You're in, {email} - let's get your first client set up</Preview>
       <Body style={main}>
         <Container style={container}>
           <Heading style={heading}>Lanx</Heading>
 
-          <Text style={paragraph}>Hey {firstName},</Text>
+          <Text style={paragraph}>Hey {email},</Text>
 
           <Text style={paragraph}>
             Welcome - genuinely glad you're here. Lanx exists because freelancing shouldn't mean
