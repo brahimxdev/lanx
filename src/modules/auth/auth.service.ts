@@ -1,5 +1,6 @@
 import type {
   IConfirmEmail,
+  IForgotPassword,
   IResendConfirmationCode,
   ISignIn,
   ISignup,
@@ -201,7 +202,7 @@ export class AuthService {
 
     if (!existingUser || existingUser.isEmailVerified) {
       return {
-        message: "If an account exist, a confirmation code has been sent - No email",
+        message: "If an account exist, a confirmation code has been sent!",
       };
     }
 
@@ -229,7 +230,7 @@ export class AuthService {
     await EmailService.sendConfirmationCode("brahimxdev@gmail.com", confirmationCode);
 
     return {
-      message: "If an account exist, a code has been sent - Yes Email",
+      message: "If an account exist, a code has been sent!",
     };
   }
 
@@ -290,5 +291,44 @@ export class AuthService {
     };
 
     return { user, accessToken, refreshToken };
+  }
+
+  // Forgot password
+  static async forgotPassword(input: IForgotPassword) {
+    // Check if user exist by email
+    const existingUser = await authUserRepository.findByEmail(input.email);
+
+    if (!existingUser) {
+      return {
+        message: "If an account exist, a confirmation code has been sent!",
+      };
+    }
+
+    const confirmationCode = generateConfirmationCode();
+    const confirmationCodeHash = hashConfirmationCode(confirmationCode);
+
+    // db transactions
+    await db.transaction(async (tx) => {
+      // tx 1 - Invalidate previous code
+      await emailConfirmationRepository.invalidateAllUnused(existingUser.id, tx);
+
+      // tx 2 - Insert new confirmation record in db
+      await emailConfirmationRepository.create(
+        {
+          authUserId: existingUser.id,
+          codeHash: confirmationCodeHash,
+          confirmationType: "password_reset",
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+        },
+        tx
+      );
+    });
+
+    // 4. Send code to user via email
+    await EmailService.sendConfirmationCode("brahimxdev@gmail.com", confirmationCode);
+
+    return {
+      message: "If an account exist, a code has been sent!",
+    };
   }
 }

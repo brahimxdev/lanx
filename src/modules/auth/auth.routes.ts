@@ -2,6 +2,7 @@ import { Router } from "express";
 import { validateRequest } from "@/middlewares/validateRequest.js";
 import {
   confirmEmailSchema,
+  forgotPasswordSchema,
   resendConfirmationCodeSchema,
   signInSchema,
   signUpSchema,
@@ -33,8 +34,12 @@ router.post(
 // Route for sign in
 router.post("/sign-in", validateRequest(signInSchema), asyncHandler(AuthController.signIn));
 
-// // Route for forgot password
-// router.post("/forgot-password");
+// Route for forgot password
+router.post(
+  "/forgot-password",
+  validateRequest(forgotPasswordSchema),
+  asyncHandler(AuthController.forgotPassword)
+);
 
 // // Route for reseting passwordd
 // router.post("/reset-password");

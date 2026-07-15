@@ -1,6 +1,7 @@
 import { HttpStatus } from "@/errors/index.js";
 import type {
   IConfirmEmail,
+  IForgotPassword,
   IResendConfirmationCode,
   ISignIn,
   ISignup,
@@ -84,6 +85,24 @@ export class AuthController {
       data: {
         user,
         accessToken,
+      },
+    });
+  };
+
+  // Forgot password
+  static forgotPassword = async (
+    req: Request<unknown, unknown, IForgotPassword>,
+    res: Response
+  ) => {
+    // Validation middleware already validated data!
+    const { email } = req.body;
+
+    const { message } = await AuthService.forgotPassword({ email });
+
+    res.status(HttpStatus.OK).json({
+      status: "true",
+      data: {
+        message,
       },
     });
   };

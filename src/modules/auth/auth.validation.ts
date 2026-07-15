@@ -59,7 +59,17 @@ export const signInSchema = z.object({
     }),
 });
 
+// Forgot password schema
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.email({ pattern: z.regexes.email })),
+});
+
 export type ISignup = z.infer<typeof signUpSchema>;
 export type IConfirmEmail = z.infer<typeof confirmEmailSchema>;
 export type IResendConfirmationCode = z.infer<typeof resendConfirmationCodeSchema>;
 export type ISignIn = z.infer<typeof signInSchema>;
+export type IForgotPassword = z.infer<typeof forgotPasswordSchema>;
