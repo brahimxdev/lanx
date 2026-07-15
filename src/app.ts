@@ -5,7 +5,7 @@ import { errorHandler } from "./middlewares/errorHandler.js";
 import { AppError } from "@/errors/AppError.js";
 import { isDev } from "./config/app-env.js";
 import { router as authRouter } from "@/modules/auth/auth.routes.js";
-import { router as userRouter } from "./routes/user.routes.js";
+// import { router as userRouter } from "./routes/user.routes.js";
 import cookieParser from "cookie-parser";
 
 const app = express();

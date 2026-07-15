@@ -42,6 +42,10 @@ export default tseslint.config(
       "@typescript-eslint/no-unsafe-argument": "warn",
       "@typescript-eslint/no-floating-promises": "error",
       "@typescript-eslint/await-thenable": "error",
+
+      //* Remember to turn this back on
+      "@typescript-eslint/no-extraneous-class": "off",
+
       "no-console": "off",
       "no-debugger": "error",
       eqeqeq: ["error", "always"],

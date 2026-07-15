@@ -1,4 +1,3 @@
-import { xataHttpCodecs } from "drizzle-orm/xata-http";
 import { z } from "zod";
 
 // sign-up schema

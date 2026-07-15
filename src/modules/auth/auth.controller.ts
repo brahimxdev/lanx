@@ -3,18 +3,17 @@ import type {
   IConfirmEmail,
   IResendConfirmationCode,
   ISignIn,
-  ISignupInput,
+  ISignup,
 } from "./auth.validation.js";
 import { AuthService } from "./auth.service.js";
 import type { Request, Response } from "express";
-import type { IRequestMeta } from "./auth.types.js";
 import { TokenService } from "./token.service.js";
 
 // POST - /api/v1/auth/sign-up
 
 export class AuthController {
   // sign-up - create new account on auth_users table
-  static signup = async (req: Request<unknown, unknown, ISignupInput>, res: Response) => {
+  static signup = async (req: Request<unknown, unknown, ISignup>, res: Response) => {
     // Validation middleware already validated data!
 
     const { email, password } = req.body;

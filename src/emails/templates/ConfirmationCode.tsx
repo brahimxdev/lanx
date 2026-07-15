@@ -1,6 +1,5 @@
 import { Html, Head, Body, Preview, Container, Heading, Text, Section, Hr } from "react-email";
 
-
 interface IConfirmationCodeEmailProps {
   code: string;
 }

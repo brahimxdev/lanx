@@ -1,4 +1,15 @@
-import { Html, Head, Body, Preview, Container, Heading, Text, Section, Button, Hr } from "react-email";
+import {
+  Html,
+  Head,
+  Body,
+  Preview,
+  Container,
+  Heading,
+  Text,
+  Section,
+  Button,
+  Hr,
+} from "react-email";
 
 export interface IWelcomeEmailWarmProps {
   email: string;
@@ -10,7 +21,11 @@ export interface IWelcomeEmailWarmProps {
  * Sent once after a freelancer completes email confirmation / signup.
  * Tone: warm, personal, indie/solo-builder feel.
  */
-export const WelcomeEmailWarm = ({ email, dashboardUrl, connectStripeUrl }: IWelcomeEmailWarmProps) => {
+export const WelcomeEmailWarm = ({
+  email,
+  dashboardUrl,
+  connectStripeUrl,
+}: IWelcomeEmailWarmProps) => {
   return (
     <Html lang="en" dir="ltr">
       <Head />
@@ -23,15 +38,15 @@ export const WelcomeEmailWarm = ({ email, dashboardUrl, connectStripeUrl }: IWel
 
           <Text style={paragraph}>
             Welcome - genuinely glad you're here. Lanx exists because freelancing shouldn't mean
-            juggling a proposal tool, a contract tool, a timer, and an invoicing app that don't
-            talk to each other. Everything here connects: one accepted proposal turns into a
-            contract, one signed contract turns into a project, and tracked time turns into an
-            invoice you can actually get paid on.
+            juggling a proposal tool, a contract tool, a timer, and an invoicing app that don't talk
+            to each other. Everything here connects: one accepted proposal turns into a contract,
+            one signed contract turns into a project, and tracked time turns into an invoice you can
+            actually get paid on.
           </Text>
 
           <Text style={paragraph}>
-            The one thing worth doing first is connecting your Stripe account, so that when a
-            client pays, the money goes straight to you - we never touch it.
+            The one thing worth doing first is connecting your Stripe account, so that when a client
+            pays, the money goes straight to you - we never touch it.
           </Text>
 
           <Section style={buttonSection}>
@@ -41,8 +56,8 @@ export const WelcomeEmailWarm = ({ email, dashboardUrl, connectStripeUrl }: IWel
           </Section>
 
           <Text style={paragraph}>
-            After that, add your first client and send a proposal - they won't even need an
-            account to view and accept it.
+            After that, add your first client and send a proposal - they won't even need an account
+            to view and accept it.
           </Text>
 
           <Text style={secondaryLink}>
@@ -57,8 +72,7 @@ export const WelcomeEmailWarm = ({ email, dashboardUrl, connectStripeUrl }: IWel
 
           <Text style={footer}>
             Reply any time if something's unclear - a real person reads these.
-            <br />
-            - The Lanx Team
+            <br />- The Lanx Team
           </Text>
         </Container>
       </Body>
@@ -96,7 +110,12 @@ const buttonPrimary = {
   padding: "12px 24px",
 };
 
-const secondaryLink = { fontSize: "13px", color: "#666666", textAlign: "center" as const, margin: "0 0 8px" };
+const secondaryLink = {
+  fontSize: "13px",
+  color: "#666666",
+  textAlign: "center" as const,
+  margin: "0 0 8px",
+};
 
 const link = { color: "#111111", textDecoration: "underline" };
 
