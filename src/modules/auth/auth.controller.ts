@@ -1,5 +1,10 @@
 import { HttpStatus } from "@/errors/index.js";
-import type { IConfirmEmail, IResendConfirmationCode, ISignupInput } from "./auth.validation.js";
+import type {
+  IConfirmEmail,
+  IResendConfirmationCode,
+  ISignIn,
+  ISignupInput,
+} from "./auth.validation.js";
 import { AuthService } from "./auth.service.js";
 import type { Request, Response } from "express";
 import type { IRequestMeta } from "./auth.types.js";
@@ -44,7 +49,7 @@ export class AuthController {
     });
   };
 
-  // resend confirmation code - usable for signup
+  // Resend confirmation code - usable for signup
   static resendConfirmationCode = async (
     req: Request<unknown, unknown, IResendConfirmationCode>,
     res: Response
@@ -58,6 +63,28 @@ export class AuthController {
       status: "true",
       data: {
         message,
+      },
+    });
+  };
+
+  // Sign in
+  static signIn = async (req: Request<unknown, unknown, ISignIn>, res: Response) => {
+    // Validation middleware already validated data!
+    const { email, password } = req.body;
+
+    const { user, accessToken, refreshToken } = await AuthService.signIn(
+      { email, password },
+      { ipAddress: req.ip, userAgent: req.headers["user-agent"] }
+    );
+
+    // set refresh token to cookie
+    TokenService.setRefreshTokenCookie(res, refreshToken);
+
+    res.status(HttpStatus.Created).json({
+      status: "true",
+      data: {
+        user,
+        accessToken,
       },
     });
   };

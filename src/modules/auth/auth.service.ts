@@ -1,4 +1,9 @@
-import type { IConfirmEmail, IResendConfirmationCode, ISignupInput } from "./auth.validation.js";
+import type {
+  IConfirmEmail,
+  IResendConfirmationCode,
+  ISignIn,
+  ISignup,
+} from "./auth.validation.js";
 import { db } from "@/db/client.js";
 import { AppError, ErrorCode } from "@/errors/index.js";
 import bcrypt from "bcryptjs";
@@ -19,7 +24,7 @@ import { TokenService } from "./token.service.js";
 
 export class AuthService {
   // Create new user
-  static async createUser(input: ISignupInput): Promise<{ newUser: IAuthenticatedUser }> {
+  static async createUser(input: ISignup): Promise<{ newUser: IAuthenticatedUser }> {
     // 1. Check if account exist by email
     const existingUser = await authUserRepository.findByEmail(input.email);
 
@@ -226,5 +231,64 @@ export class AuthService {
     return {
       message: "If an account exist, a code has been sent - Yes Email",
     };
+  }
+
+  // Sign in
+  static async signIn(input: ISignIn, meta: IRequestMeta) {
+    // Check if user exist
+    const existingUser = await authUserRepository.findByEmail(input.email);
+
+    if (!existingUser) {
+      throw AppError.unauthorized(
+        "Email/password combination is incorrect",
+        ErrorCode.UNAUTHORIZED
+      );
+    }
+
+    // compare password against hash in db
+    const isPasswordMatch = await bcrypt.compare(input.password, existingUser.passwordHash);
+
+    if (!isPasswordMatch) {
+      throw AppError.unauthorized(
+        "Email/password combination is incorrect",
+        ErrorCode.UNAUTHORIZED
+      );
+    }
+
+    // Check if email is not confirmed
+    if (!existingUser.isEmailVerified) {
+      throw AppError.unauthorized("Your email has not been verified", ErrorCode.EMAIL_NOT_VERIFIED);
+    }
+
+    // Generate + hash refresh Token
+    const refreshToken = TokenService.generateRefreshToken();
+    const refreshTokenHash = TokenService.hashRefreshToken(refreshToken);
+
+    const newSessionRecord = await sessionRespository.createSession({
+      authUserId: existingUser.id,
+      refreshTokenHash: refreshTokenHash,
+      expiresAt: new Date(Date.now() + authConfig.refreshTokenTTL),
+      ipAddress: meta.ipAddress,
+      userAgent: meta.userAgent,
+      deviceType: meta.deviceType,
+      deviceOs: meta.deviceOs,
+      deviceBrowser: meta.deviceBrowser,
+    });
+
+    // sign access Token
+    const accessToken = TokenService.signAccessToken({
+      userId: existingUser.id,
+      sessionId: newSessionRecord.id,
+    });
+
+    // Sanitized user to return to client
+    const user: IAuthenticatedUser = {
+      id: existingUser.id,
+      email: existingUser.email,
+      isEmailVerified: existingUser.isEmailVerified,
+      createdAt: existingUser.createdAt,
+    };
+
+    return { user, accessToken, refreshToken };
   }
 }

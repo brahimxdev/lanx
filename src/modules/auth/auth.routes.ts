@@ -3,6 +3,7 @@ import { validateRequest } from "@/middlewares/validateRequest.js";
 import {
   confirmEmailSchema,
   resendConfirmationCodeSchema,
+  signInSchema,
   signUpSchema,
 } from "./auth.validation.js";
 import { asyncHandler } from "@/utils/asyncHandler.js";
@@ -29,8 +30,8 @@ router.post(
   asyncHandler(AuthController.resendConfirmationCode)
 );
 
-// // Route for login
-// router.post("/login");
+// Route for sign in
+router.post("/sign-in", validateRequest(signInSchema), asyncHandler(AuthController.signIn));
 
 // // Route for forgot password
 // router.post("/forgot-password");
