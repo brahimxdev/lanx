@@ -1,6 +1,10 @@
 import { Router } from "express";
 import { validateRequest } from "@/middlewares/validateRequest.js";
-import { confirmEmailSchema, signUpSchema } from "./auth.validation.js";
+import {
+  confirmEmailSchema,
+  resendConfirmationCodeSchema,
+  signUpSchema,
+} from "./auth.validation.js";
 import { asyncHandler } from "@/utils/asyncHandler.js";
 import { AuthController } from "./auth.controller.js";
 
@@ -18,8 +22,12 @@ router.post(
   asyncHandler(AuthController.confirmEmail)
 );
 
-// // Route for resending confirmation code, usable for only sign up code
-// router.post("/resend-confirmation-code");
+// Route for resending confirmation code, usable for only sign up code
+router.post(
+  "/resend-confirmation-code",
+  validateRequest(resendConfirmationCodeSchema),
+  asyncHandler(AuthController.resendConfirmationCode)
+);
 
 // // Route for login
 // router.post("/login");

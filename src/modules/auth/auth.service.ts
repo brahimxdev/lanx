@@ -1,4 +1,4 @@
-import type { IConfirmEmail, ISignupInput } from "./auth.validation.js";
+import type { IConfirmEmail, IResendConfirmationCode, ISignupInput } from "./auth.validation.js";
 import { db } from "@/db/client.js";
 import { AppError, ErrorCode } from "@/errors/index.js";
 import bcrypt from "bcryptjs";
@@ -187,5 +187,44 @@ export class AuthService {
 
     await EmailService.sendWelcomeEmailPro("brahimxdev@gmail.com", { email: newUser.email });
     return { newUser, accessToken, refreshToken };
+  }
+
+  // Resend confirmation code
+  static async resendConfirmationCode(input: IResendConfirmationCode) {
+    // Check if account exist in db
+    const existingUser = await authUserRepository.findByEmail(input.email);
+
+    if (!existingUser || existingUser.isEmailVerified) {
+      return {
+        message: "If an account exist, a confirmation code has been sent - No email",
+      };
+    }
+
+    const confirmationCode = generateConfirmationCode();
+    const confirmationCodeHash = hashConfirmationCode(confirmationCode);
+
+    // db transactions
+    await db.transaction(async (tx) => {
+      // tx 1 - Invalidate all unused code
+      await emailConfirmationRepository.invalidateAllUnused(existingUser.id, tx);
+
+      // tx 2 - Insert code into confirmation record
+      await emailConfirmationRepository.create(
+        {
+          authUserId: existingUser.id,
+          codeHash: confirmationCodeHash,
+          confirmationType: "sign_up",
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+        },
+        tx
+      );
+    });
+
+    // 4. Send code to user via email
+    await EmailService.sendConfirmationCode("brahimxdev@gmail.com", confirmationCode);
+
+    return {
+      message: "If an account exist, a code has been sent - Yes Email",
+    };
   }
 }

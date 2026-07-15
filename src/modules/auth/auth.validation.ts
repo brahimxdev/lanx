@@ -1,3 +1,4 @@
+import { xataHttpCodecs } from "drizzle-orm/xata-http";
 import { z } from "zod";
 
 // sign-up schema
@@ -20,6 +21,7 @@ export const signUpSchema = z.object({
     }),
 });
 
+// Confirm email schema
 export const confirmEmailSchema = z.object({
   email: z
     .string()
@@ -29,5 +31,15 @@ export const confirmEmailSchema = z.object({
   confirmationCode: z.string().trim().length(6, "Code must be 6 characters"),
 });
 
+// Resend Confirmation Code schema
+export const resendConfirmationCodeSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.email({ pattern: z.regexes.email })),
+});
+
 export type ISignupInput = z.infer<typeof signUpSchema>;
 export type IConfirmEmail = z.infer<typeof confirmEmailSchema>;
+export type IResendConfirmationCode = z.infer<typeof resendConfirmationCodeSchema>;

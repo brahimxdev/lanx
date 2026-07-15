@@ -1,5 +1,5 @@
 import { HttpStatus } from "@/errors/index.js";
-import type { IConfirmEmail, ISignupInput } from "./auth.validation.js";
+import type { IConfirmEmail, IResendConfirmationCode, ISignupInput } from "./auth.validation.js";
 import { AuthService } from "./auth.service.js";
 import type { Request, Response } from "express";
 import type { IRequestMeta } from "./auth.types.js";
@@ -40,6 +40,24 @@ export class AuthController {
       data: {
         user: newUser,
         accessToken,
+      },
+    });
+  };
+
+  // resend confirmation code - usable for signup
+  static resendConfirmationCode = async (
+    req: Request<unknown, unknown, IResendConfirmationCode>,
+    res: Response
+  ) => {
+    // Validation middleware already validated data!
+    const { email } = req.body;
+
+    const { message } = await AuthService.resendConfirmationCode({ email });
+
+    res.status(HttpStatus.OK).json({
+      status: "true",
+      data: {
+        message,
       },
     });
   };

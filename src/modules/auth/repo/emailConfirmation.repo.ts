@@ -46,4 +46,12 @@ export const emailConfirmationRepository = {
       .set({ usedAt: new Date() })
       .where(and(eq(emailConfirmations.id, id), isNull(emailConfirmations.usedAt)));
   },
+
+  // Invalidate all unused confirmation codes
+  async invalidateAllUnused(authUserId: string, executor: Executor = db) {
+    await executor
+      .update(emailConfirmations)
+      .set({ usedAt: new Date() })
+      .where(and(eq(emailConfirmations.authUserId, authUserId), isNull(emailConfirmations.usedAt)));
+  },
 };

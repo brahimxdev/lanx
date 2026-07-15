@@ -29,7 +29,7 @@ export class EmailService {
     const { data, error } = await resend.emails.send({
       from: emailConfig.from,
       to,
-      subject: `Welcome to Lanx ${paylod.firstName}`,
+      subject: `Welcome to Lanx ${paylod.email}`,
       react: WelcomeEmailPro(paylod),
     });
 
@@ -45,7 +45,7 @@ export class EmailService {
     const { data, error } = await resend.emails.send({
       from: emailConfig.from,
       to,
-      subject: `Welcome to Lanx ${paylod.firstName}`,
+      subject: `Welcome to Lanx ${paylod.email}`,
       react: WelcomeEmailWarm(paylod),
     });
 
