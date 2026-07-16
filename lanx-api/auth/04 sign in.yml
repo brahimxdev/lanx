@@ -11,9 +11,22 @@ http:
     data: |-
       {
         "email": "ibrahim.techresources@proton.me",
-        "password": "IBRahim123!!!"
+        "password": "randomPass3!!!"
       }
   auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const body = res.getBody();
+        const accessToken = body?.data?.accessToken;
+
+        if (accessToken) {
+          bru.setEnvVar("accessToken", accessToken);
+        } else {
+          console.log("Access token setting failed");
+        }
 
 settings:
   encodeUrl: true
