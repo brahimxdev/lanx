@@ -4,6 +4,7 @@ import {
   confirmEmailSchema,
   forgotPasswordSchema,
   resendConfirmationCodeSchema,
+  resetPasswordSchema,
   signInSchema,
   signUpSchema,
 } from "./auth.validation.js";
@@ -41,8 +42,12 @@ router.post(
   asyncHandler(AuthController.forgotPassword)
 );
 
-// // Route for reseting passwordd
-// router.post("/reset-password");
+// Route for reseting passwordd
+router.post(
+  "/reset-password",
+  validateRequest(resetPasswordSchema),
+  asyncHandler(AuthController.resetPassword)
+);
 
 // // Route for changing password - (need auth access)
 // router.post("/change-password");

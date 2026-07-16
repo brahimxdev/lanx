@@ -2,6 +2,7 @@ import type {
   IConfirmEmail,
   IForgotPassword,
   IResendConfirmationCode,
+  IResetPassword,
   ISignIn,
   ISignup,
 } from "./auth.validation.js";
@@ -52,7 +53,7 @@ export class AuthService {
           authUserId: user.id,
           codeHash: confirmationCodeHash,
           confirmationType: "sign_up",
-          expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+          expiresAt: new Date(Date.now() + authConfig.confirmationCodeTTL),
         },
         tx
       );
@@ -83,10 +84,7 @@ export class AuthService {
     }
 
     if (existingUser.isEmailVerified) {
-      throw AppError.conflict(
-        "This email is already verified, please sign in",
-        ErrorCode.ALREADY_VERIFIED
-      );
+      throw AppError.conflict("Invalid code or email", ErrorCode.ALREADY_VERIFIED);
     }
 
     // Look up latest unused confirmation code for the user
@@ -122,10 +120,7 @@ export class AuthService {
 
     if (!isPlainEqualHashed) {
       await emailConfirmationRepository.incrementAttemptCount(confirmationRecord.id);
-      throw AppError.unauthorized(
-        "This code has expired, please request a new one",
-        ErrorCode.INVALID_CODE
-      );
+      throw AppError.unauthorized("Invalid code or email", ErrorCode.INVALID_CODE);
     }
 
     // Generate + hash refresh Token
@@ -220,7 +215,7 @@ export class AuthService {
           authUserId: existingUser.id,
           codeHash: confirmationCodeHash,
           confirmationType: "sign_up",
-          expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+          expiresAt: new Date(Date.now() + authConfig.confirmationCodeTTL),
         },
         tx
       );
@@ -318,17 +313,96 @@ export class AuthService {
           authUserId: existingUser.id,
           codeHash: confirmationCodeHash,
           confirmationType: "password_reset",
-          expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+          expiresAt: new Date(Date.now() + authConfig.confirmationCodeTTL),
         },
         tx
       );
     });
 
     // 4. Send code to user via email
-    await EmailService.sendConfirmationCode("brahimxdev@gmail.com", confirmationCode);
+    await EmailService.sendPasswordResetCode("brahimxdev@gmail.com", confirmationCode);
 
     return {
       message: "If an account exist, a code has been sent!",
+    };
+  }
+
+  // Reset password
+  static async resetPassword(input: IResetPassword) {
+    // Check if user exist by email
+    const existingUser = await authUserRepository.findByEmail(input.email);
+
+    if (!existingUser) {
+      throw AppError.badRequest("Invalid/expired code", ErrorCode.INVALID_CODE);
+    }
+
+    // Look up password reset confirmation record
+    const confirmationRecord = await emailConfirmationRepository.findLatestUnused(existingUser.id);
+
+    if (!confirmationRecord) {
+      throw AppError.badRequest(
+        "No active confirmation record, please resend",
+        ErrorCode.NO_ACTIVE_CONFIRMATION
+      );
+    }
+
+    // Attempt count check
+    if (confirmationRecord.attemptCount >= 5) {
+      throw AppError.tooManyRequests("Something went wrong, please resend a new code");
+    }
+
+    // Expiry check
+    const isExpired = confirmationRecord.expiresAt <= new Date();
+    if (isExpired) {
+      await emailConfirmationRepository.incrementAttemptCount(confirmationRecord.id);
+      throw AppError.badRequest(
+        "This code has expired, please request a new one",
+        ErrorCode.EXPIRED_CODE
+      );
+    }
+
+    // compare inputed code against stored hased code
+    const isPlainEqualHashed = verifyConfirmationCode(
+      input.confirmationCode,
+      confirmationRecord.codeHash
+    );
+
+    if (!isPlainEqualHashed) {
+      await emailConfirmationRepository.incrementAttemptCount(confirmationRecord.id);
+      throw AppError.unauthorized("Invalid code or email", ErrorCode.INVALID_CODE);
+    }
+
+    // Compare new pass against existing pass to see if it's the same
+    const isPasswordMatch = await bcrypt.compare(input.newPassword, existingUser.passwordHash);
+
+    if (isPasswordMatch) {
+      throw AppError.forbidden("Your new password cannot be same as old password");
+    }
+
+    const newPasswordHash = await bcrypt.hash(input.newPassword, 12);
+
+    // db transactions
+    await db.transaction(async (tx) => {
+      // tx 1 - mark code as used
+      await emailConfirmationRepository.markUsed(confirmationRecord.id, tx);
+
+      // tx 2 - invalidate all existing sessions for the user
+      await sessionRespository.revokeAllActive(existingUser.id, tx);
+
+      // tx 3 - update password
+      const user = await authUserRepository.updatePassword(existingUser.id, newPasswordHash, tx);
+
+      // tx 4 - Promote account to verified, if unverifed
+      if (!user.isEmailVerified) {
+        await authUserRepository.markEmailVerified(existingUser.id, tx);
+      }
+    });
+
+    // Send password reset notification
+    await EmailService.sendPasswordResetNotification("brahimxdev@gmail.com");
+
+    return {
+      message: "Your password has been reset",
     };
   }
 }

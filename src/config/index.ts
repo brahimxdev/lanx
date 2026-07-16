@@ -23,6 +23,7 @@ export const authConfig = {
   jwtAlg: "HS256" as const,
   refreshCookieName: "refreshToken",
   refreshTokenTTL: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+  confirmationCodeTTL: 10 * 60 * 1000,
 } as const;
 
 export const emailConfig = {

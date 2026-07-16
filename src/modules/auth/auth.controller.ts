@@ -3,6 +3,7 @@ import type {
   IConfirmEmail,
   IForgotPassword,
   IResendConfirmationCode,
+  IResetPassword,
   ISignIn,
   ISignup,
 } from "./auth.validation.js";
@@ -98,6 +99,22 @@ export class AuthController {
     const { email } = req.body;
 
     const { message } = await AuthService.forgotPassword({ email });
+
+    res.status(HttpStatus.OK).json({
+      status: "true",
+      data: {
+        message,
+      },
+    });
+  };
+
+  // Reset password
+  static resetPassword = async (req: Request<unknown, unknown, IResetPassword>, res: Response) => {
+    // Validation middleware already validated data!
+
+    const { email, confirmationCode, newPassword } = req.body;
+
+    const { message } = await AuthService.resetPassword({ email, confirmationCode, newPassword });
 
     res.status(HttpStatus.OK).json({
       status: "true",

@@ -1,16 +1,18 @@
 import { Html, Head, Body, Preview, Container, Heading, Text, Section, Hr } from "react-email";
 
-interface IConfirmationCodeEmailProps {
+interface INotificationEmailProps {
   preview: string;
+  title: string;
   description: string;
-  code: string;
+  warning?: string;
 }
 
-export const ConfirmationCodeEmail = ({
+export const NotificationEmail = ({
   preview,
+  title,
   description,
-  code,
-}: IConfirmationCodeEmailProps) => {
+  warning,
+}: INotificationEmailProps) => {
   return (
     <Html lang="en" dir="ltr">
       <Head />
@@ -18,13 +20,16 @@ export const ConfirmationCodeEmail = ({
       <Body style={main}>
         <Container style={container}>
           <Heading>Lanx</Heading>
+          <Text style={titleText}>{title}</Text>
           <Text>{description}</Text>
-          <Section style={codeBox}>
-            <Text style={codeText}>{code}</Text>
-          </Section>
-          <Text style={footer}>If you didn't request this, you can safely ignore this email.</Text>
+          {warning && (
+            <Section style={noticeBox}>
+              <Text style={noticeText}>{warning}</Text>
+            </Section>
+          )}
+          <Hr />
           <Text>
-            Best, <Hr /> The Lanx Team
+            Best, <br /> The Lanx Team
           </Text>
         </Container>
       </Body>
@@ -40,12 +45,11 @@ const container = {
   borderRadius: "8px",
   maxWidth: "480px",
 };
-const codeBox = {
-  backgroundColor: "#f4f4f5",
+const titleText = { fontSize: "18px", fontWeight: "bold", margin: "16px 0 8px" };
+const noticeBox = {
+  backgroundColor: "#fef2f2",
   borderRadius: "8px",
-  textAlign: "center" as const,
   padding: "16px 24px",
   margin: "24px 0",
 };
-const codeText = { fontSize: "32px", fontWeight: "bold", letterSpacing: "4px", margin: 0 };
-const footer = { color: "#999999", fontSize: "12px" };
+const noticeText = { color: "#b91c1c", fontSize: "14px", margin: 0 };

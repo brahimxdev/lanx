@@ -39,4 +39,19 @@ export const authUserRepository = {
 
     return user;
   },
+
+  // Update password
+  async updatePassword(authUserId: string, newPasswordHash: string, executor: Executor = db) {
+    const [user] = await executor
+      .update(authUsers)
+      .set({ passwordHash: newPasswordHash })
+      .where(and(eq(authUsers.id, authUserId), isNull(authUsers.deletedAt)))
+      .returning();
+
+    if (!user) {
+      throw AppError.internalServerError("Failed to update password");
+    }
+
+    return user;
+  },
 };
