@@ -26,7 +26,7 @@ export class TokenService {
   }
 
   // Verify access Token
-  static verifyAcessToken(token: string): IAccessTokenPayload {
+  static verifyAcesssToken(token: string): IAccessTokenPayload {
     return jwt.verify(token, authConfig.jwtSecret, {
       algorithms: [authConfig.jwtAlg],
     }) as IAccessTokenPayload;

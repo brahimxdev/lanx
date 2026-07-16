@@ -81,7 +81,7 @@ export class AuthController {
     // set refresh token to cookie
     TokenService.setRefreshTokenCookie(res, refreshToken);
 
-    res.status(HttpStatus.Created).json({
+    res.status(HttpStatus.OK).json({
       status: "true",
       data: {
         user,
@@ -123,4 +123,9 @@ export class AuthController {
       },
     });
   };
+
+  // Change password - (need auth access)
+  // static changePassword = (req: Request, res: Response) => {
+
+  // }
 }

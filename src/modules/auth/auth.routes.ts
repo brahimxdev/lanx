@@ -10,6 +10,7 @@ import {
 } from "./auth.validation.js";
 import { asyncHandler } from "@/utils/asyncHandler.js";
 import { AuthController } from "./auth.controller.js";
+import { requireAuth } from "@/middlewares/requireAuth.js";
 
 export const router = Router();
 
@@ -49,8 +50,8 @@ router.post(
   asyncHandler(AuthController.resetPassword)
 );
 
-// // Route for changing password - (need auth access)
-// router.post("/change-password");
+// Route for changing password - (need auth access)
+router.post("/change-password", asyncHandler(requireAuth));
 
 // // Route for changing email - (need auth access)
 // router.post("/change-email");

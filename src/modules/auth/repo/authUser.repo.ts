@@ -16,6 +16,17 @@ export const authUserRepository = {
     return user ?? null;
   },
 
+  // Find user by id
+  async findById(id: string, executor: Executor = db) {
+    const [user] = await executor
+      .select()
+      .from(authUsers)
+      .where(and(eq(authUsers.id, id), isNull(authUsers.deletedAt)))
+      .limit(1);
+
+    return user ?? null;
+  },
+
   // Create user in authUsers table
   async createUser(data: typeof authUsers.$inferInsert, executor: Executor = db) {
     const [user] = await executor.insert(authUsers).values(data).returning();
