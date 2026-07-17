@@ -1,0 +1,1 @@
+ALTER TABLE "email_confirmations" ADD COLUMN "new_email" text;

@@ -1,17 +1,17 @@
 info:
-  name: 02 confirm email
+  name: sign up
   type: http
-  seq: 2
+  seq: 1
 
 http:
   method: POST
-  url: "{{baseUrl}}/auth/confirm-email"
+  url: "{{baseUrl}}/auth/sign-up"
   body:
     type: json
     data: |-
       {
         "email": "ibrahim.techresources@proton.me",
-        "confirmationCode": "881127"
+        "password": "IBRahim123!!!"
       }
   auth: inherit
 

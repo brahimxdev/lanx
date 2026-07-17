@@ -1,16 +1,17 @@
 info:
-  name: 05 forget password
+  name: request change of email
   type: http
-  seq: 5
+  seq: 8
 
 http:
   method: POST
-  url: "{{baseUrl}}/auth/forgot-password"
+  url: "{{baseUrl}}/account/email"
   body:
     type: json
     data: |-
       {
-        "email": "ibrahim.techresources@proton.me"
+        "newEmail": "lekxyyusuf@gmail.com",
+        "currentPassword": "IBRahim123!!!"
       }
   auth: inherit
 

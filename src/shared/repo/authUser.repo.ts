@@ -55,7 +55,22 @@ export const authUserRepository = {
   async updatePassword(authUserId: string, newPasswordHash: string, executor: Executor = db) {
     const [user] = await executor
       .update(authUsers)
-      .set({ passwordHash: newPasswordHash })
+      .set({ passwordHash: newPasswordHash, passwordChangedAt: new Date() })
+      .where(and(eq(authUsers.id, authUserId), isNull(authUsers.deletedAt)))
+      .returning();
+
+    if (!user) {
+      throw AppError.internalServerError("Failed to update password");
+    }
+
+    return user;
+  },
+
+  // Update email
+  async updateEmail(authUserId: string, newEmail: string, executor: Executor = db) {
+    const [user] = await executor
+      .update(authUsers)
+      .set({ email: newEmail })
       .where(and(eq(authUsers.id, authUserId), isNull(authUsers.deletedAt)))
       .returning();
 

@@ -1,11 +1,11 @@
 info:
-  name: 14 delete user
+  name: delete user
   type: http
-  seq: 14
+  seq: 15
 
 http:
   method: DELETE
-  url: "{{baseUrl}}/users/me"
+  url: "{{baseUrl}}/account"
   body:
     type: json
     data: |-

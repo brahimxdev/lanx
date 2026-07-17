@@ -1,5 +1,5 @@
 info:
-  name: 03 resend confirmation code
+  name: resend confirmation code
   type: http
   seq: 3
 

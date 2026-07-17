@@ -30,6 +30,7 @@ export const authUsers = pgTable(
     isEmailVerified: boolean("is_email_verified").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    passwordChangedAt: timestamp("password_changed_at", { withTimezone: true }),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   // columns constraints and indexes
@@ -49,6 +50,7 @@ export const emailConfirmations = pgTable(
       .notNull()
       .references(() => authUsers.id, { onDelete: "cascade" }),
     codeHash: text("code_hash").notNull(),
+    newEmail: text("new_email"),
     confirmationType: confirmationTypeEnum("confirmation_type").notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     usedAt: timestamp("used_at", { withTimezone: true }),

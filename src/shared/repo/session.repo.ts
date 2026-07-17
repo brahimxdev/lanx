@@ -16,11 +16,31 @@ export const sessionRespository = {
 
     return sessionRecord;
   },
-  // Invalidate session
+
+  // Invalidate all sessions
   async revokeAllActive(authUserId: string, executor: Executor = db) {
     await executor
       .update(sessions)
       .set({ revokedAt: new Date() })
       .where(and(eq(sessions.authUserId, authUserId), isNull(sessions.revokedAt)));
+  },
+
+  // Invalidate a specific session
+  async revokeSession(sessionId: string, executor: Executor = db) {
+    await executor
+      .update(sessions)
+      .set({ revokedAt: new Date() })
+      .where(and(eq(sessions.id, sessionId), isNull(sessions.revokedAt)));
+  },
+
+  // Find active session
+  async findActiveById(sessionId: string, executor: Executor = db) {
+    const [activeSession] = await executor
+      .select()
+      .from(sessions)
+      .where(and(eq(sessions.id, sessionId), isNull(sessions.revokedAt)))
+      .limit(1);
+
+    return activeSession ?? null;
   },
 };

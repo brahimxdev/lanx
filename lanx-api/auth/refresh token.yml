@@ -1,11 +1,11 @@
 info:
-  name: 13 get user
+  name: refresh token
   type: http
   seq: 13
 
 http:
-  method: GET
-  url: "{{baseUrl}}/users/me"
+  method: POST
+  url: "{{baseUrl}}/auth/refresh-token"
   auth: inherit
 
 settings:

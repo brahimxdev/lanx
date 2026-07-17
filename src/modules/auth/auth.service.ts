@@ -18,10 +18,11 @@ import {
   authUserRepository,
   emailConfirmationRepository,
   sessionRespository,
-} from "./repo/index.js";
+} from "@/shared/repo/index.js";
 import type { IAuthenticatedUser, IRequestMeta } from "./auth.types.js";
 import { EmailService } from "../email/email.service.js";
 import { authConfig } from "@/config/index.js";
+import { tempEmailDomain } from "@/shared/constants/tempEmail.js";
 import { TokenService } from "./token.service.js";
 
 export class AuthService {
@@ -43,11 +44,12 @@ export class AuthService {
     const confirmationCodeHash = hashConfirmationCode(confirmationCode);
 
     // 3. Save unverified user
-    // User creation and confirmation-record creation must succeed or fail together
-    // without manual DB intervention, so this needs to be atomic.
+    // db transactions
     const { user } = await db.transaction(async (tx) => {
+      // tx 1 - create user record
       const user = await authUserRepository.createUser({ email: input.email, passwordHash }, tx);
 
+      // tx 2 - create confirmation record
       const confirmationRecord = await emailConfirmationRepository.create(
         {
           authUserId: user.id,
@@ -61,15 +63,15 @@ export class AuthService {
       return { user, confirmationRecord };
     });
 
-    // 4. Send code to user via email
-    await EmailService.sendConfirmationCode("brahimxdev@gmail.com", confirmationCode);
-
     const newUser: IAuthenticatedUser = {
       id: user.id,
       email: user.email,
       isEmailVerified: user.isEmailVerified,
       createdAt: user.createdAt,
     };
+
+    // Send code to user via email
+    await EmailService.sendConfirmationCode(tempEmailDomain, confirmationCode);
 
     return { newUser };
   }
@@ -103,8 +105,7 @@ export class AuthService {
     }
 
     // Expiry check
-    const isExpired = confirmationRecord.expiresAt <= new Date();
-    if (isExpired) {
+    if (confirmationRecord.expiresAt <= new Date()) {
       await emailConfirmationRepository.incrementAttemptCount(confirmationRecord.id);
       throw AppError.badRequest(
         "This code has expired, please request a new one",
@@ -134,16 +135,11 @@ export class AuthService {
 
       let updatedUser: typeof existingUser;
 
-      // tx 2 - mark email verified or update email
+      // tx 2 - mark email verified
       switch (confirmationRecord.confirmationType) {
         case "sign_up": {
           updatedUser = await authUserRepository.markEmailVerified(existingUser.id, tx);
           break;
-        }
-
-        case "change_email": {
-          // TODO: implement code for situation when code type is for change_email
-          throw AppError.internalServerError("Not yet implement change_email situation");
         }
 
         default: {
@@ -186,7 +182,7 @@ export class AuthService {
       createdAt: updatedUser.createdAt,
     };
 
-    await EmailService.sendWelcomeEmailPro("brahimxdev@gmail.com", { email: newUser.email });
+    await EmailService.sendWelcomeEmailPro(tempEmailDomain, { email: newUser.email });
     return { newUser, accessToken, refreshToken };
   }
 
@@ -207,7 +203,7 @@ export class AuthService {
     // db transactions
     await db.transaction(async (tx) => {
       // tx 1 - Invalidate all unused code
-      await emailConfirmationRepository.invalidateAllUnused(existingUser.id, tx);
+      await emailConfirmationRepository.invalidateAllUnused(existingUser.id, "sign_up", tx);
 
       // tx 2 - Insert code into confirmation record
       await emailConfirmationRepository.create(
@@ -222,7 +218,7 @@ export class AuthService {
     });
 
     // 4. Send code to user via email
-    await EmailService.sendConfirmationCode("brahimxdev@gmail.com", confirmationCode);
+    await EmailService.sendConfirmationCode(tempEmailDomain, confirmationCode);
 
     return {
       message: "If an account exist, a code has been sent!",
@@ -305,7 +301,7 @@ export class AuthService {
     // db transactions
     await db.transaction(async (tx) => {
       // tx 1 - Invalidate previous code
-      await emailConfirmationRepository.invalidateAllUnused(existingUser.id, tx);
+      await emailConfirmationRepository.invalidateAllUnused(existingUser.id, "password_reset", tx);
 
       // tx 2 - Insert new confirmation record in db
       await emailConfirmationRepository.create(
@@ -320,7 +316,7 @@ export class AuthService {
     });
 
     // 4. Send code to user via email
-    await EmailService.sendPasswordResetCode("brahimxdev@gmail.com", confirmationCode);
+    await EmailService.sendPasswordResetCode(tempEmailDomain, confirmationCode);
 
     return {
       message: "If an account exist, a code has been sent!",
@@ -339,7 +335,7 @@ export class AuthService {
     // Look up password reset confirmation record
     const confirmationRecord = await emailConfirmationRepository.findLatestUnused(existingUser.id);
 
-    if (!confirmationRecord) {
+    if (confirmationRecord?.confirmationType !== "password_reset") {
       throw AppError.badRequest(
         "No active confirmation record, please resend",
         ErrorCode.NO_ACTIVE_CONFIRMATION
@@ -352,8 +348,7 @@ export class AuthService {
     }
 
     // Expiry check
-    const isExpired = confirmationRecord.expiresAt <= new Date();
-    if (isExpired) {
+    if (confirmationRecord.expiresAt <= new Date()) {
       await emailConfirmationRepository.incrementAttemptCount(confirmationRecord.id);
       throw AppError.badRequest(
         "This code has expired, please request a new one",
@@ -399,7 +394,7 @@ export class AuthService {
     });
 
     // Send password reset notification
-    await EmailService.sendPasswordResetNotification("brahimxdev@gmail.com");
+    await EmailService.sendPasswordResetNotification(tempEmailDomain);
 
     return {
       message: "Your password has been reset",

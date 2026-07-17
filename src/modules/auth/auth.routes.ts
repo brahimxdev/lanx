@@ -10,60 +10,44 @@ import {
 } from "./auth.validation.js";
 import { asyncHandler } from "@/utils/asyncHandler.js";
 import { AuthController } from "./auth.controller.js";
-import { requireAuth } from "@/middlewares/requireAuth.js";
 
-export const router = Router();
+export const authRouter = Router();
 
 // base url - /api/v1/auth
 
 // Route for creating user
-router.post("/sign-up", validateRequest(signUpSchema), asyncHandler(AuthController.signup));
+authRouter.post("/sign-up", validateRequest(signUpSchema), asyncHandler(AuthController.signup));
 
 // Route for confirming email, usable for only sign up to confirm email by code
-router.post(
+authRouter.post(
   "/confirm-email",
   validateRequest(confirmEmailSchema),
   asyncHandler(AuthController.confirmEmail)
 );
 
 // Route for resending confirmation code, usable for only sign up code
-router.post(
+authRouter.post(
   "/resend-confirmation-code",
   validateRequest(resendConfirmationCodeSchema),
   asyncHandler(AuthController.resendConfirmationCode)
 );
 
 // Route for sign in
-router.post("/sign-in", validateRequest(signInSchema), asyncHandler(AuthController.signIn));
+authRouter.post("/sign-in", validateRequest(signInSchema), asyncHandler(AuthController.signIn));
 
 // Route for forgot password
-router.post(
+authRouter.post(
   "/forgot-password",
   validateRequest(forgotPasswordSchema),
   asyncHandler(AuthController.forgotPassword)
 );
 
-// Route for reseting passwordd
-router.post(
+// Route for reseting password
+authRouter.post(
   "/reset-password",
   validateRequest(resetPasswordSchema),
   asyncHandler(AuthController.resetPassword)
 );
 
-// Route for changing password - (need auth access)
-router.post("/change-password", asyncHandler(requireAuth));
-
-// // Route for changing email - (need auth access)
-// router.post("/change-email");
-
-// // Route for logout - (already authenticated, not necessarily protected route)
-// router.post("/logout");
-
-// // Route for listing all active sessions for a user (need auth access)
-// router.get("/sessions");
-
-// // Route for revoking a session by user (need auth access)
-// router.delete("/sessions/:id");
-
 // // Route for giving refresh token (require refresh token from cookie - consider a middleware to check?)
-// router.post("/refresh-token");
+// authRouter.post("/refresh-token");

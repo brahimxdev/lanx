@@ -1,5 +1,5 @@
 info:
-  name: 04 sign in
+  name: sign in
   type: http
   seq: 4
 
@@ -11,7 +11,7 @@ http:
     data: |-
       {
         "email": "ibrahim.techresources@proton.me",
-        "password": "randomPass3!!!"
+        "password": "freshPass234!!!"
       }
   auth: inherit
 

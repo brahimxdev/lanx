@@ -16,7 +16,7 @@ import { TokenService } from "./token.service.js";
 export class AuthController {
   // sign-up - create new account on auth_users table
   static signup = async (req: Request<unknown, unknown, ISignup>, res: Response) => {
-    // Validation middleware already validated data!
+    //* Validation middleware already validated data!
 
     const { email, password } = req.body;
 
@@ -70,7 +70,7 @@ export class AuthController {
 
   // Sign in
   static signIn = async (req: Request<unknown, unknown, ISignIn>, res: Response) => {
-    // Validation middleware already validated data!
+    //* Validation middleware already validated data!
     const { email, password } = req.body;
 
     const { user, accessToken, refreshToken } = await AuthService.signIn(
@@ -95,7 +95,7 @@ export class AuthController {
     req: Request<unknown, unknown, IForgotPassword>,
     res: Response
   ) => {
-    // Validation middleware already validated data!
+    //* Validation middleware already validated data!
     const { email } = req.body;
 
     const { message } = await AuthService.forgotPassword({ email });
@@ -110,7 +110,7 @@ export class AuthController {
 
   // Reset password
   static resetPassword = async (req: Request<unknown, unknown, IResetPassword>, res: Response) => {
-    // Validation middleware already validated data!
+    //* Validation middleware already validated data!
 
     const { email, confirmationCode, newPassword } = req.body;
 
@@ -123,9 +123,4 @@ export class AuthController {
       },
     });
   };
-
-  // Change password - (need auth access)
-  // static changePassword = (req: Request, res: Response) => {
-
-  // }
 }

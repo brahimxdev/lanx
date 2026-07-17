@@ -1,0 +1,18 @@
+info:
+  name: confirm change of email
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{baseUrl}}/account/email/confirm"
+  body:
+    type: json
+    data: '{"confirmationCode": "465739"}'
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

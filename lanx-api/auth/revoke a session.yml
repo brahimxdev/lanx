@@ -1,11 +1,11 @@
 info:
-  name: 11 revoke a session
+  name: revoke a session
   type: http
-  seq: 11
+  seq: 12
 
 http:
   method: DELETE
-  url: "{{baseUrl}}/auth/sessions/:id"
+  url: "{{baseUrl}}/account/sessions/:id"
   params:
     - name: id
       value: ""

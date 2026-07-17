@@ -3,10 +3,15 @@ import jwt from "jsonwebtoken";
 import { createHash, randomBytes } from "crypto";
 import type { Response } from "express";
 
-export interface IAccessTokenPayload {
+export interface IAccessTokenClaims {
   userId: string;
   roles?: string[];
   sessionId: string;
+}
+
+export interface IAccessTokenPayload extends IAccessTokenClaims {
+  iat: number;
+  exp: number;
 }
 
 export interface IRefreshTokenPayload {
@@ -16,8 +21,8 @@ export interface IRefreshTokenPayload {
 
 export class TokenService {
   // Sign access Token
-  static signAccessToken(payload: IAccessTokenPayload) {
-    const accessToken = jwt.sign(payload, authConfig.jwtSecret, {
+  static signAccessToken(claims: IAccessTokenClaims): string {
+    const accessToken = jwt.sign(claims, authConfig.jwtSecret, {
       algorithm: authConfig.jwtAlg,
       expiresIn: authConfig.jwtExpiresIn,
     });

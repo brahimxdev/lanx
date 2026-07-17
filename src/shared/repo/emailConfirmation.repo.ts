@@ -1,6 +1,6 @@
 import { db } from "@/db/client.js";
 import type { Executor } from "@/db/executor.js";
-import { emailConfirmations } from "@/db/schema/index.js";
+import { type confirmationTypeEnum, emailConfirmations } from "@/db/schema/index.js";
 import { AppError } from "@/errors/AppError.js";
 import { eq, sql, desc, and, isNull } from "drizzle-orm";
 
@@ -48,10 +48,20 @@ export const emailConfirmationRepository = {
   },
 
   // Invalidate all unused confirmation codes
-  async invalidateAllUnused(authUserId: string, executor: Executor = db) {
+  async invalidateAllUnused(
+    authUserId: string,
+    confirmationType: (typeof confirmationTypeEnum.enumValues)[number],
+    executor: Executor = db
+  ) {
     await executor
       .update(emailConfirmations)
       .set({ usedAt: new Date() })
-      .where(and(eq(emailConfirmations.authUserId, authUserId), isNull(emailConfirmations.usedAt)));
+      .where(
+        and(
+          eq(emailConfirmations.authUserId, authUserId),
+          eq(emailConfirmations.confirmationType, confirmationType),
+          isNull(emailConfirmations.usedAt)
+        )
+      );
   },
 };

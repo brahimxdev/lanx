@@ -1,17 +1,17 @@
 info:
-  name: 08 change email
+  name: confirm email
   type: http
-  seq: 8
+  seq: 2
 
 http:
   method: POST
-  url: "{{baseUrl}}/auth/change-email"
+  url: "{{baseUrl}}/auth/confirm-email"
   body:
     type: json
     data: |-
       {
-        "newEmail": "lekxyyusuf@gmail.com",
-        "currentPassword": "IBRahim123!!!"
+        "email": "ibrahim.techresources@proton.me",
+        "confirmationCode": "881127"
       }
   auth: inherit
 

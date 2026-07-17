@@ -1,11 +1,11 @@
 info:
-  name: 10 list sessions
+  name: list sessions
   type: http
-  seq: 10
+  seq: 11
 
 http:
   method: GET
-  url: "{{baseUrl}}/auth/sessions?status=active&sortBy=lastUsedAt&sortOrder=desc&limit=10&page=1"
+  url: "{{baseUrl}}/account/sessions?status=active&sortBy=lastUsedAt&sortOrder=desc&limit=10&page=1"
   params:
     - name: status
       value: active

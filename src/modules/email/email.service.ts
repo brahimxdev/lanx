@@ -75,4 +75,19 @@ export class EmailService {
       context: "password reset notification",
     });
   }
+
+  // Notify user their email was changed
+  static sendEmailChangeNotification(to: string, newEmail: string): Promise<void> {
+    return this.send({
+      to,
+      subject: "Your Lanx email was changed",
+      react: NotificationEmail({
+        preview: "Your Lanx email was changed",
+        title: "Email change",
+        description: `This is a confirmation that your email was just changed to ${newEmail}.`,
+        warning: "If you didn't make this change, please contact support immediately.",
+      }),
+      context: "email change notification",
+    });
+  }
 }

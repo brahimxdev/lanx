@@ -1,11 +1,11 @@
 info:
-  name: 12 refresh token
+  name: logout
   type: http
-  seq: 12
+  seq: 10
 
 http:
   method: POST
-  url: "{{baseUrl}}/auth/refresh-token"
+  url: "{{baseUrl}}/account/logout"
   auth: inherit
 
 settings:
