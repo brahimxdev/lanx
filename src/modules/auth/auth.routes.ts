@@ -49,5 +49,8 @@ authRouter.post(
   asyncHandler(AuthController.resetPassword)
 );
 
+// Route for logout
+authRouter.post("/logout", asyncHandler(AuthController.logout));
+
 // // Route for giving refresh token (require refresh token from cookie - consider a middleware to check?)
 // authRouter.post("/refresh-token");

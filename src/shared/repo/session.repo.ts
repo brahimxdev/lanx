@@ -43,4 +43,15 @@ export const sessionRespository = {
 
     return activeSession ?? null;
   },
+
+  // Find active session by refresh token hash
+  async findActiveByRefreshTokenHash(refreshTokenHash: string, executor: Executor = db) {
+    const [activeSession] = await executor
+      .select()
+      .from(sessions)
+      .where(and(eq(sessions.refreshTokenHash, refreshTokenHash), isNull(sessions.revokedAt)))
+      .limit(1);
+
+    return activeSession ?? null;
+  },
 };

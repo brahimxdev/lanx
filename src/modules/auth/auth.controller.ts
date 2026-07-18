@@ -123,4 +123,20 @@ export class AuthController {
       },
     });
   };
+
+  // Logout user from current session - (need refresh token in cookie)
+  static logout = async (req: Request, res: Response) => {
+    const refreshToken = TokenService.getRefreshTokenFromCookie(req);
+
+    const { message } = await AuthService.logout(refreshToken);
+
+    TokenService.clearRefreshTokenCookie(res);
+
+    res.status(HttpStatus.OK).json({
+      status: "true",
+      data: {
+        message,
+      },
+    });
+  };
 }

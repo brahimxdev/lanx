@@ -1,7 +1,7 @@
 import { authConfig } from "@/config/index.js";
 import jwt from "jsonwebtoken";
 import { createHash, randomBytes } from "crypto";
-import type { Response } from "express";
+import type { Response, Request } from "express";
 
 export interface IAccessTokenClaims {
   userId: string;
@@ -62,6 +62,19 @@ export class TokenService {
 
   // Clear refresh token from cookie
   static clearRefreshTokenCookie(res: Response): void {
-    res.clearCookie(authConfig.refreshCookieName, { path: "/api/v1/auth" });
+    res.clearCookie(authConfig.refreshCookieName, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      path: "/api/v1/auth",
+      maxAge: authConfig.refreshTokenTTL, // 7 days in ms
+    });
+  }
+
+  // get refresh token from cookie
+  static getRefreshTokenFromCookie(req: Request): string | null {
+    const raw: unknown = req.cookies.refreshToken;
+    console.log("You refresh Token from cookie:", raw);
+    return typeof raw === "string" ? raw : null;
   }
 }

@@ -37,9 +37,6 @@ accountRouter.post(
   asyncHandler(AccountController.confirmEmailChange)
 );
 
-// // Route for logout - (already authenticated, not necessarily protected route)
-// accountRouter.post("/logout");
-
 // // Route for listing all active sessions for a user (need auth access)
 // accountRouter.get("/sessions");
 

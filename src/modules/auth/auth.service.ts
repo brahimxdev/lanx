@@ -400,4 +400,28 @@ export class AuthService {
       message: "Your password has been reset",
     };
   }
+
+  // Logout
+  static async logout(refreshToken: string | null) {
+    if (!refreshToken) {
+      return {
+        message: "Logout successfully",
+      };
+    }
+
+    const refreshTokenHash = TokenService.hashRefreshToken(refreshToken);
+    const activeSession = await sessionRespository.findActiveByRefreshTokenHash(refreshTokenHash);
+
+    if (!activeSession) {
+      return {
+        message: "Logout successfully",
+      };
+    }
+
+    await sessionRespository.revokeSession(activeSession.id);
+
+    return {
+      message: "Logout successfully",
+    };
+  }
 }
