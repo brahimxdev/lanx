@@ -1,6 +1,11 @@
 import { AppError, ErrorCode, HttpStatus } from "@/errors/index.js";
 import type { NextFunction, Request, Response } from "express";
-import type { IChangePassword, IChangeEmail, IConfirmChangeEmail } from "./account.validation.js";
+import type {
+  IChangePassword,
+  IChangeEmail,
+  IConfirmChangeEmail,
+  IListSessionsQuery,
+} from "./account.validation.js";
 import { AccountService } from "./account.service.js";
 import { TokenService } from "@/modules/auth/index.js";
 
@@ -102,6 +107,39 @@ export class AccountController {
       data: {
         user: sanitizedUser,
       },
+    });
+  };
+
+  // List all sessions in dashboard - (need auth access)
+  static listSessions = async (
+    req: Request<unknown, unknown, unknown, IListSessionsQuery>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    //* Validation middleware already validated data!
+
+    if (!req.user) {
+      const err = AppError.unauthorized("Authentication required", ErrorCode.UNAUTHORIZED);
+      next(err);
+      return;
+    }
+
+    const authUserId = req.user.id;
+
+    const { status, sortBy, sortOrder, limit, page } = req.query;
+
+    // Service layer to handle logic
+    const { sessions, pagination } = await AccountService.listSessions(authUserId, {
+      status,
+      sortBy,
+      sortOrder,
+      limit,
+      page,
+    });
+
+    res.status(HttpStatus.OK).json({
+      status: true,
+      data: { sessions, pagination },
     });
   };
 }

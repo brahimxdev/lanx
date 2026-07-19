@@ -1,5 +1,10 @@
 import { AppError, ErrorCode } from "@/errors/index.js";
-import type { IChangeEmail, IChangePassword, IConfirmChangeEmail } from "./account.validation.js";
+import type {
+  IChangeEmail,
+  IChangePassword,
+  IConfirmChangeEmail,
+  IListSessionsQuery,
+} from "./account.validation.js";
 import {
   authUserRepository,
   emailConfirmationRepository,
@@ -233,5 +238,14 @@ export class AccountService {
     await EmailService.sendEmailChangeNotification(user.email, confirmationRecord.newEmail);
 
     return { sanitizedUser };
+  }
+
+  static async listSessions(authUserId: string, queryParams: IListSessionsQuery) {
+    const { sessions, pagination } = await sessionRespository.findManyByUserId(
+      authUserId,
+      queryParams
+    );
+
+    return { sessions, pagination };
   }
 }

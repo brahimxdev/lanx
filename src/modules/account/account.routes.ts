@@ -7,6 +7,7 @@ import {
   changeEmailSchema,
   changePasswordSchema,
   confirmChangeEmailSchema,
+  listSessionSchema,
 } from "./account.validation.js";
 
 export const accountRouter = Router();
@@ -37,8 +38,12 @@ accountRouter.post(
   asyncHandler(AccountController.confirmEmailChange)
 );
 
-// // Route for listing all active sessions for a user (need auth access)
-// accountRouter.get("/sessions");
+// Route for listing all active sessions for a user (need auth access)
+accountRouter.get(
+  "/sessions",
+  validateRequest(listSessionSchema),
+  asyncHandler(AccountController.listSessions)
+);
 
 // // Route for revoking a session by user (need auth access)
 // accountRouter.delete("/sessions/:id");
