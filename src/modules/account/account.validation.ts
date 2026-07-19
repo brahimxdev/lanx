@@ -39,6 +39,20 @@ export const changeEmailSchema = z.object({
 export const confirmChangeEmailSchema = z.object({
   confirmationCode: confirmationCodeSchema,
 });
+
+// List sessions query param validation & transformation
+export const listSessionSchema = z.object({
+  // Filteration
+  status: z.enum(["active", "revoked", "expired"]).default("active"),
+  // Sorting
+  sortBy: z.enum(["lastUsedAt"]).default("lastUsedAt"),
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
+  // Pagination
+  limit: z.coerce.number().int().min(1).max(5).default(1),
+  page: z.coerce.number().int().min(1).default(1),
+});
+
 export type IChangePassword = z.infer<typeof changePasswordSchema>;
 export type IChangeEmail = z.infer<typeof changeEmailSchema>;
 export type IConfirmChangeEmail = z.infer<typeof confirmChangeEmailSchema>;
+export type IListSessionsQuery = z.infer<typeof listSessionSchema>;
