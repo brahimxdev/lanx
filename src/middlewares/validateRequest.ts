@@ -26,7 +26,21 @@ export const validateRequest =
     // replace req.body/query/params with the parsed, typed, cleaned data
     // (this is important — Zod transforms like .trim() and .toLowerCase()
     // only persist if you save the parsed result back)
-    (req as unknown as Record<string, unknown>)[part] = result.data;
+    //
+    // Express 5 makes req.query a read-only getter (no setter), so a plain
+    // assignment throws "Cannot set property query of #<IncomingMessage>
+    // which has only a getter". body/params are still writable, so only
+    // query needs the defineProperty workaround.
+    if (part === "query") {
+      Object.defineProperty(req, "query", {
+        value: result.data,
+        writable: true,
+        configurable: true,
+      });
+    } else {
+      (req as unknown as Record<string, unknown>)[part] = result.data;
+    }
+
     next();
   };
 

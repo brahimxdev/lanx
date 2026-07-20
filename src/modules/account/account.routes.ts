@@ -41,7 +41,7 @@ accountRouter.post(
 // Route for listing all active sessions for a user (need auth access)
 accountRouter.get(
   "/sessions",
-  validateRequest(listSessionSchema),
+  validateRequest(listSessionSchema, "query"),
   asyncHandler(AccountController.listSessions)
 );
 
