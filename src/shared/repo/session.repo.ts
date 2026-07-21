@@ -5,10 +5,49 @@ import { AppError } from "@/errors/AppError.js";
 import type { IListSessionsQuery } from "@/modules/account/account.validation.js";
 import { eq, and, isNull, lte, gt, isNotNull, asc, desc, sql } from "drizzle-orm";
 
-// sessions table db call
-export const sessionRespository = {
-  // create new session record
-  async createSession(data: typeof sessions.$inferInsert, executor: Executor = db) {
+type Session = typeof sessions.$inferSelect;
+type CreateSession = typeof sessions.$inferInsert;
+
+// Interface - what the service binds against
+export interface ISessionRepo {
+  createSession(data: CreateSession, executor?: Executor): Promise<Session>;
+  revokeAllActive(authUserId: string, executor?: Executor): Promise<void>;
+  revokeSession(sessionId: string, executor?: Executor): Promise<void>;
+  findActiveById(sessionId: string, executor?: Executor): Promise<Session | null>;
+  findActiveByRefreshTokenHash(
+    refreshTokenHash: string,
+    executor?: Executor
+  ): Promise<Session | null>;
+  findManyByUserId(
+    authUserId: string,
+    queryParams: IListSessionsQuery,
+    executor?: Executor
+  ): Promise<{
+    sessions: Pick<
+      Session,
+      | "id"
+      | "deviceType"
+      | "deviceOs"
+      | "deviceBrowser"
+      | "location"
+      | "ipAddress"
+      | "lastUsedAt"
+      | "expiresAt"
+      | "createdAt"
+    >[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  }>;
+}
+
+// Class implementing the interface
+export class SessionRepo implements ISessionRepo {
+  // Create new session record
+  async createSession(data: CreateSession, executor: Executor = db): Promise<Session> {
     const [sessionRecord] = await executor.insert(sessions).values(data).returning();
 
     if (!sessionRecord) {
@@ -16,26 +55,26 @@ export const sessionRespository = {
     }
 
     return sessionRecord;
-  },
+  }
 
   // Invalidate all sessions
-  async revokeAllActive(authUserId: string, executor: Executor = db) {
+  async revokeAllActive(authUserId: string, executor: Executor = db): Promise<void> {
     await executor
       .update(sessions)
       .set({ revokedAt: new Date() })
       .where(and(eq(sessions.authUserId, authUserId), isNull(sessions.revokedAt)));
-  },
+  }
 
   // Invalidate a specific session
-  async revokeSession(sessionId: string, executor: Executor = db) {
+  async revokeSession(sessionId: string, executor: Executor = db): Promise<void> {
     await executor
       .update(sessions)
       .set({ revokedAt: new Date() })
       .where(and(eq(sessions.id, sessionId), isNull(sessions.revokedAt)));
-  },
+  }
 
   // Find active session
-  async findActiveById(sessionId: string, executor: Executor = db) {
+  async findActiveById(sessionId: string, executor: Executor = db): Promise<Session | null> {
     const [activeSession] = await executor
       .select()
       .from(sessions)
@@ -43,10 +82,13 @@ export const sessionRespository = {
       .limit(1);
 
     return activeSession ?? null;
-  },
+  }
 
   // Find active session by refresh token hash
-  async findActiveByRefreshTokenHash(refreshTokenHash: string, executor: Executor = db) {
+  async findActiveByRefreshTokenHash(
+    refreshTokenHash: string,
+    executor: Executor = db
+  ): Promise<Session | null> {
     const [activeSession] = await executor
       .select()
       .from(sessions)
@@ -54,9 +96,9 @@ export const sessionRespository = {
       .limit(1);
 
     return activeSession ?? null;
-  },
+  }
 
-  // Find all active sessions for a user
+  // Find all sessions for a user
   async findManyByUserId(
     authUserId: string,
     queryParams: IListSessionsQuery,
@@ -73,6 +115,8 @@ export const sessionRespository = {
           return isNotNull(sessions.revokedAt);
         case "expired":
           return and(isNull(sessions.revokedAt), lte(sessions.expiresAt, new Date()));
+        default:
+          return and(isNull(sessions.revokedAt), gt(sessions.expiresAt, new Date()));
       }
     })();
 
@@ -121,5 +165,7 @@ export const sessionRespository = {
         totalPages: Math.ceil(total / limit),
       },
     };
-  },
-};
+  }
+}
+
+export const sessionRespository = new SessionRepo();
