@@ -34,7 +34,7 @@ export interface ITokenService {
 export interface IAuthCookieService {
   setRefreshTokenCookie(res: Response, token: string): void;
   clearRefreshTokenCookie(res: Response): void;
-  getRefreshTokenFromCookie(req: Request): string;
+  getRefreshTokenFromCookie(req: Request): string | null;
 }
 
 export class TokenService implements ITokenService, IAuthCookieService {
@@ -82,7 +82,7 @@ export class TokenService implements ITokenService, IAuthCookieService {
       httpOnly: true,
       secure: authConfig.isProduction,
       sameSite: "strict",
-      path: authConfig.refreshCookiePath, // single source of truth
+      path: authConfig.refreshCookiePath,
       maxAge: authConfig.refreshTokenTTL,
     });
   }
@@ -97,11 +97,10 @@ export class TokenService implements ITokenService, IAuthCookieService {
     });
   }
 
-  getRefreshTokenFromCookie(req: Request): string {
+  getRefreshTokenFromCookie(req: Request): string | null {
     const raw: unknown = req.cookies[authConfig.refreshCookieName];
-
     if (typeof raw !== "string" || raw.length === 0) {
-      throw AppError.unauthorized("Refresh token missing", ErrorCode.UNAUTHORIZED);
+      return null;
     }
 
     return raw;

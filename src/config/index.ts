@@ -23,7 +23,7 @@ export const authConfig = {
   bcryptSaltRounds: 12,
   refreshCookieName: "refreshToken",
   refreshTokenTTL: ms(appEnv.REFRESH_TOKEN_EXPIRES_IN as StringValue), // 7 days
-  refreshCookiePath: "/api/v1/auth/refresh",
+  refreshCookiePath: "/api/v1/auth",
   confirmationCodeTTL: 10 * 60 * 1000, // 10 mins,
   isProduction: isProd,
 } as const;

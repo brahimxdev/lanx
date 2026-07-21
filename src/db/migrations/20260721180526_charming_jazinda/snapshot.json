@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "6cd8ea14-8efc-4ef7-aae0-cdaa5586f550",
+  "id": "4b732d67-b599-41f7-bbc0-82bfc85b8173",
   "prevIds": ["00000000-0000-0000-0000-000000000000"],
   "ddl": [
     {
@@ -114,6 +114,19 @@
       "default": null,
       "generated": null,
       "identity": null,
+      "name": "password_changed_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "auth_users"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
       "name": "deleted_at",
       "entityType": "columns",
       "schema": "public",
@@ -154,6 +167,19 @@
       "generated": null,
       "identity": null,
       "name": "code_hash",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "email_confirmations"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "new_email",
       "entityType": "columns",
       "schema": "public",
       "table": "email_confirmations"

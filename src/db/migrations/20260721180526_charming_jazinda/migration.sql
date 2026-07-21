@@ -6,6 +6,7 @@ CREATE TABLE "auth_users" (
 	"is_email_verified" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"password_changed_at" timestamp with time zone,
 	"deleted_at" timestamp with time zone
 );
 --> statement-breakpoint
@@ -13,6 +14,7 @@ CREATE TABLE "email_confirmations" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"auth_user_id" uuid NOT NULL,
 	"code_hash" text NOT NULL,
+	"new_email" text,
 	"confirmation_type" "confirmation_type" NOT NULL,
 	"expires_at" timestamp with time zone NOT NULL,
 	"used_at" timestamp with time zone,

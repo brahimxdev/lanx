@@ -1,2 +1,0 @@
-ALTER TABLE "sessions" ADD COLUMN "device_id" text;--> statement-breakpoint
-CREATE UNIQUE INDEX "idx_sessions_one_active_per_device" ON "sessions" ("auth_user_id","device_id") WHERE "revoked_at" IS NULL AND "device_id" IS NOT NULL;
