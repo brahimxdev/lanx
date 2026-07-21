@@ -10,6 +10,8 @@
     "target": "es2022",
     "lib": ["es2022"],
 
+    "typeRoots": ["./src/types", "./node_modules/@types"],
+
     // --- Path aliases (paths resolves relative to this tsconfig in TS 6+) ---
     "paths": {
       "@/*": ["./src/*"]

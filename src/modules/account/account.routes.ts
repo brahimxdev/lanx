@@ -20,28 +20,28 @@ accountRouter.use(requireAuth);
 // Route for changing password in dashboard - (need auth access)
 accountRouter.patch(
   "/password",
-  validateRequest(changePasswordSchema),
+  validateRequest({body: changePasswordSchema}),
   asyncHandler(AccountController.changePassword)
 );
 
 // Route for requesting email change in dashboard - (need auth access)
 accountRouter.post(
   "/email",
-  validateRequest(changeEmailSchema),
+  validateRequest({body: changeEmailSchema}),
   asyncHandler(AccountController.changeEmail)
 );
 
 // Route for confirming email change in dashboard - (need auth access)
 accountRouter.post(
   "/email/confirm",
-  validateRequest(confirmChangeEmailSchema),
+  validateRequest({body: confirmChangeEmailSchema}),
   asyncHandler(AccountController.confirmEmailChange)
 );
 
 // Route for listing all active sessions for a user (need auth access)
 accountRouter.get(
   "/sessions",
-  validateRequest(listSessionSchema, "query"),
+  validateRequest({query: listSessionSchema}),
   asyncHandler(AccountController.listSessions)
 );
 

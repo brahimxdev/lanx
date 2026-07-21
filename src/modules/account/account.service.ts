@@ -6,10 +6,12 @@ import type {
   IListSessionsQuery,
 } from "./account.validation.js";
 import {
-  authUserRepository,
-  emailConfirmationRepository,
-  sessionRespository,
+  // authUserRepository,
+  // emailConfirmationRepository,
+  // sessionRespository,
+  type IAuthUserRepository
 } from "@/shared/repo/index.js";
+
 import bcrypt from "bcryptjs";
 import { db } from "@/db/client.js";
 import { TokenService, type IRequestMeta, type IAuthenticatedUser } from "@/modules/auth/index.js";
@@ -23,10 +25,13 @@ import {
 } from "@/utils/confirmation-code.util.js";
 
 export class AccountService {
+  constructor(
+    private readonly authUserRepository: IAuthUserRepository
+  ) {}
   // Change password (need auth access)
-  static async changePassword(authUserId: string, input: IChangePassword, meta: IRequestMeta) {
+   async changePassword(authUserId: string, input: IChangePassword, meta: IRequestMeta) {
     // Find user by id
-    const existingUser = await authUserRepository.findById(authUserId);
+    const existingUser = await this.authUserRepository.findById(authUserId);
 
     if (!existingUser) {
       throw AppError.unauthorized("User not found", ErrorCode.UNAUTHORIZED);

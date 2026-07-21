@@ -5,6 +5,11 @@ declare global {
     interface Request {
       user?: IAuthenticatedUser;
       sessionId?: string;
+      validated?: {
+        body: unknown;
+        query: unknown;
+        params: unknown;
+      }
     }
   }
 }

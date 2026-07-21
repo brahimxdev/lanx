@@ -16,36 +16,36 @@ export const authRouter = Router();
 // base url - /api/v1/auth
 
 // Route for creating user
-authRouter.post("/sign-up", validateRequest(signUpSchema), asyncHandler(AuthController.signup));
+authRouter.post("/sign-up", validateRequest({body: signUpSchema}), asyncHandler(AuthController.signup));
 
 // Route for confirming email, usable for only sign up to confirm email by code
 authRouter.post(
   "/confirm-email",
-  validateRequest(confirmEmailSchema),
+  validateRequest({body: confirmEmailSchema}),
   asyncHandler(AuthController.confirmEmail)
 );
 
 // Route for resending confirmation code, usable for only sign up code
 authRouter.post(
   "/resend-confirmation-code",
-  validateRequest(resendConfirmationCodeSchema),
+  validateRequest({body: resendConfirmationCodeSchema}),
   asyncHandler(AuthController.resendConfirmationCode)
 );
 
 // Route for sign in
-authRouter.post("/sign-in", validateRequest(signInSchema), asyncHandler(AuthController.signIn));
+authRouter.post("/sign-in", validateRequest({body: signInSchema}), asyncHandler(AuthController.signIn));
 
 // Route for forgot password
 authRouter.post(
   "/forgot-password",
-  validateRequest(forgotPasswordSchema),
+  validateRequest({body: forgotPasswordSchema}),
   asyncHandler(AuthController.forgotPassword)
 );
 
 // Route for reseting password
 authRouter.post(
   "/reset-password",
-  validateRequest(resetPasswordSchema),
+  validateRequest({body: resetPasswordSchema}),
   asyncHandler(AuthController.resetPassword)
 );
 

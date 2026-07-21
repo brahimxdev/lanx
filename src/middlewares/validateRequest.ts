@@ -1,50 +1,50 @@
-import { ErrorName } from "./../errors/error-codes.js";
-import type { Request, Response, NextFunction } from "express";
 import { type ZodType } from "zod";
-import { AppError, ErrorCode, HttpStatus } from "@/errors/index.js";
+import { z } from "zod";
+import type { Request, Response, NextFunction } from "express";
+import { AppError, ErrorCode } from "@/errors/index.js";
+import { ErrorName } from "@/errors/error-codes.js";
+import { HttpStatus } from "@/errors/index.js";
 
-type RequestPart = "body" | "query" | "params";
+interface ValidationSchemas {
+  body?: ZodType;
+  query?: ZodType;
+  params?: ZodType;
+}
 
-export const validateRequest =
-  (schema: ZodType, part: RequestPart = "body") =>
-  (req: Request, res: Response, next: NextFunction): void => {
-    const result = schema.safeParse(req[part]);
+export const validate = (schemas: ValidationSchemas) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const allIssues: { field: string; message: string }[] = [];
+    const validated: { body?: unknown; query?: unknown; params?: unknown } = {};
 
-    if (!result.success) {
-      // collect every validation error into a clean array
-      const issues = result.error.issues.map((issue) => ({
-        field: issue.path.join("."),
-        message: issue.message,
-      }));
+    const targets = ["body", "query", "params"] as const;
 
-      // throw a validation error - error middleware handles the response
-      const err = new ValidationError(issues);
-      next(err);
+    for (const target of targets) {
+      const schema = schemas[target];
+      if (!schema) continue;
+
+      const result = schema.safeParse(req[target]);
+
+      if (!result.success) {
+        const issues = result.error.issues.map((issue) => ({
+          field: issue.path.join(".") || target,
+          message: issue.message,
+        }));
+        allIssues.push(...issues);
+      } else {
+        validated[target] = result.data;
+      }
+    }
+
+    if (allIssues.length > 0) {
+      next(new ValidationError(allIssues));
       return;
     }
 
-    // replace req.body/query/params with the parsed, typed, cleaned data
-    // (this is important — Zod transforms like .trim() and .toLowerCase()
-    // only persist if you save the parsed result back)
-    //
-    // Express 5 makes req.query a read-only getter (no setter), so a plain
-    // assignment throws "Cannot set property query of #<IncomingMessage>
-    // which has only a getter". body/params are still writable, so only
-    // query needs the defineProperty workaround.
-    if (part === "query") {
-      Object.defineProperty(req, "query", {
-        value: result.data,
-        writable: true,
-        configurable: true,
-      });
-    } else {
-      (req as unknown as Record<string, unknown>)[part] = result.data;
-    }
-
+    req.validated = validated as { body: unknown; query: unknown; params: unknown };
     next();
   };
+};
 
-// custom error class for validation - extends AppError so error handler picks it up
 export class ValidationError extends AppError {
   constructor(public issues: { field: string; message: string }[]) {
     super(
