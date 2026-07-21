@@ -1,53 +1,50 @@
+import type { Request, Response } from "express";
+import type { AccountService } from "./account.service.js";
 import { AppError, ErrorCode, HttpStatus } from "@/errors/index.js";
-import type { NextFunction, Response } from "express";
+import type { IRequestMeta, TokenService, IAuthenticatedUser } from "@/modules/auth/index.js";
+import type { TypedRequest, TypedBodyRequest, TypedQueryRequest } from "@/types/typed-request.js";
 import type {
-  IChangePassword,
   IChangeEmail,
+  IChangePassword,
   IConfirmChangeEmail,
   IListSessionsQuery,
 } from "./account.validation.js";
-import type { AccountService } from "./account.service.js";
-import { TokenService } from "@/modules/auth/index.js";
-import type { TypedBodyRequest, TypedQueryRequest } from "@/types/typed-request.js";
 
 export class AccountController {
-  constructor(private readonly accountService: AccountService) {}
+  constructor(
+    private readonly accountService: AccountService,
+    private readonly tokenService: TokenService
+  ) {}
 
-  private requireUser(
-    req: { user?: unknown },
-    next: NextFunction
-  ): req is { user: NonNullable<typeof req.user> } {
+  private assertUser(
+    req: TypedRequest
+  ): asserts req is TypedRequest & { user: IAuthenticatedUser } {
     if (!req.user) {
-      next(AppError.unauthorized("Authentication required", ErrorCode.UNAUTHORIZED));
-      return false;
+      throw AppError.unauthorized("Authentication required", ErrorCode.UNAUTHORIZED);
     }
-    return true;
   }
 
-  private extractMeta(
-    req: Parameters<typeof this.requireUser>[0] & {
-      ip?: string;
-      headers: Record<string, string | string[] | undefined>;
-    }
-  ): IRequestMeta {
+  private extractMeta(req: Request): IRequestMeta {
+    const getHeader = (val: string | string[] | undefined): string | null => {
+      if (typeof val === "string") return val;
+      if (Array.isArray(val)) return val[0] ?? null;
+      return null;
+    };
+
     return {
       ipAddress: req.ip ?? null,
-      userAgent: req.headers["user-agent"] ?? null,
-      deviceType: (req.headers["x-device-type"] as string) ?? null,
-      deviceOs: (req.headers["x-device-os"] as string) ?? null,
-      deviceBrowser: (req.headers["x-device-browser"] as string) ?? null,
+      userAgent: getHeader(req.headers["user-agent"]),
+      deviceType: getHeader(req.headers["x-device-type"]),
+      deviceOs: getHeader(req.headers["x-device-os"]),
+      deviceBrowser: getHeader(req.headers["x-device-browser"]),
     };
   }
 
   // Change password in dashboard - (need auth access)
-  changePassword = async (
-    req: TypedBodyRequest<IChangePassword>,
-    res: Response,
-    next: NextFunction
-  ) => {
+  changePassword = async (req: TypedBodyRequest<IChangePassword>, res: Response) => {
     //* Validation middleware already validated data!
 
-    if (!this.requireUser(req, next)) return;
+    this.assertUser(req);
 
     const authUserId = req.user.id;
     const { existingPassword, newPassword } = req.validated.body;
@@ -56,11 +53,11 @@ export class AccountController {
     const { sanitizedUser, accessToken, refreshToken } = await this.accountService.changePassword(
       authUserId,
       { existingPassword, newPassword },
-      { ipAddress: req.ip, userAgent: req.headers["user-agent"] }
+      this.extractMeta(req)
     );
 
     // Set refresh cookie
-    TokenService.setRefreshTokenCookie(res, refreshToken);
+    this.tokenService.setRefreshTokenCookie(res, refreshToken);
 
     res.status(HttpStatus.OK).json({
       status: true,
@@ -74,20 +71,16 @@ export class AccountController {
   };
 
   // Request email change in dashboard - (need auth acess)
-  changeEmail = async (req: TypedBodyRequest<IChangeEmail>, res: Response, next: NextFunction) => {
+  requestChangeEmail = async (req: TypedBodyRequest<IChangeEmail>, res: Response) => {
     //* Validation middleware already validated data!
-
-    if (!req.user) {
-      const err = AppError.unauthorized("Authentication required", ErrorCode.UNAUTHORIZED);
-      next(err);
-      return;
-    }
+    this.assertUser(req);
 
     const authUserId = req.user.id;
 
     const { newEmail, currentPassword } = req.validated.body;
 
-    const { message } = await AccountService.requestChangeEmail(authUserId, {
+    // Service layer to handle logic
+    const { message } = await this.accountService.requestChangeEmail(authUserId, {
       newEmail,
       currentPassword,
     });
@@ -99,25 +92,16 @@ export class AccountController {
   };
 
   // Confirm email change in dashboard - (need auth access)
-  confirmEmailChange = async (
-    req: TypedBodyRequest<IConfirmChangeEmail>,
-    res: Response,
-    next: NextFunction
-  ) => {
+  confirmEmailChange = async (req: TypedBodyRequest<IConfirmChangeEmail>, res: Response) => {
     //* Validation middleware already validated data!
-
-    if (!req.user) {
-      const err = AppError.unauthorized("Authentication required", ErrorCode.UNAUTHORIZED);
-      next(err);
-      return;
-    }
+    this.assertUser(req);
 
     const authUserId = req.user.id;
 
     const { confirmationCode } = req.validated.body;
 
     // Service layer to handle logic
-    const { sanitizedUser } = await AccountService.confirmChangeEmail(authUserId, {
+    const { sanitizedUser } = await this.accountService.confirmChangeEmail(authUserId, {
       confirmationCode,
     });
 
@@ -132,25 +116,17 @@ export class AccountController {
   };
 
   // List all sessions in dashboard - (need auth access)
-  listSessions = async (
-    req: TypedQueryRequest<IListSessionsQuery>,
-    res: Response,
-    next: NextFunction
-  ) => {
+  listSessions = async (req: TypedQueryRequest<IListSessionsQuery>, res: Response) => {
     //* Validation middleware already validated data!
 
-    if (!req.user) {
-      const err = AppError.unauthorized("Authentication required", ErrorCode.UNAUTHORIZED);
-      next(err);
-      return;
-    }
+    this.assertUser(req);
 
     const authUserId = req.user.id;
 
     const { status, sortBy, sortOrder, limit, page } = req.validated.query;
 
     // Service layer to handle logic
-    const { sessions, pagination } = await AccountService.listSessions(authUserId, {
+    const { sessions, pagination } = await this.accountService.listSessions(authUserId, {
       status,
       sortBy,
       sortOrder,

@@ -1,7 +1,6 @@
 import { requireAuth } from "@/middlewares/requireAuth.js";
-import { asyncHandler } from "@/utils/asyncHandler.js";
+import { asyncBodyHandler, asyncQueryHandler } from "@/utils/asyncHandler.js";
 import { Router } from "express";
-import { AccountController } from "./account.controller.js";
 import { validateRequest } from "@/middlewares/validateRequest.js";
 import {
   changeEmailSchema,
@@ -9,6 +8,7 @@ import {
   confirmChangeEmailSchema,
   listSessionSchema,
 } from "./account.validation.js";
+import { accountController } from "./account.module.js";
 
 export const accountRouter = Router();
 
@@ -21,28 +21,28 @@ accountRouter.use(requireAuth);
 accountRouter.patch(
   "/password",
   validateRequest({body: changePasswordSchema}),
-  asyncHandler(AccountController.changePassword)
+  asyncBodyHandler(accountController.changePassword)
 );
 
 // Route for requesting email change in dashboard - (need auth access)
 accountRouter.post(
   "/email",
   validateRequest({body: changeEmailSchema}),
-  asyncHandler(AccountController.changeEmail)
+  asyncBodyHandler(accountController.requestChangeEmail)
 );
 
 // Route for confirming email change in dashboard - (need auth access)
 accountRouter.post(
   "/email/confirm",
   validateRequest({body: confirmChangeEmailSchema}),
-  asyncHandler(AccountController.confirmEmailChange)
+  asyncBodyHandler(accountController.confirmEmailChange)
 );
 
 // Route for listing all active sessions for a user (need auth access)
 accountRouter.get(
   "/sessions",
   validateRequest({query: listSessionSchema}),
-  asyncHandler(AccountController.listSessions)
+  asyncQueryHandler(accountController.listSessions)
 );
 
 // // Route for revoking a session by user (need auth access)

@@ -6,7 +6,7 @@ import type { ISendEmailParams } from "./email.types.js";
 import { NotificationEmail } from "@/emails/templates/NotificationEmail.js";
 
 export class EmailService {
-  private static async send({ to, subject, react, context }: ISendEmailParams): Promise<void> {
+   private async send({ to, subject, react, context }: ISendEmailParams): Promise<void> {
     const { data, error } = await resend.emails.send({
       from: emailConfig.from,
       to,
@@ -22,8 +22,7 @@ export class EmailService {
     console.info(`${context} email sent!`, { to, emailId: data.id });
   }
 
-  // sending confirmation code for sign up
-  static sendConfirmationCode(to: string, code: string): Promise<void> {
+  async sendConfirmationCode(to: string, code: string): Promise<void> {
     return this.send({
       to,
       subject: "Your temporary Lanx verification code",
@@ -36,8 +35,7 @@ export class EmailService {
     });
   }
 
-  // Sending password reset code
-  static sendPasswordResetCode(to: string, code: string): Promise<void> {
+  async sendPasswordResetCode(to: string, code: string): Promise<void> {
     return this.send({
       to,
       subject: "Your Lanx password reset code",
@@ -50,8 +48,7 @@ export class EmailService {
     });
   }
 
-  // Sending welcome email (pro)
-  static sendWelcomeEmailPro(to: string, payload: IWelcomeEmailProProps): Promise<void> {
+  async sendWelcomeEmailPro(to: string, payload: IWelcomeEmailProProps): Promise<void> {
     return this.send({
       to,
       subject: `Welcome to Lanx ${payload.email}`,
@@ -60,8 +57,7 @@ export class EmailService {
     });
   }
 
-  // Notify user their password was reset
-  static sendPasswordResetNotification(to: string): Promise<void> {
+  async sendPasswordResetNotification(to: string): Promise<void> {
     return this.send({
       to,
       subject: "Your Lanx password was reset",
@@ -76,8 +72,7 @@ export class EmailService {
     });
   }
 
-  // Notify user their email was changed
-  static sendEmailChangeNotification(to: string, newEmail: string): Promise<void> {
+  async sendEmailChangeNotification(to: string, newEmail: string): Promise<void> {
     return this.send({
       to,
       subject: "Your Lanx email was changed",
@@ -91,3 +86,6 @@ export class EmailService {
     });
   }
 }
+
+// Singleton instance
+export const emailService = new EmailService();

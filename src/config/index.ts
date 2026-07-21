@@ -21,9 +21,10 @@ export const authConfig = {
   refreshSecret: appEnv.REFRESH_TOKEN_SECRET,
   refreshExpiresIn: appEnv.REFRESH_TOKEN_EXPIRES_IN as StringValue,
   jwtAlg: "HS256" as const,
+  bcryptSaltRounds: 12,
   refreshCookieName: "refreshToken",
-  refreshTokenTTL: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
-  confirmationCodeTTL: 10 * 60 * 1000,
+  refreshTokenTTL: 7 * 24 * 60 * 60 * 1000, // 7 days
+  confirmationCodeTTL: 10 * 60 * 1000, // 10 mins,
 } as const;
 
 export const emailConfig = {

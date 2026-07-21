@@ -21,7 +21,7 @@ export interface IRefreshTokenPayload {
 
 export class TokenService {
   // Sign access Token
-  static signAccessToken(claims: IAccessTokenClaims): string {
+  signAccessToken(claims: IAccessTokenClaims): string {
     const accessToken = jwt.sign(claims, authConfig.jwtSecret, {
       algorithm: authConfig.jwtAlg,
       expiresIn: authConfig.jwtExpiresIn,
@@ -31,26 +31,26 @@ export class TokenService {
   }
 
   // Verify access Token
-  static verifyAcesssToken(token: string): IAccessTokenPayload {
+  verifyAcesssToken(token: string): IAccessTokenPayload {
     return jwt.verify(token, authConfig.jwtSecret, {
       algorithms: [authConfig.jwtAlg],
     }) as IAccessTokenPayload;
   }
 
   // Generate refresh Token
-  static generateRefreshToken(): string {
+  generateRefreshToken(): string {
     const refreshTokenString = randomBytes(48).toString("base64url");
     return refreshTokenString;
   }
 
   // Hash refresh Token
-  static hashRefreshToken(token: string): string {
+  hashRefreshToken(token: string): string {
     const hashedRefreshToken = createHash("sha256").update(token).digest("hex");
     return hashedRefreshToken;
   }
 
   // Set refresh token to cookie
-  static setRefreshTokenCookie(res: Response, token: string): void {
+  setRefreshTokenCookie(res: Response, token: string): void {
     res.cookie(authConfig.refreshCookieName, token, {
       httpOnly: true,
       secure: true,
@@ -61,7 +61,7 @@ export class TokenService {
   }
 
   // Clear refresh token from cookie
-  static clearRefreshTokenCookie(res: Response): void {
+  clearRefreshTokenCookie(res: Response): void {
     res.clearCookie(authConfig.refreshCookieName, {
       httpOnly: true,
       secure: true,
@@ -72,9 +72,10 @@ export class TokenService {
   }
 
   // get refresh token from cookie
-  static getRefreshTokenFromCookie(req: Request): string | null {
-    const raw: unknown = req.cookies.refreshToken;
-    console.log("You refresh Token from cookie:", raw);
+  getRefreshTokenFromCookie(req: Request): string | null {
+    const raw: unknown = req.cookies[authConfig.refreshCookieName];
     return typeof raw === "string" ? raw : null;
   }
 }
+
+export const tokenService = new TokenService();

@@ -168,4 +168,4 @@ export class SessionRepo implements ISessionRepo {
   }
 }
 
-export const sessionRespository = new SessionRepo();
+export const sessionRepo = new SessionRepo();

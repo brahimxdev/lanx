@@ -1,5 +1,4 @@
 import { type ZodType } from "zod";
-import { z } from "zod";
 import type { Request, Response, NextFunction } from "express";
 import { AppError, ErrorCode } from "@/errors/index.js";
 import { ErrorName } from "@/errors/error-codes.js";
@@ -11,7 +10,7 @@ interface ValidationSchemas {
   params?: ZodType;
 }
 
-export const validate = (schemas: ValidationSchemas) => {
+export const validateRequest = (schemas: ValidationSchemas) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     const allIssues: { field: string; message: string }[] = [];
     const validated: { body?: unknown; query?: unknown; params?: unknown } = {};

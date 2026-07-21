@@ -6,9 +6,9 @@ export type IAuthenticatedUser = Pick<
 >;
 
 export interface IRequestMeta {
-  ipAddress?: string | undefined;
-  userAgent?: string | undefined;
-  deviceType?: string | undefined;
-  deviceOs?: string | undefined;
-  deviceBrowser?: string | undefined;
+  ipAddress: string | null;
+  userAgent: string | null;
+  deviceType: string | null;
+  deviceOs: string | null;
+  deviceBrowser: string | null;
 }
