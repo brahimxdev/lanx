@@ -1,4 +1,4 @@
-import type { StringValue } from "ms";
+import ms, { type StringValue } from "ms";
 import { dbEnv } from "./db-env.js";
 import { appEnv, isDev, isProd, isStaging } from "./app-env.js";
 
@@ -18,13 +18,14 @@ export const dbConfig = {
 export const authConfig = {
   jwtSecret: appEnv.JWT_SECRET,
   jwtExpiresIn: appEnv.JWT_EXPIRES_IN as StringValue,
-  refreshSecret: appEnv.REFRESH_TOKEN_SECRET,
   refreshExpiresIn: appEnv.REFRESH_TOKEN_EXPIRES_IN as StringValue,
   jwtAlg: "HS256" as const,
   bcryptSaltRounds: 12,
   refreshCookieName: "refreshToken",
-  refreshTokenTTL: 7 * 24 * 60 * 60 * 1000, // 7 days
+  refreshTokenTTL: ms(appEnv.REFRESH_TOKEN_EXPIRES_IN as StringValue), // 7 days
+  refreshCookiePath: "/api/v1/auth/refresh",
   confirmationCodeTTL: 10 * 60 * 1000, // 10 mins,
+  isProduction: isProd,
 } as const;
 
 export const emailConfig = {

@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import type { AccountService } from "./account.service.js";
 import { AppError, ErrorCode, HttpStatus } from "@/errors/index.js";
-import type { IRequestMeta, TokenService, IAuthenticatedUser } from "@/modules/auth/index.js";
+import type { IRequestMeta, IAuthCookieService, IAuthenticatedUser } from "@/modules/auth/index.js";
 import type { TypedRequest, TypedBodyRequest, TypedQueryRequest } from "@/types/typed-request.js";
 import type {
   IChangeEmail,
@@ -13,7 +13,7 @@ import type {
 export class AccountController {
   constructor(
     private readonly accountService: AccountService,
-    private readonly tokenService: TokenService
+    private readonly tokenService: IAuthCookieService
   ) {}
 
   private assertUser(

@@ -16,7 +16,6 @@ const appEnvSchema = z.object({
   // Auth
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN: z.string().default("15m"),
-  REFRESH_TOKEN_SECRET: z.string().min(32),
   REFRESH_TOKEN_EXPIRES_IN: z.string().default("7d"),
 
   // Email

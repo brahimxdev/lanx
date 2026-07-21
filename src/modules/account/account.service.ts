@@ -6,7 +6,7 @@ import type {
   IConfirmChangeEmail,
   IListSessionsQuery,
 } from "./account.validation.js";
-import type { IRequestMeta, IAuthenticatedUser, TokenService } from "@/modules/auth/index.js";
+import type { IRequestMeta, IAuthenticatedUser, ITokenService } from "@/modules/auth/index.js";
 import { AppError, ErrorCode } from "@/errors/index.js";
 import bcrypt from "bcryptjs";
 import { authConfig } from "@/config/index.js";
@@ -24,7 +24,7 @@ export class AccountService {
     private readonly emailConfirmationRepo: IEmailConfirmationRepo,
     private readonly sessionRepo: ISessionRepo,
     private readonly emailService: EmailService,
-    private readonly tokenService: TokenService
+    private readonly tokenService: ITokenService
   ) {}
 
   // Change password (need auth access)

@@ -1,14 +1,17 @@
 import { authConfig } from "@/config/index.js";
 import jwt from "jsonwebtoken";
-import { createHash, randomBytes } from "crypto";
+import crypto from "node:crypto";
 import type { Response, Request } from "express";
+import { AppError, ErrorCode } from "@/errors/index.js";
 
+// What you put IN when signing
 export interface IAccessTokenClaims {
   userId: string;
   roles?: string[];
   sessionId: string;
 }
 
+// What you get OUT after verifying
 export interface IAccessTokenPayload extends IAccessTokenClaims {
   iat: number;
   exp: number;
@@ -19,62 +22,89 @@ export interface IRefreshTokenPayload {
   sessionId: string;
 }
 
-export class TokenService {
-  // Sign access Token
+// Business/crypto logic
+export interface ITokenService {
+  generateRefreshToken(): string;
+  hashRefreshToken(token: string): string;
+  signAccessToken(claims: IAccessTokenClaims): string;
+  verifyAccessToken(token: string): IAccessTokenPayload;
+}
+
+// Transport concern
+export interface IAuthCookieService {
+  setRefreshTokenCookie(res: Response, token: string): void;
+  clearRefreshTokenCookie(res: Response): void;
+  getRefreshTokenFromCookie(req: Request): string;
+}
+
+export class TokenService implements ITokenService, IAuthCookieService {
+  generateRefreshToken(): string {
+    return crypto.randomBytes(64).toString("hex");
+  }
+
+  hashRefreshToken(token: string): string {
+    return crypto.createHash("sha256").update(token).digest("hex");
+  }
+
   signAccessToken(claims: IAccessTokenClaims): string {
-    const accessToken = jwt.sign(claims, authConfig.jwtSecret, {
+    return jwt.sign(claims, authConfig.jwtSecret, {
       algorithm: authConfig.jwtAlg,
       expiresIn: authConfig.jwtExpiresIn,
     });
-
-    return accessToken;
   }
 
-  // Verify access Token
-  verifyAcesssToken(token: string): IAccessTokenPayload {
-    return jwt.verify(token, authConfig.jwtSecret, {
-      algorithms: [authConfig.jwtAlg],
-    }) as IAccessTokenPayload;
+  verifyAccessToken(token: string): IAccessTokenPayload {
+    try {
+      const decoded = jwt.verify(token, authConfig.jwtSecret, {
+        algorithms: [authConfig.jwtAlg],
+      });
+
+      if (typeof decoded === "string") {
+        throw AppError.unauthorized("Invalid access token", ErrorCode.INVALID_TOKEN);
+      }
+
+      return decoded as IAccessTokenPayload;
+    } catch (err) {
+      if (err instanceof jwt.TokenExpiredError) {
+        throw AppError.unauthorized("Access token expired", ErrorCode.EXPIRED_TOKEN);
+      }
+
+      if (err instanceof jwt.JsonWebTokenError) {
+        throw AppError.unauthorized("Invalid access token", ErrorCode.INVALID_TOKEN);
+      }
+
+      throw err;
+    }
   }
 
-  // Generate refresh Token
-  generateRefreshToken(): string {
-    const refreshTokenString = randomBytes(48).toString("base64url");
-    return refreshTokenString;
-  }
-
-  // Hash refresh Token
-  hashRefreshToken(token: string): string {
-    const hashedRefreshToken = createHash("sha256").update(token).digest("hex");
-    return hashedRefreshToken;
-  }
-
-  // Set refresh token to cookie
   setRefreshTokenCookie(res: Response, token: string): void {
     res.cookie(authConfig.refreshCookieName, token, {
       httpOnly: true,
-      secure: true,
+      secure: authConfig.isProduction,
       sameSite: "strict",
-      path: "/api/v1/auth",
-      maxAge: authConfig.refreshTokenTTL, // 7 days in ms
+      path: authConfig.refreshCookiePath, // single source of truth
+      maxAge: authConfig.refreshTokenTTL,
     });
   }
 
-  // Clear refresh token from cookie
   clearRefreshTokenCookie(res: Response): void {
     res.clearCookie(authConfig.refreshCookieName, {
       httpOnly: true,
-      secure: true,
+      secure: authConfig.isProduction,
       sameSite: "strict",
-      path: "/api/v1/auth",
-      maxAge: authConfig.refreshTokenTTL, // 7 days in ms
+      path: authConfig.refreshCookiePath,
+      maxAge: authConfig.refreshTokenTTL,
     });
   }
 
-  // get refresh token from cookie
-  getRefreshTokenFromCookie(req: Request): string | null {
+  getRefreshTokenFromCookie(req: Request): string {
     const raw: unknown = req.cookies[authConfig.refreshCookieName];
-    return typeof raw === "string" ? raw : null;
+
+    if (typeof raw !== "string" || raw.length === 0) {
+      throw AppError.unauthorized("Refresh token missing", ErrorCode.UNAUTHORIZED);
+    }
+
+    return raw;
   }
 }
 
