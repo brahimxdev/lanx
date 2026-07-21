@@ -9,7 +9,7 @@ declare global {
         body: unknown;
         query: unknown;
         params: unknown;
-      }
+      };
     }
   }
 }

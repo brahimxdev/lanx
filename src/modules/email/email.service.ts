@@ -6,7 +6,7 @@ import type { ISendEmailParams } from "./email.types.js";
 import { NotificationEmail } from "@/emails/templates/NotificationEmail.js";
 
 export class EmailService {
-   private async send({ to, subject, react, context }: ISendEmailParams): Promise<void> {
+  private async send({ to, subject, react, context }: ISendEmailParams): Promise<void> {
     const { data, error } = await resend.emails.send({
       from: emailConfig.from,
       to,

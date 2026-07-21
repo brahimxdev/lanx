@@ -12,7 +12,4 @@ const accountService = new AccountService(
   tokenService
 );
 
-export const accountController = new AccountController(
-  accountService,
-  tokenService
-)
+export const accountController = new AccountController(accountService, tokenService);

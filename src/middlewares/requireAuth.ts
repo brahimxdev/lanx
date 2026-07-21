@@ -1,10 +1,9 @@
 import { AppError } from "@/errors/AppError.js";
 import { ErrorCode } from "@/errors/error-codes.js";
 import type { IAuthenticatedUser } from "@/modules/auth/auth.types.js";
-import { authUserRepository, sessionRespository } from "@/shared/repo/index.js";
-import { TokenService } from "@/modules/auth/token.service.js";
+import { authUserRepo, sessionRepo } from "@/shared/repo/index.js";
+import { tokenService } from "@/modules/auth/token.service.js";
 import type { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   // Grab header from req body
@@ -31,27 +30,14 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
   // Verify the token
   let decodedToken;
   try {
-    decodedToken = TokenService.verifyAcesssToken(accessToken);
-  } catch (jwtError) {
-    if (jwtError instanceof jwt.TokenExpiredError) {
-      const err = AppError.unauthorized("Token expired", ErrorCode.UNAUTHORIZED);
-      next(err);
-      return;
-    }
-
-    if (jwtError instanceof jwt.JsonWebTokenError) {
-      const err = AppError.unauthorized("Invalid token", ErrorCode.UNAUTHORIZED);
-      next(err);
-      return;
-    }
-
-    const err = AppError.unauthorized("Token verification failed", ErrorCode.UNAUTHORIZED);
+    decodedToken = tokenService.verifyAccessToken(accessToken);
+  } catch (err) {
     next(err);
     return;
   }
 
   // Check if the user exists by id
-  const existingUser = await authUserRepository.findById(decodedToken.userId);
+  const existingUser = await authUserRepo.findById(decodedToken.userId);
 
   if (!existingUser) {
     const err = AppError.unauthorized("Authentication failed", ErrorCode.UNAUTHORIZED);
@@ -74,7 +60,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
   }
 
   // Check if the session tied to the token is still active
-  const activeSession = await sessionRespository.findActiveById(decodedToken.sessionId);
+  const activeSession = await sessionRepo.findActiveById(decodedToken.sessionId);
 
   if (!activeSession) {
     const err = AppError.unauthorized(
