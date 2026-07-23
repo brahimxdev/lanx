@@ -159,7 +159,7 @@ export class AccountService {
 
     await this.emailService.sendConfirmationCode(tempEmailDomain, confirmationCode);
 
-    return { message: "Confirmation code sent to your email" };
+    return { message: "Confirmation code sent to your new email" };
   }
 
   // Confirm email change (need auth access)

@@ -11,7 +11,7 @@ http:
     data: |-
       {
         "email": "ibrahim.techresources@proton.me",
-        "password": "freshPass234!!!"
+        "password": "IBRahim123!!!"
       }
   auth: inherit
 
@@ -23,7 +23,10 @@ runtime:
         const accessToken = body?.data?.accessToken;
 
         if (accessToken) {
+          const payload = JSON.parse(atob(accessToken.split(".")[1]));
+          
           bru.setEnvVar("accessToken", accessToken);
+          bru.setEnvVar("sessionId", payload.sessionId)
         } else {
           console.log("Access token setting failed");
         }

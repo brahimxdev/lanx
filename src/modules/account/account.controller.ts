@@ -155,6 +155,7 @@ export class AccountController {
     const authUserId = req.user.id;
 
     const { sessionId } = req.validated.params;
+    console.log("sessionId", sessionId);
 
     // Service layer to handle logic
     await this.accountService.revokeSession(authUserId, sessionId);

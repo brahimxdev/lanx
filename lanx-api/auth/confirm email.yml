@@ -11,9 +11,25 @@ http:
     data: |-
       {
         "email": "ibrahim.techresources@proton.me",
-        "confirmationCode": "881127"
+        "confirmationCode": "687285"
       }
   auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const body = res.getBody();
+        const accessToken = body?.data?.accessToken;
+
+        if (accessToken) {
+          const payload = JSON.parse(atob(accessToken.split(".")[1]));
+          
+          bru.setEnvVar("accessToken", accessToken);
+          bru.setEnvVar("sessionId", payload.sessionId)
+        } else {
+          console.log("Access token setting failed");
+        }
 
 settings:
   encodeUrl: true

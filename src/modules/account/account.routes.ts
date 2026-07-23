@@ -48,7 +48,7 @@ accountRouter.get(
 
 // Route for revoking a session by user (need auth access)
 accountRouter.delete(
-  "/sessions/:session_id",
+  "/sessions/:sessionId",
   validateRequest({ params: revokeSessionSchema }),
   asyncParamsHandler(accountController.revokeSession)
 );

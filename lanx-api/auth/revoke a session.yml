@@ -5,12 +5,22 @@ info:
 
 http:
   method: DELETE
-  url: "{{baseUrl}}/account/sessions/:id"
-  params:
-    - name: id
-      value: ""
-      type: path
-  auth: inherit
+  url: "{{baseUrl}}/account/sessions/{{sessionId}}"
+  auth:
+    type: bearer
+    token: "{{accessToken}}"
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // const accessToken = bru.getEnvVar("accessToken");
+
+        // if (accessToken) {
+        //   req.setHeader("Authorization", `Bearer ${accessToken}`);
+        // } else {
+        //   console.warn("No access token found — request may fail authentication.");
+        // }
 
 settings:
   encodeUrl: true

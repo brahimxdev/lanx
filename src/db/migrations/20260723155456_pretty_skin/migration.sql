@@ -1,3 +1,7 @@
+
+
+
+
 CREATE TYPE "confirmation_type" AS ENUM('sign_up', 'change_email', 'password_reset');--> statement-breakpoint
 CREATE TABLE "auth_users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),

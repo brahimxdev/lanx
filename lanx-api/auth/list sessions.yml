@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/account/sessions?status=active&sortBy=lastUsedAt&sortOrder=desc&limit=10&page=1"
+  url: "{{baseUrl}}/account/sessions?status=active&sortBy=lastUsedAt&sortOrder=desc&limit=5&page=1"
   params:
     - name: status
       value: active
@@ -17,12 +17,24 @@ http:
       value: desc
       type: query
     - name: limit
-      value: "10"
+      value: "5"
       type: query
     - name: page
       value: "1"
       type: query
   auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        const accessToken = bru.getEnvVar("accessToken");
+
+        if (accessToken) {
+          req.setHeader("Authorization", `Bearer ${accessToken}`);
+        } else {
+          console.warn("No access token found — request may fail authentication.");
+        }
 
 settings:
   encodeUrl: true
