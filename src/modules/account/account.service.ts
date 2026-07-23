@@ -242,4 +242,25 @@ export class AccountService {
     );
     return { sessions, pagination };
   }
+
+  // Revoke a session
+  async revokeSession(authUserId: string, sessionId: string) {
+    // Find the session
+    const activeSession = await this.sessionRepo.findActiveById(sessionId);
+
+    if (!activeSession) {
+      throw AppError.notFound("Session not found", ErrorCode.NOT_FOUND);
+    }
+
+    // Ownership check - ensure the session belongs to the requesting user
+    if (activeSession.authUserId !== authUserId) {
+      throw AppError.forbidden(
+        "You do not have permission to revoke this session",
+        ErrorCode.FORBIDDEN
+      );
+    }
+
+    // Revoke session
+    await this.sessionRepo.revokeSession(sessionId);
+  }
 }

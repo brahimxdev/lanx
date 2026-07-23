@@ -1,12 +1,13 @@
 import { requireAuth } from "@/middlewares/requireAuth.js";
-import { asyncBodyHandler, asyncQueryHandler } from "@/utils/asyncHandler.js";
+import { asyncBodyHandler, asyncParamsHandler, asyncQueryHandler } from "@/utils/asyncHandler.js";
 import { Router } from "express";
 import { validateRequest } from "@/middlewares/validateRequest.js";
 import {
   changeEmailSchema,
   changePasswordSchema,
   confirmChangeEmailSchema,
-  listSessionSchema,
+  listSessionsSchema,
+  revokeSessionSchema,
 } from "./account.validation.js";
 import { accountController } from "./account.module.js";
 
@@ -41,12 +42,16 @@ accountRouter.post(
 // Route for listing all active sessions for a user (need auth access)
 accountRouter.get(
   "/sessions",
-  validateRequest({ query: listSessionSchema }),
+  validateRequest({ query: listSessionsSchema }),
   asyncQueryHandler(accountController.listSessions)
 );
 
-// // Route for revoking a session by user (need auth access)
-// accountRouter.delete("/sessions/:id");
+// Route for revoking a session by user (need auth access)
+accountRouter.delete(
+  "/sessions/:session_id",
+  validateRequest({ params: revokeSessionSchema }),
+  asyncParamsHandler(accountController.revokeSession)
+);
 
 // // Route to fetch loggedin profile details - (need auth access)
 // accountRouter.get("/");

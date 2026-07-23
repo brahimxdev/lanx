@@ -2,12 +2,18 @@ import type { Request, Response } from "express";
 import type { AccountService } from "./account.service.js";
 import { AppError, ErrorCode, HttpStatus } from "@/errors/index.js";
 import type { IRequestMeta, IAuthCookieService, IAuthenticatedUser } from "@/modules/auth/index.js";
-import type { TypedRequest, TypedBodyRequest, TypedQueryRequest } from "@/types/typed-request.js";
+import type {
+  TypedRequest,
+  TypedBodyRequest,
+  TypedQueryRequest,
+  TypedParamsRequest,
+} from "@/types/typed-request.js";
 import type {
   IChangeEmail,
   IChangePassword,
   IConfirmChangeEmail,
   IListSessionsQuery,
+  IRevokeSessionParams,
 } from "./account.validation.js";
 
 export class AccountController {
@@ -137,6 +143,25 @@ export class AccountController {
     res.status(HttpStatus.OK).json({
       status: true,
       data: { sessions, pagination },
+    });
+  };
+
+  // Revoke a session in dashboard - (need auth access)
+  revokeSession = async (req: TypedParamsRequest<IRevokeSessionParams>, res: Response) => {
+    //* Validation middleware already validated data!
+
+    this.assertUser(req);
+
+    const authUserId = req.user.id;
+
+    const { sessionId } = req.validated.params;
+
+    // Service layer to handle logic
+    await this.accountService.revokeSession(authUserId, sessionId);
+
+    res.status(HttpStatus.OK).json({
+      status: true,
+      message: "Device logged out successfully",
     });
   };
 }

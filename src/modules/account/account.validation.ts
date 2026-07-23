@@ -41,7 +41,7 @@ export const confirmChangeEmailSchema = z.object({
 });
 
 // List sessions query param validation & transformation
-export const listSessionSchema = z.object({
+export const listSessionsSchema = z.object({
   // Filteration
   status: z.enum(["active", "revoked", "expired"]).default("active"),
   // Sorting
@@ -52,7 +52,13 @@ export const listSessionSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
 });
 
+// Revoke session path paramater validation
+export const revokeSessionSchema = z.object({
+  sessionId: z.uuid("Invalid session ID"),
+});
+
 export type IChangePassword = z.infer<typeof changePasswordSchema>;
 export type IChangeEmail = z.infer<typeof changeEmailSchema>;
 export type IConfirmChangeEmail = z.infer<typeof confirmChangeEmailSchema>;
-export type IListSessionsQuery = z.infer<typeof listSessionSchema>;
+export type IListSessionsQuery = z.infer<typeof listSessionsSchema>;
+export type IRevokeSessionParams = z.infer<typeof revokeSessionSchema>;
