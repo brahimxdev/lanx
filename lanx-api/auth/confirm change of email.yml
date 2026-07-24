@@ -9,7 +9,9 @@ http:
   body:
     type: json
     data: '{"confirmationCode": "465739"}'
-  auth: inherit
+  auth:
+    type: bearer
+    token: "{{accessToken}}"
 
 settings:
   encodeUrl: true

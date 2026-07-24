@@ -425,4 +425,67 @@ export class AuthService {
       message: "Logout successfully",
     };
   }
+
+  // Refresh access token - (need refresh token in cookie)
+  async refreshToken(refreshToken: string | null, meta: IRequestMeta) {
+    if (!refreshToken) {
+      throw AppError.unauthorized("Refresh token is missing", ErrorCode.UNAUTHORIZED);
+    }
+
+    // Hash refresh token
+    const refreshTokenHash = this.tokenService.hashRefreshToken(refreshToken);
+
+    // find the session
+    const activeSession = await this.sessionRepo.findActiveByRefreshTokenHash(refreshTokenHash);
+
+    if (!activeSession) {
+      throw AppError.unauthorized("Invalid refresh token", ErrorCode.UNAUTHORIZED);
+    }
+
+    // Check if session already revoked
+    if (activeSession.revokedAt) {
+      await this.sessionRepo.revokeAllActive(activeSession.authUserId);
+      throw AppError.unauthorized("Refresh token has been revoked", ErrorCode.UNAUTHORIZED);
+    }
+
+    // Check if refresh token is expired
+    if (activeSession.expiresAt <= new Date()) {
+      throw AppError.unauthorized("Refresh token has expired", ErrorCode.UNAUTHORIZED);
+    }
+
+    // Fetch user
+    const existingUser = await this.authUserRepo.findById(activeSession.authUserId);
+
+    if (!existingUser) {
+      throw AppError.unauthorized("User no longer exists", ErrorCode.UNAUTHORIZED);
+    }
+
+    // Rotata refresh token
+    const newrefreshToken = this.tokenService.generateRefreshToken();
+    const newRefreshTokenHash = this.tokenService.hashRefreshToken(newrefreshToken);
+
+    // Update session in DB
+    await this.sessionRepo.rotateRefreshToken(activeSession.id, {
+      refreshTokenHash: newRefreshTokenHash,
+      expiresAt: new Date(Date.now() + authConfig.refreshTokenTTL),
+      ipAddress: meta.ipAddress,
+      userAgent: meta.userAgent,
+    });
+
+    // sign access Token
+    const accessToken = this.tokenService.signAccessToken({
+      userId: existingUser.id,
+      sessionId: activeSession.id,
+    });
+
+    // Sanitized user to return to client
+    const sanitizedUser: IAuthenticatedUser = {
+      id: existingUser.id,
+      email: existingUser.email,
+      isEmailVerified: existingUser.isEmailVerified,
+      createdAt: existingUser.createdAt,
+    };
+
+    return { sanitizedUser, accessToken, newrefreshToken };
+  }
 }

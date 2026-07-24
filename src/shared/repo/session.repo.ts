@@ -7,6 +7,10 @@ import { eq, and, isNull, lte, gt, isNotNull, asc, desc, sql } from "drizzle-orm
 
 type Session = typeof sessions.$inferSelect;
 type CreateSession = typeof sessions.$inferInsert;
+type RotateRefreshTokenData = Pick<
+  Session,
+  "refreshTokenHash" | "expiresAt" | "ipAddress" | "userAgent"
+>;
 
 // Interface - what the service binds against
 export interface ISessionRepo {
@@ -42,6 +46,11 @@ export interface ISessionRepo {
       totalPages: number;
     };
   }>;
+  rotateRefreshToken(
+    sessionId: string,
+    data: RotateRefreshTokenData,
+    executor?: Executor
+  ): Promise<void>;
 }
 
 // Class implementing the interface
@@ -165,6 +174,29 @@ export class SessionRepo implements ISessionRepo {
         totalPages: Math.ceil(total / limit),
       },
     };
+  }
+
+  // rotate refresh token
+  async rotateRefreshToken(
+    sessionId: string,
+    data: {
+      refreshTokenHash: string;
+      expiresAt: Date;
+      ipAddress?: string | null;
+      userAgent: string | null;
+    },
+    executor: Executor = db
+  ): Promise<void> {
+    await executor
+      .update(sessions)
+      .set({
+        refreshTokenHash: data.refreshTokenHash,
+        expiresAt: data.expiresAt,
+        ipAddress: data.ipAddress,
+        userAgent: data.userAgent,
+        lastUsedAt: new Date(),
+      })
+      .where(eq(sessions.id, sessionId));
   }
 }
 

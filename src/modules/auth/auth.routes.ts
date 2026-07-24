@@ -8,7 +8,7 @@ import {
   signInSchema,
   signUpSchema,
 } from "./auth.validation.js";
-import { asyncBodyHandler } from "@/utils/asyncHandler.js";
+import { asyncBodyHandler, asyncHandler } from "@/utils/asyncHandler.js";
 import { authController } from "./auth.module.js";
 
 export const authRouter = Router();
@@ -60,5 +60,5 @@ authRouter.post(
 // Route for logout
 authRouter.post("/logout", asyncBodyHandler(authController.logout));
 
-// // Route for giving refresh token (require refresh token from cookie - consider a middleware to check?)
-// authRouter.post("/refresh-token");
+// Route for giving refresh token (require refresh token from cookie - consider a middleware to check?)
+authRouter.post("/refresh-token", asyncHandler(authController.refreshToken));

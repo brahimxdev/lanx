@@ -13,7 +13,9 @@ http:
         "newEmail": "lekxyyusuf@gmail.com",
         "currentPassword": "IBRahim123!!!"
       }
-  auth: inherit
+  auth:
+    type: bearer
+    token: "{{accessToken}}"
 
 settings:
   encodeUrl: true

@@ -163,4 +163,24 @@ export class AuthController {
       },
     });
   };
+
+  // Refresh access token - (need refresh token in cookie)
+  refreshToken = async (req: Request, res: Response) => {
+    const refreshToken = this.tokenService.getRefreshTokenFromCookie(req);
+
+    const { sanitizedUser, accessToken, newrefreshToken } = await this.authService.refreshToken(
+      refreshToken,
+      this.extractMeta(req)
+    );
+
+    this.tokenService.setRefreshTokenCookie(res, newrefreshToken);
+
+    res.status(HttpStatus.OK).json({
+      status: true,
+      data: {
+        user: sanitizedUser,
+        accessToken,
+      },
+    });
+  };
 }
