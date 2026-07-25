@@ -1,9 +1,9 @@
 import { AppError } from "@/errors/AppError.js";
 import { ErrorCode } from "@/errors/error-codes.js";
-import type { IAuthenticatedUser } from "@/modules/auth/auth.types.js";
 import { authUserRepo, sessionRepo } from "@/shared/repo/index.js";
 import { tokenService } from "@/modules/auth/token.service.js";
 import type { Request, Response, NextFunction } from "express";
+import { sanitizeUser } from "@/utils/sanitizeUser.js";
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   // Grab header from req body
@@ -72,12 +72,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
   }
 
   // Attach user to the request object
-  const user: IAuthenticatedUser = {
-    id: existingUser.id,
-    email: existingUser.email,
-    isEmailVerified: existingUser.isEmailVerified,
-    createdAt: existingUser.createdAt,
-  };
+  const user = sanitizeUser(existingUser);
 
   req.user = user;
   req.sessionId = decodedToken.sessionId;

@@ -19,6 +19,7 @@ export interface IEmailConfirmationRepo {
     type: ConfirmationType,
     executor?: Executor
   ): Promise<void>;
+  invalidateAllUnusedForUser(authUserId: string, executor?: Executor): Promise<void>; // ← for account deletion
 }
 
 // class implementing the interface
@@ -81,6 +82,14 @@ export class EmailConfirmationRepo implements IEmailConfirmationRepo {
           isNull(emailConfirmations.usedAt)
         )
       );
+  }
+
+  // Invalidate ALL unused codes for a user regardless of type (used on account deletion)
+  async invalidateAllUnusedForUser(authUserId: string, executor: Executor = db): Promise<void> {
+    await executor
+      .update(emailConfirmations)
+      .set({ usedAt: new Date() })
+      .where(and(eq(emailConfirmations.authUserId, authUserId), isNull(emailConfirmations.usedAt)));
   }
 }
 

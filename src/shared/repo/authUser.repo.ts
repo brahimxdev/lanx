@@ -19,6 +19,7 @@ export interface IAuthUserRepo {
     executor?: Executor
   ): Promise<AuthUser>;
   updateEmail(authUserId: string, newEmail: string, executor?: Executor): Promise<AuthUser>;
+  softDelete(authUserId: string, executor?: Executor): Promise<void>;
 }
 
 // Class implementing the interface
@@ -107,6 +108,14 @@ export class AuthUserRepo implements IAuthUserRepo {
     }
 
     return user;
+  }
+
+  // Soft delete user
+  async softDelete(authUserId: string, executor: Executor = db): Promise<void> {
+    await executor
+      .update(authUsers)
+      .set({ deletedAt: new Date() })
+      .where(and(eq(authUsers.id, authUserId), isNull(authUsers.deletedAt)));
   }
 }
 

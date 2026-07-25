@@ -85,6 +85,20 @@ export class EmailService {
       context: "email change notification",
     });
   }
+
+  async sendAccountDeletedNotification(to: string): Promise<void> {
+    return this.send({
+      to,
+      subject: "Your Lanx account has been deleted",
+      react: NotificationEmail({
+        preview: "Your lanx account has been deleted",
+        title: "Account delete",
+        description: "This is a confirmation that your account has been deleted",
+        warning: "If you didn't make this change, please contact support immediately.",
+      }),
+      context: "account delete notification",
+    });
+  }
 }
 
 // Singleton instance

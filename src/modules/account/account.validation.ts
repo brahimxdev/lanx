@@ -57,8 +57,14 @@ export const revokeSessionSchema = z.object({
   sessionId: z.uuid("Invalid session ID"),
 });
 
+// Delete account
+export const deleteAccountSchema = z.object({
+  currentPassword: strongPasswordSchema,
+});
+
 export type IChangePassword = z.infer<typeof changePasswordSchema>;
 export type IChangeEmail = z.infer<typeof changeEmailSchema>;
 export type IConfirmChangeEmail = z.infer<typeof confirmChangeEmailSchema>;
 export type IListSessionsQuery = z.infer<typeof listSessionsSchema>;
 export type IRevokeSessionParams = z.infer<typeof revokeSessionSchema>;
+export type IDeleteAccount = z.infer<typeof deleteAccountSchema>;

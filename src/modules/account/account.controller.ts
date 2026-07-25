@@ -12,6 +12,7 @@ import type {
   IChangeEmail,
   IChangePassword,
   IConfirmChangeEmail,
+  IDeleteAccount,
   IListSessionsQuery,
   IRevokeSessionParams,
 } from "./account.validation.js";
@@ -155,7 +156,6 @@ export class AccountController {
     const authUserId = req.user.id;
 
     const { sessionId } = req.validated.params;
-    console.log("sessionId", sessionId);
 
     // Service layer to handle logic
     await this.accountService.revokeSession(authUserId, sessionId);
@@ -163,6 +163,39 @@ export class AccountController {
     res.status(HttpStatus.OK).json({
       status: true,
       message: "Device logged out successfully",
+    });
+  };
+
+  // Fetch loggedin user profile details - (need auth access)
+  getProfile = async (req: TypedRequest, res: Response) => {
+    this.assertUser(req);
+
+    const authUserId = req.user.id;
+
+    const { profileData } = await this.accountService.getProfile(authUserId);
+
+    res.status(HttpStatus.OK).json({
+      status: true,
+      data: profileData,
+    });
+  };
+
+  // Delete account - (need auth access)
+  deleteAccount = async (req: TypedBodyRequest<IDeleteAccount>, res: Response) => {
+    this.assertUser(req);
+
+    const authUserId = req.user.id;
+
+    const { currentPassword } = req.validated.body;
+
+    // Service layer to handle logic
+    await this.accountService.deleteAccount(authUserId, { currentPassword });
+
+    this.tokenService.clearRefreshTokenCookie(res);
+
+    res.status(HttpStatus.OK).json({
+      status: true,
+      message: "Your account has been deleted!",
     });
   };
 }

@@ -1,11 +1,17 @@
 import { requireAuth } from "@/middlewares/requireAuth.js";
-import { asyncBodyHandler, asyncParamsHandler, asyncQueryHandler } from "@/utils/asyncHandler.js";
+import {
+  asyncBodyHandler,
+  asyncHandler,
+  asyncParamsHandler,
+  asyncQueryHandler,
+} from "@/utils/asyncHandler.js";
 import { Router } from "express";
 import { validateRequest } from "@/middlewares/validateRequest.js";
 import {
   changeEmailSchema,
   changePasswordSchema,
   confirmChangeEmailSchema,
+  deleteAccountSchema,
   listSessionsSchema,
   revokeSessionSchema,
 } from "./account.validation.js";
@@ -53,11 +59,15 @@ accountRouter.delete(
   asyncParamsHandler(accountController.revokeSession)
 );
 
-// // Route to fetch loggedin profile details - (need auth access)
-// accountRouter.get("/");
+// Route to fetch loggedin profile details - (need auth access)
+accountRouter.get("/", asyncHandler(accountController.getProfile));
 
-// // Route to delete loggedin user - (need auth acccess)
-// accountRouter.delete("/");
+// Route to delete loggedin user - (need auth acccess)
+accountRouter.delete(
+  "/",
+  validateRequest({ body: deleteAccountSchema }),
+  asyncBodyHandler(accountController.deleteAccount)
+);
 
 // // Route to update loggedin user profile details - (need auth access)
 // accountRouter.patch("/");

@@ -5,6 +5,7 @@ import type {
   IChangeEmail,
   IConfirmChangeEmail,
   IListSessionsQuery,
+  IDeleteAccount,
 } from "./account.validation.js";
 import type { IRequestMeta, IAuthenticatedUser, ITokenService } from "@/modules/auth/index.js";
 import { AppError, ErrorCode } from "@/errors/index.js";
@@ -17,12 +18,15 @@ import {
   hashConfirmationCode,
   verifyConfirmationCode,
 } from "@/utils/confirmation-code.util.js";
+import { sanitizeUser } from "@/utils/sanitizeUser.js";
+import type { IAccountRepo } from "./account.repo.js";
 
 export class AccountService {
   constructor(
     private readonly authUserRepo: IAuthUserRepo,
     private readonly emailConfirmationRepo: IEmailConfirmationRepo,
     private readonly sessionRepo: ISessionRepo,
+    private readonly accountRepo: IAccountRepo,
     private readonly emailService: EmailService,
     private readonly tokenService: ITokenService
   ) {}
@@ -90,12 +94,7 @@ export class AccountService {
     });
 
     // sanitize user to return to client
-    const sanitizedUser: IAuthenticatedUser = {
-      id: user.id,
-      email: user.email,
-      isEmailVerified: user.isEmailVerified,
-      createdAt: user.createdAt,
-    };
+    const sanitizedUser: IAuthenticatedUser = sanitizeUser(user);
 
     // Send password reset notification to email
     await this.emailService.sendPasswordResetNotification(tempEmailDomain);
@@ -222,12 +221,7 @@ export class AccountService {
     });
 
     // Sanitized user to return to client
-    const sanitizedUser: IAuthenticatedUser = {
-      id: user.id,
-      email: user.email,
-      isEmailVerified: user.isEmailVerified,
-      createdAt: user.createdAt,
-    };
+    const sanitizedUser: IAuthenticatedUser = sanitizeUser(user);
 
     await this.emailService.sendEmailChangeNotification(user.email, confirmationRecord.newEmail);
 
@@ -262,5 +256,55 @@ export class AccountService {
 
     // Revoke session
     await this.sessionRepo.revokeSession(sessionId);
+  }
+
+  // Fetch loggedin user profile details - (need auth access)
+  async getProfile(authUserId: string) {
+    const profileData = await this.accountRepo.findProfile(authUserId);
+
+    if (!profileData) {
+      throw AppError.unauthorized("User no longer exist", ErrorCode.UNAUTHORIZED);
+    }
+
+    return { profileData };
+  }
+
+  // Delete account - (need auth access)
+  async deleteAccount(authUserId: string, input: IDeleteAccount) {
+    // Check if user exists
+    const existingUser = await this.authUserRepo.findById(authUserId);
+
+    if (!existingUser) {
+      throw AppError.unauthorized("User not found, please login", ErrorCode.UNAUTHORIZED);
+    }
+
+    // compare current password against hash in db
+    const isCurrentPasswordMatch = await bcrypt.compare(
+      input.currentPassword,
+      existingUser.passwordHash
+    );
+
+    if (!isCurrentPasswordMatch) {
+      throw AppError.badRequest("Password is incorrect", ErrorCode.INVALID_CREDENTIALS);
+    }
+
+    // const emailOnFile = existingUser.email;
+
+    // db transactions
+    await db.transaction(async (tx) => {
+      // tx 1 - Invalidate all pending confirmation codes
+      await this.emailConfirmationRepo.invalidateAllUnusedForUser(authUserId, tx);
+
+      // tx 2 - invalidate all existing sessions for the user
+      await this.sessionRepo.revokeAllActive(existingUser.id, tx);
+
+      // tx 3 - soft delete profile
+      await this.accountRepo.softDelete(authUserId, tx);
+
+      // tx 4 - Soft delete auth user
+      await this.authUserRepo.softDelete(authUserId, tx);
+    });
+
+    void this.emailService.sendAccountDeletedNotification(tempEmailDomain);
   }
 }

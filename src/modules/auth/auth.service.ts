@@ -20,6 +20,7 @@ import { db } from "@/db/client.js";
 import { authConfig } from "@/config/index.js";
 import type { IAuthenticatedUser, IRequestMeta } from "@/modules/auth/index.js";
 import { tempEmailDomain } from "@/shared/constants/tempEmail.js";
+import { sanitizeUser } from "@/utils/sanitizeUser.js";
 
 export class AuthService {
   constructor(
@@ -67,12 +68,7 @@ export class AuthService {
       return { user, confirmationRecord };
     });
 
-    const newUser: IAuthenticatedUser = {
-      id: user.id,
-      email: user.email,
-      isEmailVerified: user.isEmailVerified,
-      createdAt: user.createdAt,
-    };
+    const newUser: IAuthenticatedUser = sanitizeUser(user);
 
     // Send code to user via email
     await this.emailService.sendConfirmationCode(tempEmailDomain, confirmationCode);
@@ -176,12 +172,7 @@ export class AuthService {
     });
 
     // Sanitized user to return to client
-    const newUser: IAuthenticatedUser = {
-      id: updatedUser.id,
-      email: updatedUser.email,
-      isEmailVerified: updatedUser.isEmailVerified,
-      createdAt: updatedUser.createdAt,
-    };
+    const newUser: IAuthenticatedUser = sanitizeUser(updatedUser);
 
     await this.emailService.sendWelcomeEmailPro(tempEmailDomain, { email: newUser.email });
     return { newUser, accessToken, refreshToken };
@@ -275,12 +266,7 @@ export class AuthService {
     });
 
     // Sanitized user to return to client
-    const user: IAuthenticatedUser = {
-      id: existingUser.id,
-      email: existingUser.email,
-      isEmailVerified: existingUser.isEmailVerified,
-      createdAt: existingUser.createdAt,
-    };
+    const user: IAuthenticatedUser = sanitizeUser(existingUser);
 
     return { user, accessToken, refreshToken };
   }
@@ -479,12 +465,7 @@ export class AuthService {
     });
 
     // Sanitized user to return to client
-    const sanitizedUser: IAuthenticatedUser = {
-      id: existingUser.id,
-      email: existingUser.email,
-      isEmailVerified: existingUser.isEmailVerified,
-      createdAt: existingUser.createdAt,
-    };
+    const sanitizedUser: IAuthenticatedUser = sanitizeUser(existingUser);
 
     return { sanitizedUser, accessToken, newrefreshToken };
   }

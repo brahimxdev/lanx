@@ -98,3 +98,18 @@ export const sessions = pgTable(
     index("idx_sessions_expires_at").on(pgTable.expiresAt),
   ]
 );
+
+// profiles table
+export const profiles = pgTable("profiles", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  authUserId: uuid("auth_user_id")
+    .notNull()
+    .references(() => authUsers.id, { onDelete: "restrict" }),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  bio: text("bio"),
+  avatarUrl: text("avatar_url"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
+});
