@@ -7,7 +7,7 @@ import type {
   IListSessionsQuery,
   IDeleteAccount,
 } from "./account.validation.js";
-import type { IRequestMeta, IAuthenticatedUser, ITokenService } from "@/modules/auth/index.js";
+import type { IRequestMeta, ITokenService } from "@/modules/auth/index.js";
 import { AppError, ErrorCode } from "@/errors/index.js";
 import bcrypt from "bcryptjs";
 import { authConfig } from "@/config/index.js";
@@ -94,7 +94,7 @@ export class AccountService {
     });
 
     // sanitize user to return to client
-    const sanitizedUser: IAuthenticatedUser = sanitizeUser(user);
+    const sanitizedUser = sanitizeUser(user);
 
     // Send password reset notification to email
     await this.emailService.sendPasswordResetNotification(tempEmailDomain);
@@ -221,7 +221,7 @@ export class AccountService {
     });
 
     // Sanitized user to return to client
-    const sanitizedUser: IAuthenticatedUser = sanitizeUser(user);
+    const sanitizedUser = sanitizeUser(user);
 
     await this.emailService.sendEmailChangeNotification(user.email, confirmationRecord.newEmail);
 
