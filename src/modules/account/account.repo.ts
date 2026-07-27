@@ -9,8 +9,11 @@ type Profile = typeof profiles.$inferSelect;
 export type MeResult = Pick<AuthUser, "id" | "email" | "isEmailVerified" | "createdAt"> & {
   firstName: Profile["firstName"] | null;
   lastName: Profile["lastName"] | null;
-  bio: Profile["bio"] | null;
-  avatarUrl: Profile["avatarUrl"] | null;
+  businessName: Profile["businessName"] | null;
+  logoUrl: Profile["logoUrl"] | null;
+  profession: Profile["professionId"] | null;
+  country: Profile["countryCode"] | null;
+  currency: Profile["currencyCode"] | null;
 };
 
 export interface IAccountRepo {
@@ -31,8 +34,11 @@ export class AccountRepo implements IAccountRepo {
         // profiles fields (null if no profile yet)
         firstName: profiles.firstName,
         lastName: profiles.lastName,
-        bio: profiles.bio,
-        avatarUrl: profiles.avatarUrl,
+        businessName: profiles.businessName,
+        logoUrl: profiles.logoUrl,
+        profession: profiles.professionId,
+        country: profiles.countryCode,
+        currency: profiles.currencyCode,
       })
       .from(authUsers)
       .leftJoin(profiles, eq(profiles.authUserId, authUsers.id))
