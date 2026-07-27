@@ -1,4 +1,13 @@
-import { index, pgTable, text, timestamp, uniqueIndex, uuid, char } from "drizzle-orm/pg-core";
+import {
+  index,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+  char,
+  pgEnum,
+} from "drizzle-orm/pg-core";
 import { authUsers } from "@/db/schema/index.js";
 
 export const currencies = pgTable("currencies", {
@@ -16,12 +25,15 @@ export const countries = pgTable("countries", {
   ),
 });
 
+export const professionSourceEnum = pgEnum("profession_source_enum", ["seed", "admin", "user"]);
+
 export const professions = pgTable(
   "professions",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),
     slug: text("slug").notNull(),
+    source: professionSourceEnum("source").notNull().default("seed"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   // columns constraints and indexes

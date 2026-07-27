@@ -98,5 +98,3 @@ export const sessions = pgTable(
     index("idx_sessions_expires_at").on(pgTable.expiresAt),
   ]
 );
-
-

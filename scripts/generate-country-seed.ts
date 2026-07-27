@@ -1,8 +1,15 @@
-import countriesList from "world-countries";
 import { writeFileSync } from "fs";
+import countriesListRaw from "world-countries";
+
+interface CountrySeedEntry {
+  cca2: string;
+  name: { common: string };
+  currencies?: Record<string, unknown>;
+}
+
+const countriesList = countriesListRaw as CountrySeedEntry[];
 
 const seedData = countriesList.map((country) => {
-
   const currencyCodes = Object.keys(country.currencies ?? {});
 
   return {
@@ -12,9 +19,6 @@ const seedData = countriesList.map((country) => {
   };
 });
 
-writeFileSync(
-  "src/db/seed-data/countries.json",
-  JSON.stringify(seedData, null, 2)
-);
+writeFileSync("src/db/seed-data/countries.json", JSON.stringify(seedData, null, 2));
 
-console.log(`Wrote ${seedData.length} countries to seed-data/countries.json`);
+console.log(`Wrote ${String(seedData.length)} countries to seed-data/countries.json`);
