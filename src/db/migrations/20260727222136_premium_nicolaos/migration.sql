@@ -1,4 +1,5 @@
 CREATE TYPE "confirmation_type" AS ENUM('sign_up', 'change_email', 'password_reset');--> statement-breakpoint
+CREATE TYPE "profession_source_enum" AS ENUM('seed', 'admin', 'user');--> statement-breakpoint
 CREATE TABLE "auth_users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"email" text NOT NULL,
@@ -55,6 +56,7 @@ CREATE TABLE "professions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"name" text NOT NULL,
 	"slug" text NOT NULL,
+	"source" "profession_source_enum" DEFAULT 'seed'::"profession_source_enum" NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint

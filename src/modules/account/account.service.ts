@@ -298,10 +298,7 @@ export class AccountService {
       // tx 2 - invalidate all existing sessions for the user
       await this.sessionRepo.revokeAllActive(existingUser.id, tx);
 
-      // tx 3 - soft delete profile
-      await this.accountRepo.softDelete(authUserId, tx);
-
-      // tx 4 - Soft delete auth user
+      // tx 3 - Soft delete auth user
       await this.authUserRepo.softDelete(authUserId, tx);
     });
 

@@ -1,12 +1,18 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "84d203b1-0c75-4269-9047-755b0522be35",
+  "id": "015920b1-f293-4f2f-8a43-69d5832d4547",
   "prevIds": ["00000000-0000-0000-0000-000000000000"],
   "ddl": [
     {
       "values": ["sign_up", "change_email", "password_reset"],
       "name": "confirmation_type",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": ["seed", "admin", "user"],
+      "name": "profession_source_enum",
       "entityType": "enums",
       "schema": "public"
     },
@@ -555,6 +561,19 @@
       "generated": null,
       "identity": null,
       "name": "slug",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "professions"
+    },
+    {
+      "type": "profession_source_enum",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'seed'",
+      "generated": null,
+      "identity": null,
+      "name": "source",
       "entityType": "columns",
       "schema": "public",
       "table": "professions"
