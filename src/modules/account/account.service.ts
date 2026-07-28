@@ -295,8 +295,8 @@ export class AccountService {
       // tx 1 - Invalidate all pending confirmation codes
       await this.emailConfirmationRepo.invalidateAllUnusedForUser(authUserId, tx);
 
-      // tx 2 - invalidate all existing sessions for the user
-      await this.sessionRepo.revokeAllActive(existingUser.id, tx);
+      // // tx 2 - invalidate all existing sessions for the user
+      //  Already set in auto trigger
 
       // tx 3 - Soft delete auth user
       await this.authUserRepo.softDelete(authUserId, tx);

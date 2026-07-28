@@ -71,8 +71,7 @@ CREATE TABLE "profiles" (
 	"country_code" char(2),
 	"currency_code" char(3),
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"deleted_at" timestamp with time zone
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX "auth_users_email_unique_active" ON "auth_users" ("email") WHERE "deleted_at" IS NULL;--> statement-breakpoint

@@ -68,7 +68,6 @@ export const profiles = pgTable(
 
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (pgTable) => [
     uniqueIndex("profiles_auth_user_id_unique").on(pgTable.authUserId),
