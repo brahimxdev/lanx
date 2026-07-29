@@ -4,7 +4,7 @@ info:
   seq: 1
 
 http:
-  method: GET
+  method: PATCH
   url: "{{baseUrl}}/profile"
   body:
     type: json
@@ -14,8 +14,8 @@ http:
         "lastName": "Yusuf", 
         "businessName": "brahimx",
         "professionId": "4f2d57aa-8dc9-4036-bfa2-105b437a80e2",
-        
-       
+        "countryCode": "NG",
+        "currencyCode": "NGA"
       }
   auth: inherit
 

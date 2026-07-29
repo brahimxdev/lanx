@@ -68,6 +68,3 @@ accountRouter.delete(
   validateRequest({ body: deleteAccountSchema }),
   asyncBodyHandler(accountController.deleteAccount)
 );
-
-// // Route to update loggedin user profile details - (need auth access)
-// accountRouter.patch("/");

@@ -24,8 +24,7 @@
     "test:run": "vitest --run",
     "test:ui": "vitest --ui",
     "coverage": "vitest run --coverage",
-    "prepare": "husky",
-    "email:dev": "email dev"
+    "prepare": "husky"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

@@ -5,9 +5,9 @@ import { errorHandler } from "./middlewares/errorHandler.js";
 import { AppError } from "@/errors/AppError.js";
 import { isDev } from "./config/app-env.js";
 import { authRouter } from "@/modules/auth/auth.routes.js";
-// import { router as userRouter } from "./routes/user.routes.js";
 import cookieParser from "cookie-parser";
-import { accountRouter } from "./modules/account/account.routes.js";
+import { accountRouter } from "@/modules/account/account.routes.js";
+import { lookupRouter } from "@/modules/lookup/lookup.routes.js";
 
 const app = express();
 
@@ -24,6 +24,7 @@ app.use(cookieParser());
 // Mouting Routes
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/account", accountRouter);
+app.use("/api/v1/lookup", lookupRouter);
 
 // Catch all routes and display 404 for not matched route
 app.use((req: Request, _res: Response, _next: NextFunction) => {

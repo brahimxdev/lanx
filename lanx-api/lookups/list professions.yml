@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/professions?search=backend&limit=20&page=1&sortBy=name&sortOrder=asc"
+  url: "{{baseUrl}}/lookup/professions?search=backend&limit=20&page=1&sortBy=name&sortOrder=asc"
   params:
     - name: search
       value: backend

@@ -5,14 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/countries?sortBy=name&sortOrder=asc"
-  params:
-    - name: sortBy
-      value: name
-      type: query
-    - name: sortOrder
-      value: asc
-      type: query
+  url: "{{baseUrl}}/lookup/countries"
   auth: inherit
 
 settings:

@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/currencies?sortBy=code&sortOrder=asc"
+  url: "{{baseUrl}}/lookup/currencies?sortBy=code&sortOrder=asc"
   params:
     - name: sortBy
       value: code

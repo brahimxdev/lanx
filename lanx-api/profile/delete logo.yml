@@ -1,0 +1,23 @@
+info:
+  name: delete logo
+  type: http
+  seq: 4
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/profile/logo"
+  body:
+    type: multipart-form
+    data:
+      - name: logo
+        type: text
+        value: image file
+  auth:
+    type: bearer
+    token: "{{accessToken}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
