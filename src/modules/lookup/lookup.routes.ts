@@ -10,8 +10,8 @@ export const lookupRouter = Router();
 // Route for listing all countries
 lookupRouter.get("/countries", asyncHandler(lookupController.listCountries));
 
-// // Route for listing all currencies
-// lookupRouter.get("/currencies");
+// Route for listing all currencies
+lookupRouter.get("/currencies", asyncHandler(lookupController.listCurrencies));
 
 // // Route for listing all professions
 // lookupRouter.get("/professions");

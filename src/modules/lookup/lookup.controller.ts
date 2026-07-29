@@ -25,4 +25,15 @@ export class LookupController {
       data: countries,
     });
   };
+
+  // list all currencies
+  listCurrencies = async (req: TypedRequest, res: Response) => {
+    // Service layer to handle logic
+    const { currencies } = await this.lookupService.getCurrencies();
+
+    res.status(HttpStatus.OK).json({
+      status: true,
+      data: currencies,
+    });
+  };
 }

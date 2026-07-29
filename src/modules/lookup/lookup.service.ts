@@ -9,4 +9,11 @@ export class LookupService {
 
     return { countries };
   }
+
+  // get currencies
+  async getCurrencies() {
+    const currencies = await this.lookupRepo.getCurrencies();
+
+    return { currencies };
+  }
 }
