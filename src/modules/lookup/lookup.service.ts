@@ -1,4 +1,5 @@
 import type { ILookupRepo } from "./lookup.repo.js";
+import type { IListProfessionsQuery } from "./lookup.validation.js";
 
 export class LookupService {
   constructor(private readonly lookupRepo: ILookupRepo) {}
@@ -15,5 +16,12 @@ export class LookupService {
     const currencies = await this.lookupRepo.getCurrencies();
 
     return { currencies };
+  }
+
+  // get professions
+  async getProfessions(queryParams: IListProfessionsQuery) {
+    const professions = await this.lookupRepo.getProfessions(queryParams);
+
+    return {professions}
   }
 }

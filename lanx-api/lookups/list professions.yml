@@ -5,22 +5,22 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/lookup/professions?search=backend&limit=20&page=1&sortBy=name&sortOrder=asc"
+  url: "{{baseUrl}}/lookup/professions?search=backend&sortBy=name&sortOrder=asc&limit=20&page=1"
   params:
     - name: search
       value: backend
-      type: query
-    - name: limit
-      value: "20"
-      type: query
-    - name: page
-      value: "1"
       type: query
     - name: sortBy
       value: name
       type: query
     - name: sortOrder
       value: asc
+      type: query
+    - name: limit
+      value: "20"
+      type: query
+    - name: page
+      value: "1"
       type: query
   auth: inherit
 

@@ -1,7 +1,8 @@
-import { requireAuth } from "@/middlewares/requireAuth.js";
-import { asyncHandler } from "@/utils/asyncHandler.js";
+import { asyncHandler, asyncQueryHandler } from "@/utils/asyncHandler.js";
 import { Router } from "express";
 import { lookupController } from "./lookup.module.js";
+import { validateRequest } from "@/middlewares/validateRequest.js";
+import { listProfessionsSchema } from "./lookup.validation.js";
 
 export const lookupRouter = Router();
 
@@ -13,8 +14,12 @@ lookupRouter.get("/countries", asyncHandler(lookupController.listCountries));
 // Route for listing all currencies
 lookupRouter.get("/currencies", asyncHandler(lookupController.listCurrencies));
 
-// // Route for listing all professions
-// lookupRouter.get("/professions");
+// Route for listing all professions
+lookupRouter.get(
+  "/professions",
+  validateRequest({ query: listProfessionsSchema }),
+  asyncQueryHandler(lookupController.listProfessions)
+);
 
 // // Route for creating profession - (need auth access)
 // lookupRouter.post("/professions", requireAuth);

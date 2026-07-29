@@ -1,8 +1,9 @@
-import type { TypedRequest } from "@/types/typed-request.js";
+import type { TypedRequest, TypedQueryRequest } from "@/types/typed-request.js";
 import type { LookupService } from "./lookup.service.js";
 import type { IAuthenticatedUser } from "../auth/index.js";
 import { AppError, ErrorCode, HttpStatus } from "@/errors/index.js";
 import type { Response } from "express";
+import type { IListProfessionsQuery } from "./lookup.validation.js";
 
 export class LookupController {
   constructor(private readonly lookupService: LookupService) {}
@@ -34,6 +35,21 @@ export class LookupController {
     res.status(HttpStatus.OK).json({
       status: true,
       data: currencies,
+    });
+  };
+
+  // list all professions by default or search query
+  listProfessions = async (req: TypedQueryRequest<IListProfessionsQuery>, res: Response) => {
+    //* Validation middleware already validated data!
+
+    const { search, limit, page } = req.validated.query;
+
+    // Service layer to handle logic
+    const { professions } = await this.lookupService.getProfessions({ search, limit, page });
+
+    res.status(HttpStatus.OK).json({
+      status: true,
+      data: professions,
     });
   };
 }
