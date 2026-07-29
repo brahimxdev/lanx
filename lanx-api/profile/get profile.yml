@@ -1,12 +1,14 @@
 info:
-  name: get user
+  name: get profile
   type: http
   seq: 14
 
 http:
   method: GET
-  url: "{{baseUrl}}/account"
-  auth: inherit
+  url: "{{baseUrl}}/profile"
+  auth:
+    type: bearer
+    token: "{{accessToken}}"
 
 settings:
   encodeUrl: true

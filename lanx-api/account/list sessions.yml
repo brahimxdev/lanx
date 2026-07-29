@@ -22,7 +22,9 @@ http:
     - name: page
       value: "1"
       type: query
-  auth: inherit
+  auth:
+    type: bearer
+    token: "{{accessToken}}"
 
 runtime:
   scripts:

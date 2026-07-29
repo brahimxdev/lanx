@@ -10,9 +10,11 @@ http:
     type: json
     data: |-
       {
-        "currentPassword": "IBRahim123!!!"
+        "currentPassword": "DevPassword123!"
       }
-  auth: inherit
+  auth:
+    type: bearer
+    token: "{{accessToken}}"
 
 settings:
   encodeUrl: true
