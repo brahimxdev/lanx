@@ -19,10 +19,10 @@ import { accountController } from "./account.module.js";
 
 export const accountRouter = Router();
 
+// base url - /api/v1/account
+
 // apply requireAuth to all account routes
 accountRouter.use(requireAuth);
-
-// base url - /api/v1/account
 
 // Route for changing password in dashboard - (need auth access)
 accountRouter.patch(
@@ -58,9 +58,6 @@ accountRouter.delete(
   validateRequest({ params: revokeSessionSchema }),
   asyncParamsHandler(accountController.revokeSession)
 );
-
-// Route to fetch loggedin profile details - (need auth access)
-accountRouter.get("/", asyncHandler(accountController.getProfile));
 
 // Route to delete loggedin user - (need auth acccess)
 accountRouter.delete(

@@ -12,16 +12,6 @@ type Country = typeof countries.$inferSelect;
 type Currency = typeof currencies.$inferSelect;
 type Profession = typeof professions.$inferSelect;
 
-// interface IPaginatedProfessions {
-//   professions: Profession[];
-//   pagination: {
-//     page: number;
-//     limit: number;
-//     total: number;
-//     totalPages: number;
-//   };
-// }
-
 export interface ILookupRepo {
   getCountries(queryParams: IListCountriesQuery, executor?: Executor): Promise<Country[]>;
   getCurrencies(queryParams: IListCurrenciesQuery, executor?: Executor): Promise<Currency[]>;

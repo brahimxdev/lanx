@@ -19,14 +19,12 @@ import {
   verifyConfirmationCode,
 } from "@/utils/confirmation-code.util.js";
 import { sanitizeUser } from "@/utils/sanitizeUser.js";
-import type { IAccountRepo } from "./account.repo.js";
 
 export class AccountService {
   constructor(
     private readonly authUserRepo: IAuthUserRepo,
     private readonly emailConfirmationRepo: IEmailConfirmationRepo,
     private readonly sessionRepo: ISessionRepo,
-    private readonly accountRepo: IAccountRepo,
     private readonly emailService: EmailService,
     private readonly tokenService: ITokenService
   ) {}
@@ -256,17 +254,6 @@ export class AccountService {
 
     // Revoke session
     await this.sessionRepo.revokeSession(sessionId);
-  }
-
-  // Fetch loggedin user profile details - (need auth access)
-  async getProfile(authUserId: string) {
-    const profileData = await this.accountRepo.findProfile(authUserId);
-
-    if (!profileData) {
-      throw AppError.unauthorized("User no longer exist", ErrorCode.UNAUTHORIZED);
-    }
-
-    return { profileData };
   }
 
   // Delete account - (need auth access)

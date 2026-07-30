@@ -5,7 +5,11 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/lookup/countries"
+  url: "{{baseUrl}}/lookup/countries?search=unit"
+  params:
+    - name: search
+      value: unit
+      type: query
   auth: inherit
 
 settings:

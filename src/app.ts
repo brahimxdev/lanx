@@ -8,6 +8,7 @@ import { authRouter } from "@/modules/auth/auth.routes.js";
 import cookieParser from "cookie-parser";
 import { accountRouter } from "@/modules/account/account.routes.js";
 import { lookupRouter } from "@/modules/lookup/lookup.routes.js";
+import { profileRouter } from "@/modules/profile/profile.routes.js";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use(cookieParser());
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/account", accountRouter);
 app.use("/api/v1/lookup", lookupRouter);
+app.use("/api/v1/profile", profileRouter);
 
 // Catch all routes and display 404 for not matched route
 app.use((req: Request, _res: Response, _next: NextFunction) => {

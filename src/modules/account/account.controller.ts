@@ -166,19 +166,6 @@ export class AccountController {
     });
   };
 
-  // Fetch loggedin user profile details - (need auth access)
-  getProfile = async (req: TypedRequest, res: Response) => {
-    this.assertUser(req);
-
-    const authUserId = req.user.id;
-
-    const { profileData } = await this.accountService.getProfile(authUserId);
-
-    res.status(HttpStatus.OK).json({
-      status: true,
-      data: profileData,
-    });
-  };
 
   // Delete account - (need auth access)
   deleteAccount = async (req: TypedBodyRequest<IDeleteAccount>, res: Response) => {
