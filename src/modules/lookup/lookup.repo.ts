@@ -2,7 +2,11 @@ import type { Executor } from "@/db/executor.js";
 import { countries, currencies, professions } from "@/db/schema/index.js";
 import { asc, ilike, sql } from "drizzle-orm";
 import { db } from "@/db/client.js";
-import type { IListProfessionsQuery } from "./lookup.validation.js";
+import type {
+  IListCountriesQuery,
+  IListCurrenciesQuery,
+  IListProfessionsQuery,
+} from "./lookup.validation.js";
 
 type Country = typeof countries.$inferSelect;
 type Currency = typeof currencies.$inferSelect;
@@ -19,8 +23,8 @@ interface IPaginatedProfessions {
 }
 
 export interface ILookupRepo {
-  getCountries(executor?: Executor): Promise<Country[]>;
-  getCurrencies(executor?: Executor): Promise<Currency[]>;
+  getCountries(queryParams: IListCountriesQuery, executor?: Executor): Promise<Country[]>;
+  getCurrencies(queryParams: IListCurrenciesQuery, executor?: Executor): Promise<Currency[]>;
   getProfessions(
     queryParams: IListProfessionsQuery,
     executor?: Executor
@@ -30,15 +34,32 @@ export interface ILookupRepo {
 // Class implementing the interface
 export class LookupRepo implements ILookupRepo {
   // get countries
-  async getCountries(executor: Executor = db): Promise<Country[]> {
-    const country = await executor.select().from(countries).orderBy(asc(countries.name));
+  async getCountries(
+    queryParams: IListCountriesQuery,
+    executor: Executor = db
+  ): Promise<Country[]> {
+    const { search } = queryParams;
+
+    const country = await executor
+      .select()
+      .from(countries)
+      .where(search ? ilike(countries.name, `%${search}%`) : undefined)
+      .orderBy(asc(countries.name));
 
     return country;
   }
 
   // get currencies
-  async getCurrencies(executor: Executor = db): Promise<Currency[]> {
-    const currency = await executor.select().from(currencies).orderBy(asc(currencies.code));
+  async getCurrencies(
+    queryParams: IListCurrenciesQuery,
+    executor: Executor = db
+  ): Promise<Currency[]> {
+    const { search } = queryParams;
+    const currency = await executor
+      .select()
+      .from(currencies)
+      .where(search ? ilike(currencies.name, `%${search}%`) : undefined)
+      .orderBy(asc(currencies.code));
 
     return currency;
   }
@@ -55,7 +76,7 @@ export class LookupRepo implements ILookupRepo {
       executor
         .select()
         .from(professions)
-        .where(search ? ilike(professions.name, `${search}%`) : undefined)
+        .where(search ? ilike(professions.name, `%${search}%`) : undefined)
         .orderBy(asc(professions.name), asc(professions.id))
         .limit(limit)
         .offset(offset),

@@ -1,19 +1,23 @@
 import type { ILookupRepo } from "./lookup.repo.js";
-import type { IListProfessionsQuery } from "./lookup.validation.js";
+import type {
+  IListCountriesQuery,
+  IListCurrenciesQuery,
+  IListProfessionsQuery,
+} from "./lookup.validation.js";
 
 export class LookupService {
   constructor(private readonly lookupRepo: ILookupRepo) {}
 
   // get countries
-  async getCountries() {
-    const countries = await this.lookupRepo.getCountries();
+  async getCountries(queryParams: IListCountriesQuery) {
+    const countries = await this.lookupRepo.getCountries(queryParams);
 
     return { countries };
   }
 
   // get currencies
-  async getCurrencies() {
-    const currencies = await this.lookupRepo.getCurrencies();
+  async getCurrencies(queryParams: IListCurrenciesQuery) {
+    const currencies = await this.lookupRepo.getCurrencies(queryParams);
 
     return { currencies };
   }
@@ -22,6 +26,6 @@ export class LookupService {
   async getProfessions(queryParams: IListProfessionsQuery) {
     const professions = await this.lookupRepo.getProfessions(queryParams);
 
-    return {professions}
+    return { professions };
   }
 }
