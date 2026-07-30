@@ -50,10 +50,10 @@ export class LookupController {
   listProfessions = async (req: TypedQueryRequest<IListProfessionsQuery>, res: Response) => {
     //* Validation middleware already validated data!
 
-    const { search, limit, page } = req.validated.query;
+    const { search } = req.validated.query;
 
     // Service layer to handle logic
-    const { professions } = await this.lookupService.getProfessions({ search, limit, page });
+    const { professions } = await this.lookupService.getProfessions({ search });
 
     res.status(HttpStatus.OK).json({
       status: true,

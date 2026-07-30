@@ -1,6 +1,6 @@
 import type { Executor } from "@/db/executor.js";
 import { countries, currencies, professions } from "@/db/schema/index.js";
-import { asc, ilike, sql } from "drizzle-orm";
+import { asc, ilike } from "drizzle-orm";
 import { db } from "@/db/client.js";
 import type {
   IListCountriesQuery,
@@ -12,15 +12,15 @@ type Country = typeof countries.$inferSelect;
 type Currency = typeof currencies.$inferSelect;
 type Profession = typeof professions.$inferSelect;
 
-interface IPaginatedProfessions {
-  professions: Profession[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
+// interface IPaginatedProfessions {
+//   professions: Profession[];
+//   pagination: {
+//     page: number;
+//     limit: number;
+//     total: number;
+//     totalPages: number;
+//   };
+// }
 
 export interface ILookupRepo {
   getCountries(queryParams: IListCountriesQuery, executor?: Executor): Promise<Country[]>;
@@ -66,16 +66,13 @@ export class LookupRepo implements ILookupRepo {
     queryParams: IListProfessionsQuery,
     executor: Executor = db
   ): Promise<Profession[]> {
-    const { search, limit, page } = queryParams;
-    const offset = (page - 1) * limit;
+    const { search } = queryParams;
 
     const profession = await executor
       .select()
       .from(professions)
       .where(search ? ilike(professions.name, `%${search}%`) : undefined)
-      .orderBy(asc(professions.name), asc(professions.id))
-      .limit(limit)
-      .offset(offset);
+      .orderBy(asc(professions.name));
 
     return profession;
   }

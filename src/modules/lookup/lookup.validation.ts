@@ -21,9 +21,6 @@ export const listCurrenciesSchema = z.object({
 export const listProfessionsSchema = z.object({
   // Filteration
   search: searchSchema,
-  // Pagination
-  limit: z.coerce.number().int().min(1).max(30).default(30),
-  page: z.coerce.number().int().min(1).default(1),
 });
 
 export type IListProfessionsQuery = z.infer<typeof listProfessionsSchema>;
