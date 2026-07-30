@@ -1,5 +1,5 @@
 info:
-  name: create logo url
+  name: Upload Logo
   type: http
   seq: 3
 
@@ -14,7 +14,7 @@ http:
         value: image file
   auth:
     type: bearer
-    token: "{{accessToken}}"
+    token: ""
 
 settings:
   encodeUrl: true

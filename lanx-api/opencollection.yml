@@ -2,6 +2,41 @@ opencollection: 1.0.0
 
 info:
   name: Lanx Api
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ""
+      port: ""
+      auth:
+        username: ""
+        password: ""
+      bypassProxy: ""
+
+request:
+  scripts:
+    - type: before-request
+      code: |-
+        // Skip this logic entirely when the auth requests run themselves
+        const AUTH_REQUESTS = ["Sign Up User", "Confirm Email", "Sign In User", "Logout User", "Refresh Token"];
+        if (AUTH_REQUESTS.includes(req.getName())) return;
+
+        const expiry = bru.getEnvVar("accessTokenExpiry");
+        const isExpired = !expiry || Date.now() > Number(expiry);
+        console.log("is token expired?:", isExpired)
+
+        if (isExpired) {
+          const r = await bru.runRequest("auth/Refresh Token"); // cookie jar sends the refresh token cookie automatically
+
+          if (r.status !== 200) {
+            console.log("Refresh failed — sign in again");
+            return; // don't fire the request carrying a dead token
+          }
+          console.log("Token refreshed silently");
+        }
+
+        req.setHeader("Authorization", "Bearer " + bru.getEnvVar("accessToken"));
 bundled: false
 extensions:
   bruno:

@@ -1,5 +1,5 @@
 info:
-  name: update profile
+  name: Update Profile
   type: http
   seq: 5
 
@@ -10,14 +10,16 @@ http:
     type: json
     data: |-
       {
-        "firstName": "Ibrahim", 
-        "lastName": "Yusuf", 
-        "businessName": "brahimx",
-        "professionId": "4f2d57aa-8dc9-4036-bfa2-105b437a80e2",
-        "countryCode": "NG",
-        "currencyCode": "NGA"
+      //   "firstName": "lekxy", 
+        "lastName": "ola", 
+        "businessName": "",
+      //   "professionId": "",
+        "countryCode": "CA",
+        "currencyCode": "CAD"
       }
-  auth: inherit
+  auth:
+    type: bearer
+    token: ""
 
 settings:
   encodeUrl: true

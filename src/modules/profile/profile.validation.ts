@@ -10,5 +10,14 @@ export const createProfileSchema = z.object({
   logoUrl: z.url().optional(),
 });
 
-export type ICreateProfile = z.infer<typeof createProfileSchema>;
+export const updateProfileSchema = z.object({
+  firstName: z.string().trim().min(1).max(100).optional(),
+  lastName: z.string().trim().min(1).max(100).optional(),
+  businessName: z.string().trim().max(150).nullable().optional(),
+  professionId: z.uuid().nullable().optional(),
+  countryCode: z.string().length(2).nullable().optional(),
+  currencyCode: z.string().length(3).nullable().optional(),
+});
 
+export type ICreateProfile = z.infer<typeof createProfileSchema>;
+export type IUpdateProfile = z.infer<typeof updateProfileSchema>

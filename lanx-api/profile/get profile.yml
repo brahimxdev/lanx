@@ -1,5 +1,5 @@
 info:
-  name: get profile
+  name: Get Profile
   type: http
   seq: 14
 
@@ -8,7 +8,7 @@ http:
   url: "{{baseUrl}}/profile"
   auth:
     type: bearer
-    token: "{{accessToken}}"
+    token: ""
 
 settings:
   encodeUrl: true

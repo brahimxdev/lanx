@@ -1,14 +1,14 @@
 info:
-  name: list countries
+  name: List Countries
   type: http
   seq: 1
 
 http:
   method: GET
-  url: "{{baseUrl}}/lookup/countries?search=unit"
+  url: "{{baseUrl}}/lookup/countries?search=canada"
   params:
     - name: search
-      value: unit
+      value: canada
       type: query
   auth: inherit
 

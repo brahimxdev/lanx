@@ -1,5 +1,5 @@
 info:
-  name: refresh token
+  name: Refresh Token
   type: http
   seq: 8
 
@@ -7,6 +7,22 @@ http:
   method: POST
   url: "{{baseUrl}}/auth/refresh-token"
   auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const body = res.getBody();
+        const accessToken = body?.data?.accessToken;
+
+        if (accessToken) {
+          const payload = JSON.parse(atob(accessToken.split(".")[1]));
+          bru.setEnvVar("accessToken", accessToken);
+          bru.setEnvVar("sessionId", payload.sessionId);
+          bru.setEnvVar("accessTokenExpiry", payload.exp * 1000);
+        } else {
+          console.log("Token refresh failed");
+        }
 
 settings:
   encodeUrl: true

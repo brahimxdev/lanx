@@ -8,9 +8,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create trigger for updating updated_at
+-- Create trigger for updating updated_at on auth_users
 CREATE TRIGGER set_auth_users_updated_at
 BEFORE UPDATE ON auth_users
+FOR EACH ROW
+EXECUTE FUNCTION trigger_set_updated_at();
+
+-- Create triger for updating updated_at on profiles
+CREATE TRIGGER set_profiles_updated_at
+BEFORE UPDATE ON profiles
 FOR EACH ROW
 EXECUTE FUNCTION trigger_set_updated_at();
 

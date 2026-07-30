@@ -9,7 +9,7 @@ type Profile = typeof profiles.$inferSelect;
 type Profession = typeof professions.$inferSelect;
 type Country = typeof countries.$inferSelect;
 type Currency = typeof currencies.$inferSelect;
-type CreateProfile = typeof profiles.$inferInsert;
+type NewProfile = typeof profiles.$inferInsert;
 
 export type ProfileResult = Pick<AuthUser, "id" | "email" | "isEmailVerified" | "createdAt"> & {
   firstName: Profile["firstName"] | null;
@@ -21,10 +21,25 @@ export type ProfileResult = Pick<AuthUser, "id" | "email" | "isEmailVerified" | 
   currency: Pick<Currency, "code" | "name" | "symbol"> | null;
 };
 
+type UpdateProfileData = {
+  [K in
+    | "firstName"
+    | "lastName"
+    | "businessName"
+    | "professionId"
+    | "countryCode"
+    | "currencyCode"]?: NewProfile[K] | undefined;
+};
+
 export interface IProfileRepo {
   findByAuthUserId(authUserId: string, executor?: Executor): Promise<ProfileResult | null>;
-  createProfile(data: CreateProfile, executor?: Executor): Promise<CreateProfile>;
+  createProfile(data: NewProfile, executor?: Executor): Promise<NewProfile>;
   existsByAuthUserId(authUserId: string, executor?: Executor): Promise<boolean>;
+  updateByAuthUserId(
+    authUserId: string,
+    data: UpdateProfileData,
+    executor?: Executor
+  ): Promise<Profile | null>;
 }
 
 // Class implementing the interface
@@ -103,7 +118,7 @@ export class ProfileRepo implements IProfileRepo {
   }
 
   // Create profile one-time on onboarding
-  async createProfile(data: CreateProfile, executor: Executor = db): Promise<CreateProfile> {
+  async createProfile(data: NewProfile, executor: Executor = db): Promise<NewProfile> {
     const [profile] = await executor.insert(profiles).values(data).returning();
 
     if (!profile) {
@@ -122,6 +137,21 @@ export class ProfileRepo implements IProfileRepo {
       .limit(1);
 
     return profile !== undefined;
+  }
+
+  // Update profile by authUserId
+  async updateByAuthUserId(
+    authUserId: string,
+    data: UpdateProfileData,
+    executor: Executor = db
+  ): Promise<Profile | null> {
+    const [updatedProfile] = await executor
+      .update(profiles)
+      .set(data)
+      .where(eq(profiles.authUserId, authUserId))
+      .returning();
+
+    return updatedProfile ?? null;
   }
 }
 

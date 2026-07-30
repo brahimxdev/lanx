@@ -1,5 +1,5 @@
 info:
-  name: logout
+  name: Logout User
   type: http
   seq: 7
 

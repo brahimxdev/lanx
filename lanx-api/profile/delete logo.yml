@@ -1,5 +1,5 @@
 info:
-  name: delete logo
+  name: Delete Logo
   type: http
   seq: 4
 
@@ -14,7 +14,7 @@ http:
         value: image file
   auth:
     type: bearer
-    token: "{{accessToken}}"
+    token: ""
 
 settings:
   encodeUrl: true

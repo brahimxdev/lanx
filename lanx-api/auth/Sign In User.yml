@@ -1,5 +1,5 @@
 info:
-  name: sign in
+  name: Sign In User
   type: http
   seq: 4
 
@@ -39,9 +39,9 @@ runtime:
 
         if (accessToken) {
           const payload = JSON.parse(atob(accessToken.split(".")[1]));
-          
           bru.setEnvVar("accessToken", accessToken);
-          bru.setEnvVar("sessionId", payload.sessionId)
+          bru.setEnvVar("sessionId", payload.sessionId);
+          bru.setEnvVar("accessTokenExpiry", payload.exp * 1000); // exp is in seconds, Date.now() is ms
         } else {
           console.log("Access token setting failed");
         }

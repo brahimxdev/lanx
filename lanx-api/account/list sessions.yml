@@ -1,5 +1,5 @@
 info:
-  name: list sessions
+  name: List Sessions
   type: http
   seq: 11
 
@@ -24,7 +24,7 @@ http:
       type: query
   auth:
     type: bearer
-    token: "{{accessToken}}"
+    token: ""
 
 runtime:
   scripts:

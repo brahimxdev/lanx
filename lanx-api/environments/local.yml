@@ -6,3 +6,7 @@ variables:
     name: accessToken
   - secret: true
     name: sessionId
+  - name: accessTokenExpiry
+    value:
+      type: number
+      data: "1785438102000"

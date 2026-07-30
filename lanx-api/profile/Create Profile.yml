@@ -1,5 +1,5 @@
 info:
-  name: create profile
+  name: Create Profile
   type: http
   seq: 1
 
@@ -19,7 +19,7 @@ http:
       }
   auth:
     type: bearer
-    token: "{{accessToken}}"
+    token: ""
 
 settings:
   encodeUrl: true

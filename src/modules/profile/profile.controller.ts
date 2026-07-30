@@ -3,7 +3,7 @@ import type { ProfileService } from "./profile.service.js";
 import type { IAuthenticatedUser } from "../auth/auth.types.js";
 import { AppError, ErrorCode, HttpStatus } from "@/errors/index.js";
 import type { Response } from "express";
-import type { ICreateProfile } from "./profile.validation.js";
+import type { ICreateProfile, IUpdateProfile } from "./profile.validation.js";
 
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
@@ -46,6 +46,25 @@ export class ProfileController {
     res.status(HttpStatus.Created).json({
       status: true,
       data: newProfile,
+    });
+  };
+
+  // update profile - (need auth access)
+  updateProfile = async (req: TypedBodyRequest<IUpdateProfile>, res: Response) => {
+    //* Validation middleware already validated data!
+
+    this.assertUser(req);
+
+    const authUserId = req.user.id;
+
+    const input = req.validated.body;
+
+    // Service layer to handle logic
+    const {updatedProfile} = await this.profileService.updateProfile(authUserId, input)
+
+     res.status(HttpStatus.Created).json({
+      status: true,
+      data: updatedProfile,
     });
   };
 }

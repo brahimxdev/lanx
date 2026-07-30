@@ -1,5 +1,5 @@
 info:
-  name: revoke a session
+  name: Revoke Session
   type: http
   seq: 11
 
@@ -8,7 +8,7 @@ http:
   url: "{{baseUrl}}/account/sessions/{{sessionId}}"
   auth:
     type: bearer
-    token: "{{accessToken}}"
+    token: ""
 
 runtime:
   scripts:

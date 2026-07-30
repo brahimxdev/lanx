@@ -1,6 +1,6 @@
 import { AppError, ErrorCode } from "@/errors/index.js";
 import type { IProfileRepo } from "./profile.repo.js";
-import type { ICreateProfile } from "./profile.validation.js";
+import type { ICreateProfile, IUpdateProfile } from "./profile.validation.js";
 import { mapForeignKeyError } from "./profile.util.js";
 
 export class ProfileService {
@@ -37,6 +37,21 @@ export class ProfileService {
       });
 
       return { newProfile };
+    } catch (error) {
+      mapForeignKeyError(error);
+      throw error;
+    }
+  }
+
+  // update profile - (need auth access)
+  async updateProfile(authUserId: string, input: IUpdateProfile) {
+    try {
+      const updatedProfile = await this.profileRepo.updateByAuthUserId(authUserId, input);
+      if (!updatedProfile) {
+        throw AppError.notFound("Profile not found", ErrorCode.NOT_FOUND);
+      }
+
+      return { updatedProfile };
     } catch (error) {
       mapForeignKeyError(error);
       throw error;

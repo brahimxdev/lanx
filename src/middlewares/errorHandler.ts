@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { AppError } from "@/errors/index.js";
+import { AppError, ErrorCode } from "@/errors/index.js";
 import { ValidationError } from "./validateRequest.js";
 import { appConfig } from "@/config/index.js";
 
@@ -15,6 +15,24 @@ export const errorHandler = (
     console.error(err);
   }
 
+  // Malformed JSON body (thrown by express.json() body-parser, before it reaches routes)
+  if (err instanceof SyntaxError && "status" in err && err.status === 400 && "body" in err) {
+    const badRequest = AppError.badRequest(
+      "Malformed JSON in request body",
+      ErrorCode.VALIDATION_ERROR
+    );
+    res.status(badRequest.statusCode).json({
+      status: false,
+      error: {
+        code: badRequest.code,
+        name: badRequest.name,
+        message: badRequest.message,
+        statusCode: badRequest.statusCode,
+      },
+    });
+    return;
+  }
+
   // Validation error
   if (err instanceof ValidationError) {
     res.status(err.statusCode).json({
@@ -28,7 +46,7 @@ export const errorHandler = (
   }
 
   // EXPECTED ERRORS (AppError)
-  // these are errors YOU threw on purpose - safe to send to client
+  // these are errors thrown on purpose - safe to send to client
   if (err instanceof AppError && err.isOperational) {
     const body: Record<string, unknown> = {
       status: false,
