@@ -53,6 +53,8 @@ export const ErrorCode = {
   // Rate limiting
   TOO_MANY_REQUESTS: "TOO_MANY_REQUESTS",
 
+  INVALID_REFERENCE: "INVALID_REFERENCE",
+
   // Server
   INTERNAL_ERROR: "INTERNAL_ERROR",
 } as const;

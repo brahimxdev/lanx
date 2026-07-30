@@ -1,8 +1,9 @@
-import type { TypedRequest } from "@/types/typed-request.js";
+import type { TypedBodyRequest, TypedRequest } from "@/types/typed-request.js";
 import type { ProfileService } from "./profile.service.js";
 import type { IAuthenticatedUser } from "../auth/auth.types.js";
 import { AppError, ErrorCode, HttpStatus } from "@/errors/index.js";
 import type { Response } from "express";
+import type { ICreateProfile } from "./profile.validation.js";
 
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
@@ -26,6 +27,25 @@ export class ProfileController {
     res.status(HttpStatus.OK).json({
       status: true,
       data: profile,
+    });
+  };
+
+  // create profile one-time on onboarding - (need auth access)
+  createProfile = async (req: TypedBodyRequest<ICreateProfile>, res: Response) => {
+    //* Validation middleware already validated data!
+
+    this.assertUser(req);
+
+    const authUserId = req.user.id;
+
+    const input = req.validated.body;
+
+    // Service layer to handle logic
+    const { newProfile } = await this.profileService.createProfile(authUserId, input);
+
+    res.status(HttpStatus.Created).json({
+      status: true,
+      data: newProfile,
     });
   };
 }

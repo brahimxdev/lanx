@@ -2,12 +2,14 @@ import type { Executor } from "@/db/executor.js";
 import { authUsers, profiles, professions, countries, currencies } from "@/db/schema/index.js";
 import { eq, isNull, and } from "drizzle-orm";
 import { db } from "@/db/client.js";
+import { AppError } from "@/errors/index.js";
 
 type AuthUser = typeof authUsers.$inferSelect;
 type Profile = typeof profiles.$inferSelect;
 type Profession = typeof professions.$inferSelect;
 type Country = typeof countries.$inferSelect;
 type Currency = typeof currencies.$inferSelect;
+type CreateProfile = typeof profiles.$inferInsert;
 
 export type ProfileResult = Pick<AuthUser, "id" | "email" | "isEmailVerified" | "createdAt"> & {
   firstName: Profile["firstName"] | null;
@@ -21,6 +23,8 @@ export type ProfileResult = Pick<AuthUser, "id" | "email" | "isEmailVerified" | 
 
 export interface IProfileRepo {
   findByAuthUserId(authUserId: string, executor?: Executor): Promise<ProfileResult | null>;
+  createProfile(data: CreateProfile, executor?: Executor): Promise<CreateProfile>;
+  existsByAuthUserId(authUserId: string, executor?: Executor): Promise<boolean>;
 }
 
 // Class implementing the interface
@@ -57,7 +61,8 @@ export class ProfileRepo implements IProfileRepo {
       .leftJoin(professions, eq(professions.id, profiles.professionId))
       .leftJoin(countries, eq(countries.code, profiles.countryCode))
       .leftJoin(currencies, eq(currencies.code, profiles.currencyCode))
-      .where(and(eq(authUsers.id, authUserId), isNull(authUsers.deletedAt)));
+      .where(and(eq(authUsers.id, authUserId), isNull(authUsers.deletedAt)))
+      .limit(1);
 
     if (!profile) return null;
 
@@ -95,6 +100,28 @@ export class ProfileRepo implements IProfileRepo {
             }
           : null,
     };
+  }
+
+  // Create profile one-time on onboarding
+  async createProfile(data: CreateProfile, executor: Executor = db): Promise<CreateProfile> {
+    const [profile] = await executor.insert(profiles).values(data).returning();
+
+    if (!profile) {
+      throw AppError.internalServerError("Failed to create profile");
+    }
+
+    return profile;
+  }
+
+  // Check if a profile exist by authUserId
+  async existsByAuthUserId(authUserId: string, executor: Executor = db): Promise<boolean> {
+    const [profile] = await executor
+      .select({ id: profiles.id })
+      .from(profiles)
+      .where(eq(profiles.authUserId, authUserId))
+      .limit(1);
+
+    return profile !== undefined;
   }
 }
 

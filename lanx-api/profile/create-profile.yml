@@ -4,20 +4,22 @@ info:
   seq: 1
 
 http:
-  method: PATCH
+  method: POST
   url: "{{baseUrl}}/profile"
   body:
     type: json
     data: |-
       {
-        "firstName": "Ibrahim", 
-        "lastName": "Yusuf", 
-        "businessName": "brahimx",
-        "professionId": "4f2d57aa-8dc9-4036-bfa2-105b437a80e2",
-        "countryCode": "NG",
-        "currencyCode": "NGA"
+        "firstName": "lekxy", 
+        "lastName": "ola", 
+        "businessName": "lek inc",
+        "professionId": "08b058cd-c77f-4633-a59f-e38e76ff3033",
+        "countryCode": "US",
+        "currencyCode": "USD"
       }
-  auth: inherit
+  auth:
+    type: bearer
+    token: "{{accessToken}}"
 
 settings:
   encodeUrl: true

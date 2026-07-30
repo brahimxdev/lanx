@@ -9,8 +9,23 @@ http:
   body:
     type: json
     data: |-
+      // {
+      //   "email": "ibrahim@lanx.dev",
+      //   "password": "DevPassword123!"
+      // }
+
+      // {
+      //   "email": "amara@lanx.dev",
+      //   "password": "DevPassword123!"
+      // }
+
+      // {
+      //   "email": "john@lanx.dev",
+      //   "password": "DevPassword123!"
+      // }
+
       {
-        "email": "ibrahim@lanx.dev",
+        "email": "lekxy@lanx.dev",
         "password": "DevPassword123!"
       }
   auth: inherit

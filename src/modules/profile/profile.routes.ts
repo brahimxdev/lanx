@@ -1,7 +1,9 @@
 import { requireAuth } from "@/middlewares/requireAuth.js";
-import { asyncHandler } from "@/utils/asyncHandler.js";
+import { asyncHandler, asyncBodyHandler } from "@/utils/asyncHandler.js";
 import { Router } from "express";
 import { profileController } from "./profile.module.js";
+import { validateRequest } from "@/middlewares/validateRequest.js";
+import { createProfileSchema } from "./profile.validation.js";
 
 export const profileRouter = Router();
 
@@ -12,3 +14,10 @@ profileRouter.use(requireAuth);
 
 // Route to fetch loggedin user profile details - (need auth access)
 profileRouter.get("/", asyncHandler(profileController.getProfile));
+
+// Route to create profile one-time on onboarding
+profileRouter.post(
+  "/",
+  validateRequest({ body: createProfileSchema }),
+  asyncBodyHandler(profileController.createProfile)
+);

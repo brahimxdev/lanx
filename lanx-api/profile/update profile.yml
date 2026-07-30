@@ -1,0 +1,26 @@
+info:
+  name: update profile
+  type: http
+  seq: 5
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/profile"
+  body:
+    type: json
+    data: |-
+      {
+        "firstName": "Ibrahim", 
+        "lastName": "Yusuf", 
+        "businessName": "brahimx",
+        "professionId": "4f2d57aa-8dc9-4036-bfa2-105b437a80e2",
+        "countryCode": "NG",
+        "currencyCode": "NGA"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

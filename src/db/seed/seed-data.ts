@@ -79,6 +79,7 @@ const devAuthUsersData: DevAuthUserSeed[] = [
   { email: "ibrahim@lanx.dev", password: "DevPassword123!", isEmailVerified: true },
   { email: "amara@lanx.dev", password: "DevPassword123!", isEmailVerified: true },
   { email: "john@lanx.dev", password: "DevPassword123!", isEmailVerified: false },
+  { email: "lekxy@lanx.dev", password: "DevPassword123!", isEmailVerified: true },
 ];
 
 const seedDevAuthUsers = async (executor: Executor): Promise<void> => {
@@ -118,7 +119,7 @@ const devProfilesData: DevProfileSeed[] = [
     firstName: "Ibrahim",
     lastName: "Yusuf",
     businessName: "brahimx",
-    professionSlug: "web-developer",
+    professionSlug: "legal",
     countryCode: "NG",
     currencyCode: "NGN",
   },
@@ -127,7 +128,7 @@ const devProfilesData: DevProfileSeed[] = [
     firstName: "Amara",
     lastName: "Okafor",
     businessName: "Amara Designs",
-    professionSlug: "graphic-designer",
+    professionSlug: "graphic-design",
     countryCode: "NG",
     currencyCode: "NGN",
   },
