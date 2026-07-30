@@ -25,10 +25,7 @@ interface IPaginatedProfessions {
 export interface ILookupRepo {
   getCountries(queryParams: IListCountriesQuery, executor?: Executor): Promise<Country[]>;
   getCurrencies(queryParams: IListCurrenciesQuery, executor?: Executor): Promise<Currency[]>;
-  getProfessions(
-    queryParams: IListProfessionsQuery,
-    executor?: Executor
-  ): Promise<IPaginatedProfessions>;
+  getProfessions(queryParams: IListProfessionsQuery, executor?: Executor): Promise<Profession[]>;
 }
 
 // Class implementing the interface
@@ -68,36 +65,19 @@ export class LookupRepo implements ILookupRepo {
   async getProfessions(
     queryParams: IListProfessionsQuery,
     executor: Executor = db
-  ): Promise<IPaginatedProfessions> {
+  ): Promise<Profession[]> {
     const { search, limit, page } = queryParams;
     const offset = (page - 1) * limit;
 
-    const [rows, countResult] = await Promise.all([
-      executor
-        .select()
-        .from(professions)
-        .where(search ? ilike(professions.name, `%${search}%`) : undefined)
-        .orderBy(asc(professions.name), asc(professions.id))
-        .limit(limit)
-        .offset(offset),
+    const profession = await executor
+      .select()
+      .from(professions)
+      .where(search ? ilike(professions.name, `%${search}%`) : undefined)
+      .orderBy(asc(professions.name), asc(professions.id))
+      .limit(limit)
+      .offset(offset);
 
-      executor
-        .select({ count: sql<number>`count(*)::int` })
-        .from(professions)
-        .where(search ? ilike(professions.name, `${search}%`) : undefined),
-    ]);
-
-    const total = countResult[0]?.count ?? 0;
-
-    return {
-      professions: rows,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
+    return profession;
   }
 }
 
