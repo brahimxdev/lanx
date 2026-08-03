@@ -1,7 +1,6 @@
-import type { TypedRequest, TypedQueryRequest } from "@/types/typed-request.js";
+import type { TypedQueryRequest } from "@/types/typed-request.js";
 import type { LookupService } from "./lookup.service.js";
-import type { IAuthenticatedUser } from "../auth/index.js";
-import { AppError, ErrorCode, HttpStatus } from "@/errors/index.js";
+import { HttpStatus } from "@/errors/index.js";
 import type { Response } from "express";
 import type {
   IListCountriesQuery,
@@ -11,14 +10,6 @@ import type {
 
 export class LookupController {
   constructor(private readonly lookupService: LookupService) {}
-
-  private assertUser(
-    req: TypedRequest
-  ): asserts req is TypedRequest & { user: IAuthenticatedUser } {
-    if (!req.user) {
-      throw AppError.unauthorized("Authentication required", ErrorCode.UNAUTHORIZED);
-    }
-  }
 
   // list all countries
   listCountries = async (req: TypedQueryRequest<IListCountriesQuery>, res: Response) => {

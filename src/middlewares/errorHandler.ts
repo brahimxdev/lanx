@@ -1,9 +1,11 @@
 import type { Request, Response, NextFunction } from "express";
+import multer from "multer";
 import { AppError, ErrorCode } from "@/errors/index.js";
 import { ValidationError } from "./validateRequest.js";
 import { appConfig } from "@/config/index.js";
+import { mapMulterError } from "@/utils/upload.js";
 
-// the error handler middleware — always register this LAST in server.ts
+// the error handler middleware
 export const errorHandler = (
   err: Error | AppError,
   req: Request,
@@ -30,6 +32,21 @@ export const errorHandler = (
         statusCode: badRequest.statusCode,
       },
     });
+    return;
+  }
+  // Multer errors
+  if (err instanceof multer.MulterError) {
+    const multerError = mapMulterError(err, "the allowed limit");
+    res.status(multerError.statusCode).json({
+      status: false,
+      error: {
+        code: multerError.code,
+        name: multerError.name,
+        message: multerError.message,
+        statusCode: multerError.statusCode,
+      },
+    });
+
     return;
   }
 

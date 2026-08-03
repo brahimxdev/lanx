@@ -166,7 +166,6 @@ export class AccountController {
     });
   };
 
-
   // Delete account - (need auth access)
   deleteAccount = async (req: TypedBodyRequest<IDeleteAccount>, res: Response) => {
     this.assertUser(req);

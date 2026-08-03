@@ -60,11 +60,44 @@ export class ProfileController {
     const input = req.validated.body;
 
     // Service layer to handle logic
-    const {updatedProfile} = await this.profileService.updateProfile(authUserId, input)
+    const { updatedProfile } = await this.profileService.updateProfile(authUserId, input);
 
-     res.status(HttpStatus.Created).json({
+    res.status(HttpStatus.Created).json({
       status: true,
       data: updatedProfile,
+    });
+  };
+
+  // Upload logo - (need auth access)
+  uploadLogo = async (req: TypedRequest, res: Response) => {
+    this.assertUser(req);
+
+    const authUserId = req.user.id;
+
+    if (!req.file) {
+      throw AppError.badRequest("No file provided", ErrorCode.VALIDATION_ERROR);
+    }
+
+    // Service layer to handle logic
+    const { logoUrl } = await this.profileService.uploadLogo(authUserId, req.file);
+
+    res.status(HttpStatus.OK).json({
+      status: true,
+      data: { logoUrl },
+    });
+  };
+
+  // Delete logo - (need auth access)
+  deleteLogo = async (req: TypedRequest, res: Response): Promise<void> => {
+    this.assertUser(req);
+
+    const authUserId = req.user.id;
+
+    const { logoUrl } = await this.profileService.deleteLogo(authUserId);
+
+    res.status(HttpStatus.OK).json({
+      status: true,
+      data: { logoUrl },
     });
   };
 }

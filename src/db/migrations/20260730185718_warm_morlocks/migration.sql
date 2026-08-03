@@ -1,4 +1,5 @@
 -- Custom SQL migration file, put your code below! --
+-- Custom SQL migration file, put your code below! --
 -- Create function for updating updated_at timestamp
 CREATE OR REPLACE FUNCTION trigger_set_updated_at()
 RETURNS TRIGGER AS $$

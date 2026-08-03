@@ -40,6 +40,11 @@ export interface IProfileRepo {
     data: UpdateProfileData,
     executor?: Executor
   ): Promise<Profile | null>;
+  updateLogoUrl(
+    authUserId: string,
+    logoUrl: string | null,
+    executor?: Executor
+  ): Promise<Profile | null>;
 }
 
 // Class implementing the interface
@@ -148,6 +153,21 @@ export class ProfileRepo implements IProfileRepo {
     const [updatedProfile] = await executor
       .update(profiles)
       .set(data)
+      .where(eq(profiles.authUserId, authUserId))
+      .returning();
+
+    return updatedProfile ?? null;
+  }
+
+  // Update logo url
+  async updateLogoUrl(
+    authUserId: string,
+    logoUrl: string | null,
+    executor: Executor = db
+  ): Promise<Profile | null> {
+    const [updatedProfile] = await executor
+      .update(profiles)
+      .set({ logoUrl })
       .where(eq(profiles.authUserId, authUserId))
       .returning();
 

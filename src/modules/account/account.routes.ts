@@ -1,10 +1,5 @@
 import { requireAuth } from "@/middlewares/requireAuth.js";
-import {
-  asyncBodyHandler,
-  asyncHandler,
-  asyncParamsHandler,
-  asyncQueryHandler,
-} from "@/utils/asyncHandler.js";
+import { asyncBodyHandler, asyncParamsHandler, asyncQueryHandler } from "@/utils/asyncHandler.js";
 import { Router } from "express";
 import { validateRequest } from "@/middlewares/validateRequest.js";
 import {

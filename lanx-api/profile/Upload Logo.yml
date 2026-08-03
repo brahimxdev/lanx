@@ -10,8 +10,10 @@ http:
     type: multipart-form
     data:
       - name: logo
-        type: text
-        value: image file
+        type: file
+        value:
+          - /Users/ibrahimyusuf/Downloads/Brahimx Logo.png
+        contentType: image/png
   auth:
     type: bearer
     token: ""

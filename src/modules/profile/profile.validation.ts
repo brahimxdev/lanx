@@ -20,4 +20,4 @@ export const updateProfileSchema = z.object({
 });
 
 export type ICreateProfile = z.infer<typeof createProfileSchema>;
-export type IUpdateProfile = z.infer<typeof updateProfileSchema>
+export type IUpdateProfile = z.infer<typeof updateProfileSchema>;

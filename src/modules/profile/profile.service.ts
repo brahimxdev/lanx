@@ -2,9 +2,15 @@ import { AppError, ErrorCode } from "@/errors/index.js";
 import type { IProfileRepo } from "./profile.repo.js";
 import type { ICreateProfile, IUpdateProfile } from "./profile.validation.js";
 import { mapForeignKeyError } from "./profile.util.js";
+import type { StorageService } from "../storage/storage.service.js";
+import { randomUUID } from "crypto";
+import { sanitizeFilename } from "@/utils/sanitizeFilename.js";
 
 export class ProfileService {
-  constructor(private readonly profileRepo: IProfileRepo) {}
+  constructor(
+    private readonly profileRepo: IProfileRepo,
+    private readonly storageService: StorageService
+  ) {}
 
   // Fetch loggedin user profile details - (need auth access)
   async getProfile(authUserId: string) {
@@ -56,5 +62,41 @@ export class ProfileService {
       mapForeignKeyError(error);
       throw error;
     }
+  }
+
+  // Upload logo
+  async uploadLogo(authUserId: string, file: Express.Multer.File) {
+    const key = `logos/${authUserId}/${randomUUID()}-${sanitizeFilename(file.originalname)}`;
+    const logoUrl = await this.storageService.uploadPublic(key, file.buffer, file.mimetype);
+
+    const existingProfile = await this.profileRepo.findByAuthUserId(authUserId);
+
+    // No profile row yet. Client holds the URL until POST /profile.
+    if (!existingProfile) {
+      return { logoUrl };
+    }
+
+    // Clean up the old logo now that the new one is safely uploaded
+    if (existingProfile.logoUrl) {
+      await this.storageService.deletePublic(existingProfile.logoUrl);
+    }
+
+    const updatedProfile = await this.profileRepo.updateLogoUrl(authUserId, logoUrl);
+    return { logoUrl: updatedProfile?.logoUrl ?? logoUrl };
+  }
+
+  async deleteLogo(authUserId: string) {
+    const existingProfile = await this.profileRepo.findByAuthUserId(authUserId);
+
+    if (!existingProfile) {
+      throw AppError.notFound("Profile not found.", ErrorCode.NOT_FOUND);
+    }
+
+    if (existingProfile.logoUrl) {
+      await this.storageService.deletePublic(existingProfile.logoUrl);
+    }
+
+    await this.profileRepo.updateLogoUrl(authUserId, null);
+    return { logoUrl: null };
   }
 }

@@ -10,6 +10,16 @@ declare global {
         query: unknown;
         params: unknown;
       };
+      file?: UploadedFile;
+    }
+
+    interface UploadedFile {
+      fieldname: string;
+      originalname: string;
+      encoding: string;
+      mimetype: string;
+      buffer: Buffer;
+      size: number;
     }
   }
 }

@@ -1,7 +1,3 @@
-
-
-
-
 // export interface IPaginatedProfessions {
 //   professions: Profession[];
 //   pagination: {

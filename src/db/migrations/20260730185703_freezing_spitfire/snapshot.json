@@ -1,8 +1,8 @@
 {
-  "id": "0087fb37-dbde-4c24-97fc-af7d50a9200e",
-  "prevIds": ["b3f2d427-e9e3-49a0-8b8c-bf2a71efca74"],
   "version": "8",
   "dialect": "postgres",
+  "id": "facda363-ea4a-443f-94cc-6b57f8972e1c",
+  "prevIds": ["00000000-0000-0000-0000-000000000000"],
   "ddl": [
     {
       "values": ["sign_up", "change_email", "password_reset"],

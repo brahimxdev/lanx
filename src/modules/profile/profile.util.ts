@@ -3,7 +3,7 @@ import { AppError, ErrorCode } from "@/errors/index.js";
 interface DatabaseErrorLike {
   code: string;
   constraint?: string;
-};
+}
 
 const isDatabaseErrorLike = (value: unknown): value is DatabaseErrorLike => {
   return (

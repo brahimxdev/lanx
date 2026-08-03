@@ -11,6 +11,10 @@ export const appConfig = {
   nodeEnv: appEnv.NODE_ENV,
 } as const;
 
+export const logConfig = {
+  level: appEnv.LOG_LEVEL ?? (isDev ? "debug" : "info"),
+} as const;
+
 export const dbConfig = {
   dbUrl: dbEnv.DATABASE_URL,
 } as const;
@@ -33,8 +37,19 @@ export const emailConfig = {
   from: appEnv.EMAIL_FROM,
 } as const;
 
-// export const cloudinaryConfig = {
-//   cloudName: appEnv.CLOUDINARY_CLOUD_NAME,
-//   apiKey: appEnv.CLOUDINARY_API_KEY,
-//   apiSecret: appEnv.CLOUDINARY_API_SECRET,
-// } as const;
+export const storageConfig = {
+  r2AccountId: appEnv.R2_ACCOUNT_ID,
+  r2AccessKeyId: appEnv.R2_ACCESS_KEY_ID,
+  r2SecretAccessKey: appEnv.R2_SECRET_ACCESS_KEY,
+  r2PublicBucketName: appEnv.R2_PUBLIC_BUCKET_NAME,
+  r2PublicBaseUrl: appEnv.R2_PUBLIC_BASE_URL,
+  r2PrivateBucketName: appEnv.R2_PRIVATE_BUCKET_NAME,
+
+  imageFileTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"] as const,
+  imageFileMaxSize: 5 * 1024 * 1024,
+  imageFileMaxSizeLabel: "5 MB",
+
+  documentFileTypes: ["application/pdf"] as const,
+  documentFileMaxSize: 10 * 1024 * 1024,
+  documentFileMaxSizeLabel: "10 MB",
+} as const;
