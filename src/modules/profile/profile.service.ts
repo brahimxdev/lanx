@@ -85,6 +85,7 @@ export class ProfileService {
     return { logoUrl: updatedProfile?.logoUrl ?? logoUrl };
   }
 
+  // Delete logo
   async deleteLogo(authUserId: string) {
     const existingProfile = await this.profileRepo.findByAuthUserId(authUserId);
 

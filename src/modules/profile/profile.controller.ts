@@ -93,6 +93,7 @@ export class ProfileController {
 
     const authUserId = req.user.id;
 
+    // Service layer to handle logic
     const { logoUrl } = await this.profileService.deleteLogo(authUserId);
 
     res.status(HttpStatus.OK).json({
