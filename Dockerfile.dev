@@ -1,0 +1,14 @@
+FROM node:24-alpine
+
+WORKDIR /app
+
+# Install dependencies first (layer caching - only re-runs when package.json changes)
+COPY package*.json ./
+RUN npm ci
+
+# Source code is mounted as a volume
+# So changes on host machine reflect instantly in the container
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

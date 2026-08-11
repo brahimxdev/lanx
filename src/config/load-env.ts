@@ -1,1 +1,1 @@
-process.loadEnvFile(".env.development");
+process.loadEnvFile(".env");

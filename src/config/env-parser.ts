@@ -23,7 +23,7 @@ export const parseEnv = <T extends z.ZodObject<z.ZodRawShape>>(
       }
     }
 
-    console.error("\nCheck your .env.development file against .env.example\n");
+    console.error("\nCheck your .env file against .env.example\n");
     process.exit(1);
   }
 
