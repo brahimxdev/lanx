@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { rateLimitRules, type RateLimitRule, type RateLimitRuleName } from "@/config/rateLimit.js";
 import { rateLimiterService } from "@/shared/services/ratelimit/rateLimiter.service.js";
+import { RateLimitError } from "@/errors/RateLimitError.js";
 
 function buildKey(req: Request, rule: RateLimitRule, ruleName: string): string {
   const ip = req.ip ?? "unknown";
@@ -21,10 +22,8 @@ export function rateLimiter(ruleName: RateLimitRuleName) {
 
     if (!result.allowed) {
       res.setHeader("X-RateLimit-Retry-After", result.retryAfterSeconds);
-      return res.status(429).json({
-        error: "Too many requests",
-        retryAfterSeconds: result.retryAfterSeconds,
-      });
+      next(new RateLimitError(result.retryAfterSeconds));
+      return;
     }
 
     next();

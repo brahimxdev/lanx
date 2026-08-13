@@ -79,7 +79,7 @@ export class AppError extends Error {
     return new AppError(ErrorName.TooManyRequests, HttpStatus.TooManyRequests, code, message);
   }
 
-  // ─── 5xx ──────────────────────────────────────────────────────────────────
+  // 5xx
 
   static internalServerError(message = "Internal Server Error"): AppError {
     return new AppError(

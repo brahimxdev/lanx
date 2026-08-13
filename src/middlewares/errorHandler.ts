@@ -1,9 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
 import multer from "multer";
-import { AppError, ErrorCode } from "@/errors/index.js";
-import { ValidationError } from "./validateRequest.js";
+import { AppError, ErrorCode, ValidationError } from "@/errors/index.js";
 import { appConfig } from "@/config/index.js";
 import { mapMulterError } from "@/utils/upload.js";
+import { RateLimitError } from "@/errors/RateLimitError.js";
 
 // the error handler middleware
 export const errorHandler = (
@@ -47,6 +47,21 @@ export const errorHandler = (
       },
     });
 
+    return;
+  }
+
+  // rate limit errors
+  if (err instanceof RateLimitError) {
+    res.status(err.statusCode).json({
+      status: false,
+      error: {
+        code: err.code,
+        name: err.name,
+        message: err.message,
+        statusCode: err.statusCode,
+        retryAfterSeconds: err.retryAfterSeconds,
+      },
+    });
     return;
   }
 

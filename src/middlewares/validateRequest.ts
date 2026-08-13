@@ -1,8 +1,6 @@
 import { type ZodType } from "zod";
 import type { Request, Response, NextFunction } from "express";
-import { AppError, ErrorCode } from "@/errors/index.js";
-import { ErrorName } from "@/errors/error-codes.js";
-import { HttpStatus } from "@/errors/index.js";
+import { ValidationError } from "@/errors/index.js";
 
 interface ValidationSchemas {
   body?: ZodType;
@@ -43,17 +41,3 @@ export const validateRequest = (schemas: ValidationSchemas) => {
     next();
   };
 };
-
-export class ValidationError extends AppError {
-  constructor(public issues: { field: string; message: string }[]) {
-    super(
-      ErrorName.ValidationError,
-      HttpStatus.UnprocessableEntity,
-      ErrorCode.VALIDATION_ERROR,
-      "Validation failed",
-      true,
-      issues
-    );
-    Object.setPrototypeOf(this, new.target.prototype);
-  }
-}

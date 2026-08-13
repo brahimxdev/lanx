@@ -11,7 +11,7 @@ http:
     data: |-
       {
         "email": "ibrahim.techresources@proton.me",
-        "confirmationCode": "687285"
+        "confirmationCode": "241600"
       }
   auth: inherit
 
