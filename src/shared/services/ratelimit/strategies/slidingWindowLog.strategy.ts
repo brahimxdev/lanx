@@ -3,6 +3,10 @@ import path from "path";
 import { redisClient } from "@/lib/redis.client.js";
 import type { RateLimitRule } from "@/config/rateLimit.js";
 import type { RateLimitResult, RateLimitStrategy } from "../types.js";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const script = fs.readFileSync(path.join(__dirname, "../script/slidingWindowLog.lua"), "utf-8");
 
