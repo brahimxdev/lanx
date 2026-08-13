@@ -10,7 +10,7 @@ import type {
 import type { IRequestMeta, ITokenService } from "@/modules/auth/index.js";
 import { AppError, ErrorCode } from "@/errors/index.js";
 import bcrypt from "bcryptjs";
-import { authConfig } from "@/config/index.js";
+import { authConfig, redisConfig } from "@/config/index.js";
 import { db } from "@/db/client.js";
 import { tempEmailDomain } from "@/shared/constants/tempEmail.js";
 import {
@@ -19,6 +19,7 @@ import {
   verifyConfirmationCode,
 } from "@/utils/confirmation-code.util.js";
 import { sanitizeUser } from "@/utils/sanitizeUser.js";
+import type { ICacheService } from "@/shared/services/cache.service.js";
 
 export class AccountService {
   constructor(
@@ -26,11 +27,17 @@ export class AccountService {
     private readonly emailConfirmationRepo: IEmailConfirmationRepo,
     private readonly sessionRepo: ISessionRepo,
     private readonly emailService: EmailService,
-    private readonly tokenService: ITokenService
+    private readonly tokenService: ITokenService,
+    private readonly cacheService: ICacheService
   ) {}
 
   // Change password (need auth access)
-  async changePassword(authUserId: string, input: IChangePassword, meta: IRequestMeta) {
+  async changePassword(
+    authUserId: string,
+    deviceId: string,
+    input: IChangePassword,
+    meta: IRequestMeta
+  ) {
     // Find user by id
     const existingUser = await this.authUserRepo.findById(authUserId);
 
@@ -63,9 +70,9 @@ export class AccountService {
     const refreshTokenHash = this.tokenService.hashRefreshToken(refreshToken);
 
     // db transactions
-    const { user, newSessionRecord } = await db.transaction(async (tx) => {
+    const { user, newSessionRecord, revokedSessions } = await db.transaction(async (tx) => {
       // tx 1 - invalidate all existing sessions for the user
-      await this.sessionRepo.revokeAllActive(existingUser.id, tx);
+      const revokedSessions = await this.sessionRepo.revokeAllActive(existingUser.id, tx);
 
       // tx 2 - update password
       const user = await this.authUserRepo.updatePassword(existingUser.id, newPasswordHash, tx);
@@ -73,6 +80,7 @@ export class AccountService {
       // tx 3 - Issue new session
       const newSessionRecord = await this.sessionRepo.createSession({
         authUserId: existingUser.id,
+        deviceId,
         refreshTokenHash: refreshTokenHash,
         expiresAt: new Date(Date.now() + authConfig.refreshTokenTTL),
         ipAddress: meta.ipAddress,
@@ -82,8 +90,15 @@ export class AccountService {
         deviceBrowser: meta.deviceBrowser,
       });
 
-      return { user, newSessionRecord };
+      return { user, newSessionRecord, revokedSessions };
     });
+
+    // Blocklist every session the password change just revoked
+    await Promise.all(
+      revokedSessions.map((session) =>
+        this.cacheService.blocklistSession(session.id, redisConfig.ttl.accessToken)
+      )
+    );
 
     // sign access Token
     const accessToken = this.tokenService.signAccessToken({
@@ -95,7 +110,7 @@ export class AccountService {
     const sanitizedUser = sanitizeUser(user);
 
     // Send password reset notification to email
-    await this.emailService.sendPasswordResetNotification(tempEmailDomain);
+    void this.emailService.sendPasswordResetNotification(tempEmailDomain);
 
     return { sanitizedUser, accessToken, refreshToken };
   }
@@ -133,6 +148,18 @@ export class AccountService {
       throw AppError.conflict("Email already exist", ErrorCode.ALREADY_EXISTS);
     }
 
+    const { allowed } = await this.cacheService.checkAndIncrementIssuance(
+      existingUser.id,
+      "change_email"
+    );
+
+    if (!allowed) {
+      throw AppError.tooManyRequests(
+        "Too many attempts, please request a new code",
+        ErrorCode.TOO_MANY_REQUESTS
+      );
+    }
+
     const confirmationCode = generateConfirmationCode();
     const confirmationCodeHash = hashConfirmationCode(confirmationCode);
 
@@ -154,7 +181,8 @@ export class AccountService {
       );
     });
 
-    await this.emailService.sendConfirmationCode(tempEmailDomain, confirmationCode);
+    await this.cacheService.resetConfirmAttempts(existingUser.id, "change_email");
+    void this.emailService.sendConfirmationCode(tempEmailDomain, confirmationCode);
 
     return { message: "Confirmation code sent to your new email" };
   }
@@ -168,12 +196,23 @@ export class AccountService {
       throw AppError.badRequest("No active email change request", ErrorCode.NO_ACTIVE_CONFIRMATION);
     }
 
-    if (confirmationRecord.attemptCount >= 5) {
+    // Rate limit check in redis
+    const attempts = await this.cacheService.getConfirmAttempts(
+      confirmationRecord.authUserId,
+      confirmationRecord.confirmationType
+    );
+
+    if (attempts >= 5) {
       throw AppError.tooManyRequests("Too many attempts, please request a new code");
     }
 
+    // Expiry check
     if (confirmationRecord.expiresAt <= new Date()) {
-      await this.emailConfirmationRepo.incrementAttemptCount(confirmationRecord.id);
+      await this.cacheService.incrementConfirmAttempts(
+        confirmationRecord.authUserId,
+        confirmationRecord.confirmationType,
+        redisConfig.ttl.confirmationCode
+      );
       throw AppError.badRequest(
         "This code has expired, please request a new one",
         ErrorCode.EXPIRED_CODE
@@ -182,13 +221,14 @@ export class AccountService {
 
     // compare inputed code against stored hased code
     const isCodeValid = verifyConfirmationCode(input.confirmationCode, confirmationRecord.codeHash);
-    if (!isCodeValid) {
-      await this.emailConfirmationRepo.incrementAttemptCount(confirmationRecord.id);
-      throw AppError.unauthorized("Invalid confirmation code", ErrorCode.INVALID_CODE);
-    }
 
-    if (!confirmationRecord.newEmail) {
-      throw AppError.internalServerError("Confirmation record missing target email");
+    if (!isCodeValid) {
+      await this.cacheService.incrementConfirmAttempts(
+        confirmationRecord.authUserId,
+        confirmationRecord.confirmationType,
+        redisConfig.ttl.confirmationCode
+      );
+      throw AppError.unauthorized("Invalid code or email", ErrorCode.INVALID_CODE);
     }
 
     if (!confirmationRecord.newEmail) {
@@ -205,23 +245,30 @@ export class AccountService {
     }
 
     // db transactions
-    const { user } = await db.transaction(async (tx) => {
+    const { user, revokedSessions } = await db.transaction(async (tx) => {
       // tx 1 - mark code as used
       await this.emailConfirmationRepo.markUsed(confirmationRecord.id, tx);
 
       // tx 2 - invalidate all existing sessions for the user
-      await this.sessionRepo.revokeAllActive(authUserId, tx);
+      const revokedSessions = await this.sessionRepo.revokeAllActive(authUserId, tx);
 
       // tx 3 - update email
       const user = await this.authUserRepo.updateEmail(authUserId, newEmail, tx);
 
-      return { user };
+      return { user, revokedSessions };
     });
+
+    // Blocklist every session revoked by the email change
+    await Promise.all(
+      revokedSessions.map((session) =>
+        this.cacheService.blocklistSession(session.id, redisConfig.ttl.accessToken)
+      )
+    );
 
     // Sanitized user to return to client
     const sanitizedUser = sanitizeUser(user);
 
-    await this.emailService.sendEmailChangeNotification(user.email, confirmationRecord.newEmail);
+    void this.emailService.sendEmailChangeNotification(user.email, confirmationRecord.newEmail);
 
     return { sanitizedUser };
   }
@@ -254,6 +301,9 @@ export class AccountService {
 
     // Revoke session
     await this.sessionRepo.revokeSession(sessionId);
+
+    // Blocklist sessionId in Redis so its access token is rejected
+    await this.cacheService.blocklistSession(sessionId, redisConfig.ttl.accessToken);
   }
 
   // Delete account - (need auth access)
@@ -275,7 +325,13 @@ export class AccountService {
       throw AppError.badRequest("Password is incorrect", ErrorCode.INVALID_CREDENTIALS);
     }
 
-    // const emailOnFile = existingUser.email;
+    const { sessions: sessionsToRevoke } = await this.sessionRepo.findManyByUserId(authUserId, {
+      status: "active",
+      sortBy: "lastUsedAt",
+      sortOrder: "desc",
+      page: 1,
+      limit: 1000,
+    });
 
     // db transactions
     await db.transaction(async (tx) => {
@@ -288,6 +344,13 @@ export class AccountService {
       // tx 3 - Soft delete auth user
       await this.authUserRepo.softDelete(authUserId, tx);
     });
+
+    // Blocklist every session that was active going into the delete
+    await Promise.all(
+      sessionsToRevoke.map((session) =>
+        this.cacheService.blocklistSession(session.id, redisConfig.ttl.accessToken)
+      )
+    );
 
     void this.emailService.sendAccountDeletedNotification(tempEmailDomain);
   }

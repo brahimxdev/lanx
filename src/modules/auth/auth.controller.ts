@@ -57,6 +57,7 @@ export class AuthController {
     const { email, confirmationCode } = req.validated.body;
 
     const { newUser, accessToken, refreshToken } = await this.authService.confirmEmail(
+      req.deviceId,
       { email, confirmationCode },
       this.extractMeta(req)
     );
@@ -97,6 +98,7 @@ export class AuthController {
     const { email, password } = req.validated.body;
 
     const { user, accessToken, refreshToken } = await this.authService.signIn(
+      req.deviceId,
       { email, password },
       this.extractMeta(req)
     );

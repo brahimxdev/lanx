@@ -19,6 +19,23 @@ export const dbConfig = {
   dbUrl: dbEnv.DATABASE_URL,
 } as const;
 
+export const redisConfig = {
+  redisUrl: appEnv.REDIS_URL,
+
+  ttl: {
+    accessToken: ms(appEnv.JWT_EXPIRES_IN as StringValue), // 15 mins
+    refreshToken: ms(appEnv.REFRESH_TOKEN_EXPIRES_IN as StringValue), // 7 days
+    userProfile: 5 * 60, // 5 mins
+    lookupData: 24 * 60 * 60, // 24 hours
+    confirmationCode: 10 * 60, // 10 mins
+    issuanceWindow: 15 * 60, // 15 mins
+  },
+
+  limits: {
+    maxIssuancePerWindow: 3,
+  },
+} as const;
+
 export const authConfig = {
   jwtSecret: appEnv.JWT_SECRET,
   jwtExpiresIn: appEnv.JWT_EXPIRES_IN as StringValue,

@@ -17,7 +17,7 @@ services:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     restart: unless-stopped
 
   postgres:
@@ -38,17 +38,19 @@ services:
       retries: 5
 
   redis:
-    image: redis:7-alpine
+    image: redis:8.8-alpine
     ports:
       - "6379:6379"
     volumes:
       - redisdata:/data
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
-    command: redis-server --appendonly yes # enable persistence
+    restart: unless-stopped
 
 volumes:
   pgdata:

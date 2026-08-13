@@ -16,6 +16,9 @@ const appEnvSchema = z.object({
   // Database
   DATABASE_URL: z.url(),
 
+  // Redis
+  REDIS_URL: z.url(),
+
   // Auth
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN: z.string().default("15m"),

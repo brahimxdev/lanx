@@ -15,9 +15,14 @@ type RotateRefreshTokenData = Pick<
 // Interface - what the service binds against
 export interface ISessionRepo {
   createSession(data: CreateSession, executor?: Executor): Promise<Session>;
-  revokeAllActive(authUserId: string, executor?: Executor): Promise<void>;
+  revokeAllActive(authUserId: string, executor?: Executor): Promise<Pick<Session, "id">[]>;
   revokeSession(sessionId: string, executor?: Executor): Promise<void>;
   findActiveById(sessionId: string, executor?: Executor): Promise<Session | null>;
+  findActiveByUserAndDevice(
+    userId: string,
+    deviceId: string | null,
+    executor?: Executor
+  ): Promise<Session | null>;
   findActiveByRefreshTokenHash(
     refreshTokenHash: string,
     executor?: Executor
@@ -50,7 +55,7 @@ export interface ISessionRepo {
     sessionId: string,
     data: RotateRefreshTokenData,
     executor?: Executor
-  ): Promise<void>;
+  ): Promise<Session>;
 }
 
 // Class implementing the interface
@@ -67,11 +72,17 @@ export class SessionRepo implements ISessionRepo {
   }
 
   // Invalidate all sessions
-  async revokeAllActive(authUserId: string, executor: Executor = db): Promise<void> {
-    await executor
+  async revokeAllActive(
+    authUserId: string,
+    executor: Executor = db
+  ): Promise<Pick<Session, "id">[]> {
+    const revokedSessions = await executor
       .update(sessions)
       .set({ revokedAt: new Date() })
-      .where(and(eq(sessions.authUserId, authUserId), isNull(sessions.revokedAt)));
+      .where(and(eq(sessions.authUserId, authUserId), isNull(sessions.revokedAt)))
+      .returning({ id: sessions.id });
+
+    return revokedSessions;
   }
 
   // Invalidate a specific session
@@ -91,6 +102,28 @@ export class SessionRepo implements ISessionRepo {
       .limit(1);
 
     return activeSession ?? null;
+  }
+
+  // Find active session by user and device
+  async findActiveByUserAndDevice(
+    authUserId: string,
+    deviceId: string,
+    executor: Executor = db
+  ): Promise<Session | null> {
+    const [session] = await executor
+      .select()
+      .from(sessions)
+      .where(
+        and(
+          eq(sessions.authUserId, authUserId),
+          eq(sessions.deviceId, deviceId),
+          isNull(sessions.revokedAt),
+          gt(sessions.expiresAt, new Date())
+        )
+      )
+      .limit(1);
+
+    return session ?? null;
   }
 
   // Find active session by refresh token hash
@@ -182,21 +215,24 @@ export class SessionRepo implements ISessionRepo {
     data: {
       refreshTokenHash: string;
       expiresAt: Date;
-      ipAddress?: string | null;
-      userAgent: string | null;
     },
     executor: Executor = db
-  ): Promise<void> {
-    await executor
+  ): Promise<Session> {
+    const [updatedSession] = await executor
       .update(sessions)
       .set({
         refreshTokenHash: data.refreshTokenHash,
         expiresAt: data.expiresAt,
-        ipAddress: data.ipAddress,
-        userAgent: data.userAgent,
         lastUsedAt: new Date(),
       })
-      .where(eq(sessions.id, sessionId));
+      .where(eq(sessions.id, sessionId))
+      .returning();
+
+    if (!updatedSession) {
+      throw AppError.internalServerError("Failed to rotate refresh token");
+    }
+
+    return updatedSession;
   }
 }
 

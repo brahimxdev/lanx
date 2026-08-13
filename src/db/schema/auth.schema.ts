@@ -77,6 +77,7 @@ export const sessions = pgTable(
     authUserId: uuid("auth_user_id")
       .notNull()
       .references(() => authUsers.id, { onDelete: "restrict" }),
+    deviceId: uuid("device_id").notNull(),
     refreshTokenHash: text("refresh_token_hash").notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     revokedAt: timestamp("revoked_at", { withTimezone: true }),
@@ -93,8 +94,13 @@ export const sessions = pgTable(
   (pgTable) => [
     index("idx_sessions_auth_user_id").on(pgTable.authUserId),
     index("idx_sessions_active")
-      .on(pgTable.authUserId)
+      .on(pgTable.authUserId, pgTable.deviceId)
       .where(sql`${pgTable.revokedAt} IS NULL`),
     index("idx_sessions_expires_at").on(pgTable.expiresAt),
+    index("idx_sessions_user_device_lookup").on(
+      pgTable.authUserId,
+      pgTable.deviceId,
+      pgTable.expiresAt
+    ),
   ]
 );

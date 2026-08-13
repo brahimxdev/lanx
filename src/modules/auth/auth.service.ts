@@ -17,10 +17,12 @@ import {
   verifyConfirmationCode,
 } from "@/utils/confirmation-code.util.js";
 import { db } from "@/db/client.js";
-import { authConfig } from "@/config/index.js";
+import { authConfig, redisConfig } from "@/config/index.js";
 import type { IRequestMeta } from "@/modules/auth/index.js";
 import { tempEmailDomain } from "@/shared/constants/tempEmail.js";
 import { sanitizeUser } from "@/utils/sanitizeUser.js";
+import type { ICacheService } from "@/shared/services/cache.service.js";
+import { isUniqueViolation } from "@/utils/isUniqueViolation.js";
 
 export class AuthService {
   constructor(
@@ -28,7 +30,8 @@ export class AuthService {
     private readonly emailConfirmationRepo: IEmailConfirmationRepo,
     private readonly sessionRepo: ISessionRepo,
     private readonly emailService: EmailService,
-    private readonly tokenService: ITokenService
+    private readonly tokenService: ITokenService,
+    private readonly cacheService: ICacheService
   ) {}
 
   // Create new user
@@ -77,7 +80,7 @@ export class AuthService {
   }
 
   // Confirm email for user signing up
-  async confirmEmail(input: IConfirmEmail, meta: IRequestMeta) {
+  async confirmEmail(deviceId: string, input: IConfirmEmail, meta: IRequestMeta) {
     // 1. Check if account exist by email
     const existingUser = await this.authUserRepo.findByEmail(input.email);
 
@@ -99,14 +102,23 @@ export class AuthService {
       );
     }
 
-    // Attempt count check
-    if (confirmationRecord.attemptCount >= 5) {
-      throw AppError.tooManyRequests("Something went wrong, please resend a new code");
+    // Rate limit check in redis
+    const attempts = await this.cacheService.getConfirmAttempts(
+      existingUser.id,
+      confirmationRecord.confirmationType
+    );
+
+    if (attempts >= 5) {
+      throw AppError.tooManyRequests("Too many attempts, please request a new code");
     }
 
     // Expiry check
     if (confirmationRecord.expiresAt <= new Date()) {
-      await this.emailConfirmationRepo.incrementAttemptCount(confirmationRecord.id);
+      await this.cacheService.incrementConfirmAttempts(
+        existingUser.id,
+        confirmationRecord.confirmationType,
+        redisConfig.ttl.confirmationCode
+      );
       throw AppError.badRequest(
         "This code has expired, please request a new one",
         ErrorCode.EXPIRED_CODE
@@ -117,7 +129,11 @@ export class AuthService {
     const isCodeValid = verifyConfirmationCode(input.confirmationCode, confirmationRecord.codeHash);
 
     if (!isCodeValid) {
-      await this.emailConfirmationRepo.incrementAttemptCount(confirmationRecord.id);
+      await this.cacheService.incrementConfirmAttempts(
+        existingUser.id,
+        confirmationRecord.confirmationType,
+        redisConfig.ttl.confirmationCode
+      );
       throw AppError.unauthorized("Invalid code or email", ErrorCode.INVALID_CODE);
     }
 
@@ -126,44 +142,37 @@ export class AuthService {
     const refreshTokenHash = this.tokenService.hashRefreshToken(refreshToken);
 
     // db transactions
-    const { updatedUser, newSessionRecord } = await db.transaction(async (tx) => {
+    const { updatedUser, newSessionRecord, revokedSessions } = await db.transaction(async (tx) => {
       // tx 1 - mark code as used
       await this.emailConfirmationRepo.markUsed(confirmationRecord.id, tx);
 
-      let updatedUser: typeof existingUser;
-
       // tx 2 - mark email verified
-      switch (confirmationRecord.confirmationType) {
-        case "sign_up": {
-          updatedUser = await this.authUserRepo.markEmailVerified(existingUser.id, tx);
-          break;
-        }
-
-        default: {
-          throw AppError.internalServerError("Unsupported confirmation type for this flow");
-        }
-      }
+      const updatedUser = await this.authUserRepo.markEmailVerified(existingUser.id, tx);
 
       // tx 3 - invalidate all existing sessions for the user
-      await this.sessionRepo.revokeAllActive(existingUser.id);
+      const revokedSessions = await this.sessionRepo.revokeAllActive(existingUser.id, tx);
 
       // tx 4 - Issue new session
       const newSessionRecord = await this.sessionRepo.createSession(
         {
           authUserId: existingUser.id,
+          deviceId,
           refreshTokenHash: refreshTokenHash,
           expiresAt: new Date(Date.now() + authConfig.refreshTokenTTL),
-          ipAddress: meta.ipAddress,
-          userAgent: meta.userAgent,
-          deviceType: meta.deviceType,
-          deviceOs: meta.deviceOs,
-          deviceBrowser: meta.deviceBrowser,
+          ...meta,
         },
         tx
       );
 
-      return { updatedUser, newSessionRecord };
+      return { updatedUser, newSessionRecord, revokedSessions };
     });
+
+    // Blocklist every session that is just revoked
+    await Promise.all(
+      revokedSessions.map((session) =>
+        this.cacheService.blocklistSession(session.id, redisConfig.ttl.accessToken)
+      )
+    );
 
     // sign access Token
     const accessToken = this.tokenService.signAccessToken({
@@ -174,7 +183,7 @@ export class AuthService {
     // Sanitized user to return to client
     const newUser = sanitizeUser(updatedUser);
 
-    await this.emailService.sendWelcomeEmailPro(tempEmailDomain, { email: newUser.email });
+    void this.emailService.sendWelcomeEmailPro(tempEmailDomain, { email: newUser.email });
     return { newUser, accessToken, refreshToken };
   }
 
@@ -187,6 +196,15 @@ export class AuthService {
       return {
         message: "If an account exist, a confirmation code has been sent!",
       };
+    }
+
+    const { allowed, retryAfter } = await this.cacheService.checkAndIncrementIssuance(
+      existingUser.id,
+      "sign_up"
+    );
+
+    if (!allowed) {
+      return { message: "If an account exist, a confirmation code has been sent!", retryAfter };
     }
 
     const confirmationCode = generateConfirmationCode();
@@ -210,7 +228,8 @@ export class AuthService {
     });
 
     // 4. Send code to user via email
-    await this.emailService.sendConfirmationCode(tempEmailDomain, confirmationCode);
+    await this.cacheService.resetConfirmAttempts(existingUser.id, "sign_up");
+    void this.emailService.sendConfirmationCode(tempEmailDomain, confirmationCode);
 
     return {
       message: "If an account exist, a code has been sent!",
@@ -218,7 +237,7 @@ export class AuthService {
   }
 
   // Sign in
-  async signIn(input: ISignIn, meta: IRequestMeta) {
+  async signIn(deviceId: string, input: ISignIn, meta: IRequestMeta) {
     // Check if user exist
     const existingUser = await this.authUserRepo.findByEmail(input.email);
 
@@ -244,31 +263,86 @@ export class AuthService {
       throw AppError.unauthorized("Your email has not been verified", ErrorCode.EMAIL_NOT_VERIFIED);
     }
 
-    // Generate + hash refresh Token
-    const refreshToken = this.tokenService.generateRefreshToken();
-    const refreshTokenHash = this.tokenService.hashRefreshToken(refreshToken);
-
-    const newSessionRecord = await this.sessionRepo.createSession({
-      authUserId: existingUser.id,
-      refreshTokenHash: refreshTokenHash,
-      expiresAt: new Date(Date.now() + authConfig.refreshTokenTTL),
-      ipAddress: meta.ipAddress,
-      userAgent: meta.userAgent,
-      deviceType: meta.deviceType,
-      deviceOs: meta.deviceOs,
-      deviceBrowser: meta.deviceBrowser,
-    });
+    const { sessionId, refreshToken } = await this.getOrCreateSession(
+      existingUser.id,
+      deviceId,
+      meta
+    );
 
     // sign access Token
     const accessToken = this.tokenService.signAccessToken({
       userId: existingUser.id,
-      sessionId: newSessionRecord.id,
+      sessionId,
     });
 
     // Sanitized user to return to client
     const user = sanitizeUser(existingUser);
 
     return { user, accessToken, refreshToken };
+  }
+
+  private async getOrCreateSession(
+    userId: string,
+    deviceId: string,
+    meta: IRequestMeta
+  ): Promise<{ sessionId: string; refreshToken: string }> {
+    const existingSession = await this.sessionRepo.findActiveByUserAndDevice(userId, deviceId);
+
+    if (existingSession) {
+      return this.rotateExistingSession(existingSession.id, meta);
+    }
+
+    try {
+      return await this.createFreshSession(userId, deviceId, meta);
+    } catch (err) {
+      if (isUniqueViolation(err)) {
+        const winner = await this.sessionRepo.findActiveByUserAndDevice(userId, deviceId);
+        if (winner) {
+          return this.rotateExistingSession(winner.id, meta);
+        }
+      }
+      throw err;
+    }
+  }
+
+  private async rotateExistingSession(
+    sessionId: string,
+    meta: IRequestMeta
+  ): Promise<{ sessionId: string; refreshToken: string }> {
+    const refreshToken = this.tokenService.generateRefreshToken();
+    const refreshTokenHash = this.tokenService.hashRefreshToken(refreshToken);
+
+    const rotated = await this.sessionRepo.rotateRefreshToken(sessionId, {
+      refreshTokenHash,
+      expiresAt: new Date(Date.now() + authConfig.refreshTokenTTL),
+      ipAddress: meta.ipAddress,
+      userAgent: meta.userAgent,
+    });
+
+    return { sessionId: rotated.id, refreshToken };
+  }
+
+  private async createFreshSession(
+    userId: string,
+    deviceId: string,
+    meta: IRequestMeta
+  ): Promise<{ sessionId: string; refreshToken: string }> {
+    const refreshToken = this.tokenService.generateRefreshToken();
+    const refreshTokenHash = this.tokenService.hashRefreshToken(refreshToken);
+
+    const newSessionRecord = await this.sessionRepo.createSession({
+      authUserId: userId,
+      refreshTokenHash,
+      expiresAt: new Date(Date.now() + authConfig.refreshTokenTTL),
+      ipAddress: meta.ipAddress,
+      userAgent: meta.userAgent,
+      deviceType: meta.deviceType,
+      deviceOs: meta.deviceOs,
+      deviceBrowser: meta.deviceBrowser,
+      deviceId,
+    });
+
+    return { sessionId: newSessionRecord.id, refreshToken };
   }
 
   // Forgot password
@@ -280,6 +354,14 @@ export class AuthService {
       return {
         message: "If an account exist, a confirmation code has been sent!",
       };
+    }
+    const { allowed, retryAfter } = await this.cacheService.checkAndIncrementIssuance(
+      existingUser.id,
+      "password_reset"
+    );
+
+    if (!allowed) {
+      return { message: "If an account exist, a confirmation code has been sent!", retryAfter };
     }
 
     const confirmationCode = generateConfirmationCode();
@@ -302,8 +384,9 @@ export class AuthService {
       );
     });
 
-    // 4. Send code to user via email
-    await this.emailService.sendPasswordResetCode(tempEmailDomain, confirmationCode);
+    await this.cacheService.resetConfirmAttempts(existingUser.id, "password_reset");
+
+    void this.emailService.sendPasswordResetCode(tempEmailDomain, confirmationCode);
 
     return {
       message: "If an account exist, a code has been sent!",
@@ -329,14 +412,23 @@ export class AuthService {
       );
     }
 
-    // Attempt count check
-    if (confirmationRecord.attemptCount >= 5) {
+    // Rate limit check in redis
+    const attempts = await this.cacheService.getConfirmAttempts(
+      existingUser.id,
+      confirmationRecord.confirmationType
+    );
+
+    if (attempts >= 5) {
       throw AppError.tooManyRequests("Something went wrong, please resend a new code");
     }
 
     // Expiry check
     if (confirmationRecord.expiresAt <= new Date()) {
-      await this.emailConfirmationRepo.incrementAttemptCount(confirmationRecord.id);
+      await this.cacheService.incrementConfirmAttempts(
+        existingUser.id,
+        confirmationRecord.confirmationType,
+        redisConfig.ttl.confirmationCode
+      );
       throw AppError.badRequest(
         "This code has expired, please request a new one",
         ErrorCode.EXPIRED_CODE
@@ -350,7 +442,11 @@ export class AuthService {
     );
 
     if (!isPlainEqualHashed) {
-      await this.emailConfirmationRepo.incrementAttemptCount(confirmationRecord.id);
+      await this.cacheService.incrementConfirmAttempts(
+        existingUser.id,
+        confirmationRecord.confirmationType,
+        redisConfig.ttl.confirmationCode
+      );
       throw AppError.unauthorized("Invalid code or email", ErrorCode.INVALID_CODE);
     }
 
@@ -364,12 +460,12 @@ export class AuthService {
     const newPasswordHash = await bcrypt.hash(input.newPassword, 12);
 
     // db transactions
-    await db.transaction(async (tx) => {
+    const { revokedSessions } = await db.transaction(async (tx) => {
       // tx 1 - mark code as used
       await this.emailConfirmationRepo.markUsed(confirmationRecord.id, tx);
 
       // tx 2 - invalidate all existing sessions for the user
-      await this.sessionRepo.revokeAllActive(existingUser.id, tx);
+      const revokedSessions = await this.sessionRepo.revokeAllActive(existingUser.id, tx);
 
       // tx 3 - update password
       const user = await this.authUserRepo.updatePassword(existingUser.id, newPasswordHash, tx);
@@ -378,10 +474,19 @@ export class AuthService {
       if (!user.isEmailVerified) {
         await this.authUserRepo.markEmailVerified(existingUser.id, tx);
       }
+
+      return { revokedSessions };
     });
 
+    // Blocklist every session revoked by the password reset
+    await Promise.all(
+      revokedSessions.map((session) =>
+        this.cacheService.blocklistSession(session.id, redisConfig.ttl.accessToken)
+      )
+    );
+
     // Send password reset notification
-    await this.emailService.sendPasswordResetNotification(tempEmailDomain);
+    void this.emailService.sendPasswordResetNotification(tempEmailDomain);
 
     return {
       message: "Your password has been reset",
@@ -397,6 +502,7 @@ export class AuthService {
     }
 
     const refreshTokenHash = this.tokenService.hashRefreshToken(refreshToken);
+
     const activeSession = await this.sessionRepo.findActiveByRefreshTokenHash(refreshTokenHash);
 
     if (!activeSession) {
@@ -405,7 +511,15 @@ export class AuthService {
       };
     }
 
+    // Revoke session in DB
     await this.sessionRepo.revokeSession(activeSession.id);
+
+    // Blocklist sessionId in Redis so the access token is rejected immediately
+    const sessionId = activeSession.id;
+
+    if (sessionId) {
+      await this.cacheService.blocklistSession(sessionId, redisConfig.ttl.accessToken);
+    }
 
     return {
       message: "Logout successfully",
@@ -430,7 +544,14 @@ export class AuthService {
 
     // Check if session already revoked
     if (activeSession.revokedAt) {
-      await this.sessionRepo.revokeAllActive(activeSession.authUserId);
+      const revokedSessions = await this.sessionRepo.revokeAllActive(activeSession.authUserId);
+
+      await Promise.all(
+        revokedSessions.map((session) =>
+          this.cacheService.blocklistSession(session.id, redisConfig.ttl.accessToken)
+        )
+      );
+
       throw AppError.unauthorized("Refresh token has been revoked", ErrorCode.UNAUTHORIZED);
     }
 

@@ -1,9 +1,10 @@
 import { AppError } from "@/errors/AppError.js";
 import { ErrorCode } from "@/errors/error-codes.js";
-import { authUserRepo, sessionRepo } from "@/shared/repo/index.js";
+import { authUserRepo } from "@/shared/repo/index.js";
 import { tokenService } from "@/modules/auth/token.service.js";
 import type { Request, Response, NextFunction } from "express";
 import { sanitizeUser } from "@/utils/sanitizeUser.js";
+import { cacheService } from "@/shared/services/cache.service.js";
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   // Grab header from req body
@@ -36,6 +37,18 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     return;
   }
 
+  // Check if the session tied to the token has been revoked
+  const isBlocked = await cacheService.isSessionBlocked(decodedToken.sessionId);
+
+  if (isBlocked) {
+    const err = AppError.unauthorized(
+      "Session has been revoked, please sign in",
+      ErrorCode.UNAUTHORIZED
+    );
+    next(err);
+    return;
+  }
+
   // Check if the user exists by id
   const existingUser = await authUserRepo.findById(decodedToken.userId);
 
@@ -57,18 +70,6 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
       next(err);
       return;
     }
-  }
-
-  // Check if the session tied to the token is still active
-  const activeSession = await sessionRepo.findActiveById(decodedToken.sessionId);
-
-  if (!activeSession) {
-    const err = AppError.unauthorized(
-      "Session has been revoked, please sign in",
-      ErrorCode.UNAUTHORIZED
-    );
-    next(err);
-    return;
   }
 
   // Attach user to the request object

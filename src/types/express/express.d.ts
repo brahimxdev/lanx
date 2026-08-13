@@ -5,6 +5,7 @@ declare global {
     interface Request {
       user?: IAuthenticatedUser;
       sessionId?: string;
+      deviceId: string;
       validated?: {
         body: unknown;
         query: unknown;

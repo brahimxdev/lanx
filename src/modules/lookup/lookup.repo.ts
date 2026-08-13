@@ -1,71 +1,41 @@
 import type { Executor } from "@/db/executor.js";
 import { countries, currencies, professions } from "@/db/schema/index.js";
-import { asc, ilike } from "drizzle-orm";
+import { asc } from "drizzle-orm";
 import { db } from "@/db/client.js";
-import type {
-  IListCountriesQuery,
-  IListCurrenciesQuery,
-  IListProfessionsQuery,
-} from "./lookup.validation.js";
 
 type Country = typeof countries.$inferSelect;
 type Currency = typeof currencies.$inferSelect;
 type Profession = typeof professions.$inferSelect;
 
 export interface ILookupRepo {
-  getCountries(queryParams: IListCountriesQuery, executor?: Executor): Promise<Country[]>;
-  getCurrencies(queryParams: IListCurrenciesQuery, executor?: Executor): Promise<Currency[]>;
-  getProfessions(queryParams: IListProfessionsQuery, executor?: Executor): Promise<Profession[]>;
+  getAllCountries(executor?: Executor): Promise<Country[]>;
+  getAllCurrencies(executor?: Executor): Promise<Currency[]>;
+  getAllProfessions(executor?: Executor): Promise<Profession[]>;
+
+  invalidateCountries(): Promise<void>;
+  invalidateCurrencies(): Promise<void>;
+  invalidateProfessions(): Promise<void>;
 }
 
-// Class implementing the interface
 export class LookupRepo implements ILookupRepo {
-  // get countries
-  async getCountries(
-    queryParams: IListCountriesQuery,
-    executor: Executor = db
-  ): Promise<Country[]> {
-    const { search } = queryParams;
-
-    const country = await executor
-      .select()
-      .from(countries)
-      .where(search ? ilike(countries.name, `%${search}%`) : undefined)
-      .orderBy(asc(countries.name));
-
-    return country;
+  async getAllCountries(executor: Executor = db): Promise<Country[]> {
+    return executor.select().from(countries).orderBy(asc(countries.name));
   }
 
-  // get currencies
-  async getCurrencies(
-    queryParams: IListCurrenciesQuery,
-    executor: Executor = db
-  ): Promise<Currency[]> {
-    const { search } = queryParams;
-    const currency = await executor
-      .select()
-      .from(currencies)
-      .where(search ? ilike(currencies.name, `%${search}%`) : undefined)
-      .orderBy(asc(currencies.code));
-
-    return currency;
+  async getAllCurrencies(executor: Executor = db): Promise<Currency[]> {
+    return executor.select().from(currencies).orderBy(asc(currencies.code));
   }
 
-  // get professions
-  async getProfessions(
-    queryParams: IListProfessionsQuery,
-    executor: Executor = db
-  ): Promise<Profession[]> {
-    const { search } = queryParams;
-
-    const profession = await executor
-      .select()
-      .from(professions)
-      .where(search ? ilike(professions.name, `%${search}%`) : undefined)
-      .orderBy(asc(professions.name));
-
-    return profession;
+  async getAllProfessions(executor: Executor = db): Promise<Profession[]> {
+    return executor.select().from(professions).orderBy(asc(professions.name));
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async invalidateCountries(): Promise<void> {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async invalidateCurrencies(): Promise<void> {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  async invalidateProfessions(): Promise<void> {}
 }
 
 export const lookupRepo = new LookupRepo();

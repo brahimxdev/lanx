@@ -59,6 +59,7 @@ export class AccountController {
     // Service layer to handle logic
     const { sanitizedUser, accessToken, refreshToken } = await this.accountService.changePassword(
       authUserId,
+      req.deviceId,
       { existingPassword, newPassword },
       this.extractMeta(req)
     );

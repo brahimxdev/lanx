@@ -5,20 +5,30 @@ import { mapForeignKeyError } from "./profile.util.js";
 import type { StorageService } from "../storage/storage.service.js";
 import { randomUUID } from "crypto";
 import { sanitizeFilename } from "@/utils/sanitizeFilename.js";
+import type { ICacheService } from "@/shared/services/cache.service.js";
 
 export class ProfileService {
   constructor(
     private readonly profileRepo: IProfileRepo,
-    private readonly storageService: StorageService
+    private readonly storageService: StorageService,
+    private readonly cacheService: ICacheService
   ) {}
 
   // Fetch loggedin user profile details - (need auth access)
   async getProfile(authUserId: string) {
+    const cachedProfile = await this.cacheService.getUserProfile(authUserId);
+
+    if (cachedProfile) {
+      return { profile: cachedProfile };
+    }
+
     const profile = await this.profileRepo.findByAuthUserId(authUserId);
 
     if (!profile) {
       throw AppError.unauthorized("User no longer exist", ErrorCode.UNAUTHORIZED);
     }
+
+    await this.cacheService.setUserProfile(authUserId, profile);
 
     return { profile };
   }
@@ -57,6 +67,8 @@ export class ProfileService {
         throw AppError.notFound("Profile not found", ErrorCode.NOT_FOUND);
       }
 
+      await this.cacheService.invalidateUserProfile(authUserId);
+
       return { updatedProfile };
     } catch (error) {
       mapForeignKeyError(error);
@@ -82,6 +94,9 @@ export class ProfileService {
     }
 
     const updatedProfile = await this.profileRepo.updateLogoUrl(authUserId, logoUrl);
+
+    await this.cacheService.invalidateUserProfile(authUserId);
+
     return { logoUrl: updatedProfile?.logoUrl ?? logoUrl };
   }
 
@@ -98,6 +113,9 @@ export class ProfileService {
     }
 
     await this.profileRepo.updateLogoUrl(authUserId, null);
+
+    await this.cacheService.invalidateUserProfile(authUserId);
+
     return { logoUrl: null };
   }
 }

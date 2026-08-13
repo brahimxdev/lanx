@@ -25,7 +25,7 @@ export const countries = pgTable("countries", {
   ),
 });
 
-export const professionSourceEnum = pgEnum("profession_source_enum", ["seed", "admin", "user"]);
+export const professionSourceEnum = pgEnum("profession_source_enum", ["seed", "admin"]);
 
 export const professions = pgTable(
   "professions",

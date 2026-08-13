@@ -9,6 +9,7 @@ import cookieParser from "cookie-parser";
 import { accountRouter } from "@/modules/account/account.routes.js";
 import { lookupRouter } from "@/modules/lookup/lookup.routes.js";
 import { profileRouter } from "@/modules/profile/profile.routes.js";
+import { ensureDeviceId } from "./middlewares/ensureDeviceId.js";
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use(express.json());
 
 // cookie parser
 app.use(cookieParser());
+app.use(ensureDeviceId);
 
 // Mouting Routes
 app.use("/api/v1/auth", authRouter);
