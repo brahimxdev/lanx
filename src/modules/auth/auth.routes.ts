@@ -41,7 +41,7 @@ authRouter.post(
 authRouter.post(
   "/sign-in",
   validateRequest({ body: signInSchema }),
-  rateLimiter("sign-in"),
+  rateLimiter("login"),
   asyncBodyHandler(authController.signIn)
 );
 

@@ -1,24 +1,18 @@
 import type { Request, Response, NextFunction } from "express";
+import { rateLimitRules, type RateLimitRule, type RateLimitRuleName } from "@/config/rateLimit.js";
 import { rateLimiterService } from "@/shared/services/ratelimit/rateLimiter.service.js";
-import { rateLimitRules, type RateLimitRule } from "@/config/rateLimit.js";
 
-const buildKey = (req: Request, rule: RateLimitRule, ruleName: string): string => {
-  const identifier =
-    rule.keyBy === "userId"
-      ? (req.user?.id ?? req.ip ?? "unknown") // fall back to IP if unauthenticated
-      : (req.ip ?? "unknown");
+function buildKey(req: Request, rule: RateLimitRule, ruleName: string): string {
+  const ip = req.ip ?? "unknown";
+  const identifier = rule.keyBy === "userId" ? (req.user?.id ?? ip) : ip;
 
   return `ratelimit:${ruleName}:${identifier}`;
-};
+}
 
-export const rateLimiter = (ruleName: keyof typeof rateLimitRules) => {
+export function rateLimiter(ruleName: RateLimitRuleName) {
   const rule = rateLimitRules[ruleName];
 
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (!rule) {
-      next();
-      return;
-    }
     const key = buildKey(req, rule, ruleName);
     const result = await rateLimiterService.check(key, rule);
 
@@ -36,4 +30,4 @@ export const rateLimiter = (ruleName: keyof typeof rateLimitRules) => {
     next();
     return;
   };
-};
+}

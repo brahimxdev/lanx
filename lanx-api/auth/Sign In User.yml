@@ -45,6 +45,10 @@ runtime:
         } else {
           console.log("Access token setting failed");
         }
+  assertions:
+    - expression: res.status
+      operator: in
+      value: "[200, 401, 429]"
 
 settings:
   encodeUrl: true

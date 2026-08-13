@@ -7,27 +7,25 @@ export interface RateLimitRule {
   keyBy: "ip" | "userId";
 }
 
-export const rateLimitRules: Record<string, RateLimitRule> = {
-  // general API traffic — cheap, approximate is fine
+export const rateLimitRules = {
   default: {
     algorithm: "fixed-window",
     limit: 100,
     windowSeconds: 60,
     keyBy: "userId",
   },
-
-  // brute-force-sensitive endpoints - needs precision
   login: {
     algorithm: "sliding-window-log",
     limit: 5,
     windowSeconds: 60,
-    keyBy: "ip", // no userId yet at login time
+    keyBy: "ip",
   },
-
   passwordReset: {
     algorithm: "sliding-window-log",
     limit: 3,
     windowSeconds: 300,
     keyBy: "ip",
   },
-};
+} as const satisfies Record<string, RateLimitRule>;
+
+export type RateLimitRuleName = keyof typeof rateLimitRules;
