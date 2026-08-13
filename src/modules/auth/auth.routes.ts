@@ -40,8 +40,8 @@ authRouter.post(
 // Route for sign in
 authRouter.post(
   "/sign-in",
-  validateRequest({ body: signInSchema }),
   rateLimiter("login"),
+  validateRequest({ body: signInSchema }),
   asyncBodyHandler(authController.signIn)
 );
 
@@ -55,8 +55,8 @@ authRouter.post(
 // Route for resetting password
 authRouter.post(
   "/reset-password",
-  validateRequest({ body: resetPasswordSchema }),
   rateLimiter("passwordReset"),
+  validateRequest({ body: resetPasswordSchema }),
   asyncBodyHandler(authController.resetPassword)
 );
 

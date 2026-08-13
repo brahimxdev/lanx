@@ -11,6 +11,7 @@ import {
   revokeSessionSchema,
 } from "./account.validation.js";
 import { accountController } from "./account.module.js";
+import { rateLimiter } from "@/middlewares/rateLimiter.js";
 
 export const accountRouter = Router();
 
@@ -22,6 +23,7 @@ accountRouter.use(requireAuth);
 // Route for changing password in dashboard - (need auth access)
 accountRouter.patch(
   "/password",
+  rateLimiter("changePassword"),
   validateRequest({ body: changePasswordSchema }),
   asyncBodyHandler(accountController.changePassword)
 );
@@ -29,6 +31,7 @@ accountRouter.patch(
 // Route for requesting email change in dashboard - (need auth access)
 accountRouter.post(
   "/email",
+  rateLimiter("requestChangeEmail"),
   validateRequest({ body: changeEmailSchema }),
   asyncBodyHandler(accountController.requestChangeEmail)
 );

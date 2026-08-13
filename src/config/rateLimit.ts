@@ -26,6 +26,20 @@ export const rateLimitRules = {
     windowSeconds: 300,
     keyBy: "ip",
   },
+
+  changePassword: {
+    algorithm: "sliding-window-log",
+    limit: 3,
+    windowSeconds: 300,
+    keyBy: "userId",
+  },
+
+  requestChangeEmail: {
+    algorithm: "sliding-window-log",
+    limit: 3,
+    windowSeconds: 300,
+    keyBy: "userId",
+  },
 } as const satisfies Record<string, RateLimitRule>;
 
 export type RateLimitRuleName = keyof typeof rateLimitRules;
