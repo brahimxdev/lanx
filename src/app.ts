@@ -10,7 +10,7 @@ import { accountRouter } from "@/modules/account/account.routes.js";
 import { lookupRouter } from "@/modules/lookup/lookup.routes.js";
 import { profileRouter } from "@/modules/profile/profile.routes.js";
 import { ensureDeviceId } from "./middlewares/ensureDeviceId.js";
-import { rateLimit } from "./middlewares/rateLimiter.js";
+import { rateLimiter } from "./middlewares/rateLimiter.js";
 
 const app = express();
 
@@ -20,7 +20,7 @@ if (isDev) {
 }
 
 // Rate Limit
-app.use(rateLimit("default"));
+app.use(rateLimiter("default"));
 
 // Deserialize all coming request data into json
 app.use(express.json());
@@ -29,7 +29,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(ensureDeviceId);
 
-// Mouting Routes
+// Mounting Routes
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/account", accountRouter);
 app.use("/api/v1/lookup", lookupRouter);
