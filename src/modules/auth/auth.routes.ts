@@ -10,6 +10,7 @@ import {
 } from "./auth.validation.js";
 import { asyncBodyHandler, asyncHandler } from "@/utils/asyncHandler.js";
 import { authController } from "./auth.module.js";
+import { rateLimit } from "@/middlewares/rateLimiter.js";
 
 export const authRouter = Router();
 
@@ -40,6 +41,7 @@ authRouter.post(
 authRouter.post(
   "/sign-in",
   validateRequest({ body: signInSchema }),
+  rateLimit("sign-in"),
   asyncBodyHandler(authController.signIn)
 );
 
@@ -54,6 +56,7 @@ authRouter.post(
 authRouter.post(
   "/reset-password",
   validateRequest({ body: resetPasswordSchema }),
+  rateLimit("passwordReset"),
   asyncBodyHandler(authController.resetPassword)
 );
 

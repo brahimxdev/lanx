@@ -10,6 +10,7 @@ import { accountRouter } from "@/modules/account/account.routes.js";
 import { lookupRouter } from "@/modules/lookup/lookup.routes.js";
 import { profileRouter } from "@/modules/profile/profile.routes.js";
 import { ensureDeviceId } from "./middlewares/ensureDeviceId.js";
+import { rateLimit } from "./middlewares/rateLimiter.js";
 
 const app = express();
 
@@ -17,6 +18,10 @@ const app = express();
 if (isDev) {
   app.use(morgan("dev"));
 }
+
+// Rate Limit
+app.use(rateLimit("default"));
+
 // Deserialize all coming request data into json
 app.use(express.json());
 
