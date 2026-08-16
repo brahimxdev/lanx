@@ -1,0 +1,31 @@
+info:
+  name: Create Client
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: /{{baseUrl}}/clients
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // const body = res.getBody();
+        // const accessToken = body?.data?.accessToken;
+
+        // if (accessToken) {
+        //   const payload = JSON.parse(atob(accessToken.split(".")[1]));
+        //   bru.setEnvVar("accessToken", accessToken);
+        //   bru.setEnvVar("sessionId", payload.sessionId);
+        //   bru.setEnvVar("accessTokenExpiry", payload.exp * 1000); // exp is in seconds, Date.now() is ms
+        // } else {
+        //   console.log("Access token setting failed");
+        // }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
