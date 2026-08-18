@@ -75,6 +75,20 @@ export class ClientRepo implements IClientRepo {
 
     return paginate(data, page, limit, total);
   }
+
+  // Find a client by ID for a specific freelancer
+  async findById(
+    clientId: string,
+    authUserId: string,
+    executor: Executor = db
+  ): Promise<Client | null> {
+    const [clientRecord] = await executor
+      .select()
+      .from(clients)
+      .where(and(eq(clients.id, clientId), eq(clients.authUserId, authUserId)));
+
+    return clientRecord ?? null;
+  }
 }
 
 export const clientRepo = new ClientRepo();

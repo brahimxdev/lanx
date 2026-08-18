@@ -1,8 +1,13 @@
 import type { ClientService } from "./clients.service.js";
 import type { IAuthenticatedUser } from "@/modules/auth/auth.types.js";
-import type { TypedBodyRequest, TypedQueryRequest, TypedRequest } from "@/types/typed-request.js";
+import type {
+  TypedBodyRequest,
+  TypedParamsRequest,
+  TypedQueryRequest,
+  TypedRequest,
+} from "@/types/typed-request.js";
 import { AppError, ErrorCode, HttpStatus } from "@/errors/index.js";
-import type { ICreateClient, IListClients } from "./clients.validation.js";
+import type { ICreateClient, IGetClient, IListClients } from "./clients.validation.js";
 import type { Response } from "express";
 
 export class ClientController {
@@ -49,6 +54,23 @@ export class ClientController {
     res.status(HttpStatus.OK).json({
       status: true,
       data: { clients, pagination: meta },
+    });
+  };
+
+  // Get client by ID for a freelancer
+  getClientById = async (req: TypedParamsRequest<IGetClient>, res: Response) => {
+    //* Validation middleware already validated data!
+    this.assertUser(req);
+
+    const authUserId = req.user.id;
+    const { clientId } = req.validated.params;
+
+    // Service layer to handle logic
+    const { client } = await this.clientService.getClientById(clientId, authUserId);
+
+    res.status(HttpStatus.OK).json({
+      status: true,
+      data: { client },
     });
   };
 }

@@ -5,10 +5,13 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/clients?search=johndoe&sortBy=createdAt&sortOrder=desc&isIncludedArchived=false&page=1&limit=10"
+  url: "{{baseUrl}}/clients?page=1&limit=30&sortBy=createdAt&sortOrder=desc&isIncludedArchived=false&search=johnrrr"
   params:
-    - name: search
-      value: johndoe
+    - name: page
+      value: "1"
+      type: query
+    - name: limit
+      value: "30"
       type: query
     - name: sortBy
       value: createdAt
@@ -19,11 +22,8 @@ http:
     - name: isIncludedArchived
       value: "false"
       type: query
-    - name: page
-      value: "1"
-      type: query
-    - name: limit
-      value: "10"
+    - name: search
+      value: johnrrr
       type: query
   auth: inherit
 

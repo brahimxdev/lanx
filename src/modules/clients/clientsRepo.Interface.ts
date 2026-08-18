@@ -18,4 +18,5 @@ export interface IClientRepo {
     authUserId: string,
     executor?: Executor
   ): Promise<Paginated<Client>>;
+  findById(clientId: string, authUserId: string, executor?: Executor): Promise<Client | null>;
 }

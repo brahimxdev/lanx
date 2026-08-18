@@ -33,5 +33,10 @@ export const listclientsSchema = paginationSchema.extend({
   isIncludedArchived: z.enum(["true", "false"]).default("false"),
 });
 
+export const getClientSchema = z.object({
+  clientId: z.uuid("Invalid client ID"),
+});
+
 export type ICreateClient = z.infer<typeof createClientSchema>;
 export type IListClients = z.infer<typeof listclientsSchema>;
+export type IGetClient = z.infer<typeof getClientSchema>;

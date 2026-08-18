@@ -31,4 +31,15 @@ export class ClientService {
 
     return { data, meta };
   }
+
+  // Get client by ID for a freelancer
+  async getClientById(clientId: string, authUserId: string) {
+    const client = await this.clientRepo.findById(clientId, authUserId);
+
+    if (!client) {
+      throw AppError.notFound("Client not found", ErrorCode.NOT_FOUND);
+    }
+
+    return { client };
+  }
 }

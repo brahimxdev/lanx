@@ -9,6 +9,6 @@ variables:
   - name: accessTokenExpiry
     value:
       type: number
-      data: "1787062844000"
+      data: "1787065391000"
   - name: clientId
-    value: e5129f8f-62ff-4bc2-8819-e82bec1e2395
+    value: ebea5ebd-b22f-463e-a4e7-701baede47b9
