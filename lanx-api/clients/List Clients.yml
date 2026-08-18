@@ -5,7 +5,26 @@ info:
 
 http:
   method: GET
-  url: /{{baseUrl}}/clients
+  url: "{{baseUrl}}/clients?search=johndoe&sortBy=createdAt&sortOrder=desc&isIncludedArchived=false&page=1&limit=10"
+  params:
+    - name: search
+      value: johndoe
+      type: query
+    - name: sortBy
+      value: createdAt
+      type: query
+    - name: sortOrder
+      value: desc
+      type: query
+    - name: isIncludedArchived
+      value: "false"
+      type: query
+    - name: page
+      value: "1"
+      type: query
+    - name: limit
+      value: "10"
+      type: query
   auth: inherit
 
 settings:

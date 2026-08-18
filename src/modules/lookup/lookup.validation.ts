@@ -9,17 +9,17 @@ const searchSchema = z
   .optional();
 
 export const listCountriesSchema = z.object({
-  // Filteration
+  // Filtration
   search: searchSchema,
 });
 
 export const listCurrenciesSchema = z.object({
-  // Filteration
+  // Filtration
   search: searchSchema,
 });
 
 export const listProfessionsSchema = z.object({
-  // Filteration
+  // Filtration
   search: searchSchema,
 });
 

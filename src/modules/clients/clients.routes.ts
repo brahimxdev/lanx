@@ -1,8 +1,8 @@
 import { requireAuth } from "@/middlewares/requireAuth.js";
 import { validateRequest } from "@/middlewares/validateRequest.js";
 import { Router } from "express";
-import { createClientSchema } from "./clients.validation.js";
-import { asyncBodyHandler } from "@/utils/asyncHandler.js";
+import { createClientSchema, listclientsSchema } from "./clients.validation.js";
+import { asyncBodyHandler, asyncQueryHandler } from "@/utils/asyncHandler.js";
 import { clientController } from "./clients.module.js";
 
 export const clientsRouter = Router();
@@ -17,4 +17,11 @@ clientsRouter.post(
   "/",
   validateRequest({ body: createClientSchema }),
   asyncBodyHandler(clientController.createClient)
+);
+
+// Route for listing client
+clientsRouter.get(
+  "/",
+  validateRequest({ query: listclientsSchema }),
+  asyncQueryHandler(clientController.listClients)
 );

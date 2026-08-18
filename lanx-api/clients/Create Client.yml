@@ -5,24 +5,31 @@ info:
 
 http:
   method: POST
-  url: /{{baseUrl}}/clients
+  url: "{{baseUrl}}/clients"
+  body:
+    type: json
+    data: |-
+      {
+        "firstName": "Jane",
+        "lastName": "Doe", 
+        "email": "jennifer@email.com", 
+        "companyName": "Jane Doe Inc",
+        "notes": "Working on creating API for them"
+      }
   auth: inherit
 
 runtime:
   scripts:
     - type: after-response
       code: |-
-        // const body = res.getBody();
-        // const accessToken = body?.data?.accessToken;
+        const body = res.getBody();
+        const clientId = body?.data?.newClient?.id;
 
-        // if (accessToken) {
-        //   const payload = JSON.parse(atob(accessToken.split(".")[1]));
-        //   bru.setEnvVar("accessToken", accessToken);
-        //   bru.setEnvVar("sessionId", payload.sessionId);
-        //   bru.setEnvVar("accessTokenExpiry", payload.exp * 1000); // exp is in seconds, Date.now() is ms
-        // } else {
-        //   console.log("Access token setting failed");
-        // }
+        if (clientId) {
+          bru.setEnvVar("clientId", clientId);
+        } else {
+          console.log("ClientId setting failed");
+        }
 
 settings:
   encodeUrl: true

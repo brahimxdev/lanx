@@ -1,5 +1,5 @@
 import { isUniqueViolation } from "@/utils/isUniqueViolation.js";
-import type { ICreateClient } from "./clients.validation.js";
+import type { ICreateClient, IListClients } from "./clients.validation.js";
 import type { IClientRepo, Client } from "./clientsRepo.Interface.js";
 import { AppError } from "@/errors/AppError.js";
 import { ErrorCode } from "@/errors/error-codes.js";
@@ -23,5 +23,12 @@ export class ClientService {
 
       throw error;
     }
+  }
+
+  // List clients for a freelancer with pagination, sorting, and filtration
+  async listClients(queryParams: IListClients, authUserId: string) {
+    const { data, meta } = await this.clientRepo.findManyByAuthUserId(queryParams, authUserId);
+
+    return { data, meta };
   }
 }

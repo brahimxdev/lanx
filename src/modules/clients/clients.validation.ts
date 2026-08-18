@@ -1,4 +1,8 @@
+import { paginationSchema, createSortSchema } from "@/shared/pagination/index.js";
 import { z } from "zod";
+
+// Reusable sort schema
+const clientsSortSchema = createSortSchema(["createdAt"] as const);
 
 // Reusable email schema
 const emailSchema = z
@@ -15,4 +19,19 @@ export const createClientSchema = z.object({
   notes: z.string().trim().optional(),
 });
 
+export const listclientsSchema = paginationSchema.extend({
+  ...clientsSortSchema.shape,
+  // Filtration
+  search: z
+    .string()
+    .min(1, "search query must be at least 1 characters")
+    .max(100, "Search query must be less than 100 characters")
+    .trim()
+    .optional(),
+
+  // Filtration
+  isIncludedArchived: z.enum(["true", "false"]).default("false"),
+});
+
 export type ICreateClient = z.infer<typeof createClientSchema>;
+export type IListClients = z.infer<typeof listclientsSchema>;
