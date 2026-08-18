@@ -40,10 +40,7 @@ export class AuthService {
     const existingUser = await this.authUserRepo.findByEmail(input.email);
 
     if (existingUser) {
-      throw AppError.conflict(
-        "An account with this email already exists, please sign in",
-        ErrorCode.ALREADY_EXISTS
-      );
+      throw AppError.conflict("Account already exist, please sign in", ErrorCode.ALREADY_EXISTS);
     }
 
     // 2. Hash password + Generate confirmation code
@@ -53,30 +50,38 @@ export class AuthService {
 
     // 3. Save unverified user
     // db transactions
-    const { user } = await db.transaction(async (tx) => {
-      // tx 1 - create user record
-      const user = await this.authUserRepo.createUser({ email: input.email, passwordHash }, tx);
+    try {
+      const { user } = await db.transaction(async (tx) => {
+        // tx 1 - create user record
+        const user = await this.authUserRepo.createUser({ email: input.email, passwordHash }, tx);
 
-      // tx 2 - create confirmation record
-      const confirmationRecord = await this.emailConfirmationRepo.create(
-        {
-          authUserId: user.id,
-          codeHash: confirmationCodeHash,
-          confirmationType: "sign_up",
-          expiresAt: new Date(Date.now() + authConfig.confirmationCodeTTL),
-        },
-        tx
-      );
+        // tx 2 - create confirmation record
+        const confirmationRecord = await this.emailConfirmationRepo.create(
+          {
+            authUserId: user.id,
+            codeHash: confirmationCodeHash,
+            confirmationType: "sign_up",
+            expiresAt: new Date(Date.now() + authConfig.confirmationCodeTTL),
+          },
+          tx
+        );
 
-      return { user, confirmationRecord };
-    });
+        return { user, confirmationRecord };
+      });
 
-    const newUser = sanitizeUser(user);
+      const newUser = sanitizeUser(user);
 
-    // Send code to user via email
-    await this.emailService.sendConfirmationCode(tempEmailDomain, confirmationCode);
+      // Send code to user via email
+      void this.emailService.sendConfirmationCode(tempEmailDomain, confirmationCode);
 
-    return { newUser };
+      return { newUser };
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        throw AppError.conflict("Account already exist, please sign in", ErrorCode.ALREADY_EXISTS);
+      }
+
+      throw error;
+    }
   }
 
   // Confirm email for user signing up

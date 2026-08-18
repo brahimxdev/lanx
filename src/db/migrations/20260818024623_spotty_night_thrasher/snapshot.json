@@ -1,8 +1,8 @@
 {
+  "id": "26e217c2-1e53-4835-931e-e2f83944773e",
+  "prevIds": ["96b54bc2-427d-4370-8399-95ca695bac6c"],
   "version": "8",
   "dialect": "postgres",
-  "id": "facda363-ea4a-443f-94cc-6b57f8972e1c",
-  "prevIds": ["00000000-0000-0000-0000-000000000000"],
   "ddl": [
     {
       "values": ["sign_up", "change_email", "password_reset"],
@@ -11,7 +11,7 @@
       "schema": "public"
     },
     {
-      "values": ["seed", "admin", "user"],
+      "values": ["seed", "admin"],
       "name": "profession_source_enum",
       "entityType": "enums",
       "schema": "public"
@@ -55,6 +55,12 @@
     {
       "isRlsEnabled": false,
       "name": "professions",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "clients",
       "entityType": "tables",
       "schema": "public"
     },
@@ -301,6 +307,19 @@
       "generated": null,
       "identity": null,
       "name": "auth_user_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "sessions"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "device_id",
       "entityType": "columns",
       "schema": "public",
       "table": "sessions"
@@ -735,6 +754,136 @@
       "table": "professions"
     },
     {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "clients"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "auth_user_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "clients"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "first_name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "clients"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "last_name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "clients"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "email",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "clients"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "company_name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "clients"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "notes",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "clients"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "archived_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "clients"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "clients"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "clients"
+    },
+    {
       "nameExplicit": true,
       "columns": [
         {
@@ -855,6 +1004,13 @@
           "asc": true,
           "nullsFirst": false,
           "opclass": null
+        },
+        {
+          "value": "device_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
         }
       ],
       "isUnique": false,
@@ -884,6 +1040,41 @@
       "method": "btree",
       "concurrently": false,
       "name": "idx_sessions_expires_at",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "sessions"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "auth_user_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "device_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "expires_at",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "idx_sessions_user_device_lookup",
       "entityType": "indexes",
       "schema": "public",
       "table": "sessions"
@@ -1015,6 +1206,55 @@
       "table": "professions"
     },
     {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "auth_user_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "email",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": "\"archived_at\" IS NULL",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "idx_clients_auth_user_id_email",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "clients"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "auth_user_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "idx_clients_auth_user_id",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "clients"
+    },
+    {
       "nameExplicit": false,
       "columns": ["auth_user_id"],
       "schemaTo": "public",
@@ -1106,6 +1346,19 @@
       "table": "countries"
     },
     {
+      "nameExplicit": false,
+      "columns": ["auth_user_id"],
+      "schemaTo": "public",
+      "tableTo": "auth_users",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "clients_auth_user_id_auth_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "clients"
+    },
+    {
       "columns": ["id"],
       "nameExplicit": false,
       "name": "auth_users_pkey",
@@ -1159,6 +1412,14 @@
       "name": "professions_pkey",
       "schema": "public",
       "table": "professions",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "clients_pkey",
+      "schema": "public",
+      "table": "clients",
       "entityType": "pks"
     },
     {

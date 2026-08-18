@@ -11,6 +11,7 @@ import { lookupRouter } from "@/modules/lookup/lookup.routes.js";
 import { profileRouter } from "@/modules/profile/profile.routes.js";
 import { ensureDeviceId } from "./middlewares/ensureDeviceId.js";
 import { rateLimiter } from "./middlewares/rateLimiter.js";
+import { clientsRouter } from "@/modules/clients/clients.routes.js";
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/account", accountRouter);
 app.use("/api/v1/lookup", lookupRouter);
 app.use("/api/v1/profile", profileRouter);
+app.use("/api/v1/clients", clientsRouter);
 
 // Catch all routes and display 404 for not matched route
 app.use((req: Request, _res: Response, _next: NextFunction) => {

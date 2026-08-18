@@ -1,5 +1,5 @@
 -- Custom SQL migration file, put your code below! --
--- Custom SQL migration file, put your code below! --
+
 -- Create function for updating updated_at timestamp
 CREATE OR REPLACE FUNCTION trigger_set_updated_at()
 RETURNS TRIGGER AS $$
@@ -21,6 +21,12 @@ BEFORE UPDATE ON profiles
 FOR EACH ROW
 EXECUTE FUNCTION trigger_set_updated_at();
 
+-- Create trigger for updating updated_at on clients
+CREATE TRIGGER set_clients_updated_at
+BEFORE UPDATE ON clients
+FOR EACH ROW
+EXECUTE FUNCTION trigger_set_updated_at();
+
 -- auto-revoke all sessions the moment a user is soft-deleted.
 CREATE OR REPLACE FUNCTION revoke_sessions_on_soft_delete()
 RETURNS TRIGGER AS $$
@@ -39,3 +45,4 @@ CREATE TRIGGER on_auth_user_soft_delete
 AFTER UPDATE ON auth_users
 FOR EACH ROW
 EXECUTE FUNCTION revoke_sessions_on_soft_delete();
+

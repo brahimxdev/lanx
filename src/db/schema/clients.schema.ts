@@ -20,11 +20,9 @@ export const clients = pgTable(
   },
   // columns constraints and indexes
   (pgTable) => [
-    {
-      authUserEmailUnique: uniqueIndex("idx_clients_auth_user_id_email")
-        .on(pgTable.authUserId, pgTable.email)
-        .where(sql`${pgTable.archivedAt} IS NULL`),
-      idxAuthUserId: index("idx_clients_auth_user_id").on(pgTable.authUserId),
-    },
+    uniqueIndex("idx_clients_auth_user_id_email")
+      .on(pgTable.authUserId, pgTable.email)
+      .where(sql`${pgTable.archivedAt} IS NULL`),
+    index("idx_clients_auth_user_id").on(pgTable.authUserId),
   ]
 );

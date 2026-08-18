@@ -34,7 +34,6 @@ type UpdateProfileData = {
 export interface IProfileRepo {
   findByAuthUserId(authUserId: string, executor?: Executor): Promise<ProfileResult | null>;
   createProfile(data: NewProfile, executor?: Executor): Promise<NewProfile>;
-  existsByAuthUserId(authUserId: string, executor?: Executor): Promise<boolean>;
   updateByAuthUserId(
     authUserId: string,
     data: UpdateProfileData,
@@ -131,17 +130,6 @@ export class ProfileRepo implements IProfileRepo {
     }
 
     return profile;
-  }
-
-  // Check if a profile exist by authUserId
-  async existsByAuthUserId(authUserId: string, executor: Executor = db): Promise<boolean> {
-    const [profile] = await executor
-      .select({ id: profiles.id })
-      .from(profiles)
-      .where(eq(profiles.authUserId, authUserId))
-      .limit(1);
-
-    return profile !== undefined;
   }
 
   // Update profile by authUserId
