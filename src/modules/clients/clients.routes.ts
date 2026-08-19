@@ -49,3 +49,10 @@ clientsRouter.patch(
   validateRequest({ params: getClientSchema, body: updateClientSchema }),
   asyncParamsAndBodyHandler(clientController.updateClient)
 );
+
+// Route for deleting (archive) a single client
+clientsRouter.delete(
+  "/:clientId",
+  validateRequest({ params: getClientSchema }),
+  asyncParamsHandler(clientController.archiveClient)
+);

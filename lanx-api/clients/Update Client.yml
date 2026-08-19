@@ -5,13 +5,12 @@ info:
 
 http:
   method: PATCH
-  url: "{{baseUrl}}/clients"
+  url: "{{baseUrl}}/clients/{{clientId}}"
   body:
     type: json
     data: |-
       {
-      //   "firstName": "Jane",
-      //   "lastName": "Daniel", 
+       
         "email": "jane@email.com", 
         "companyName": "Jane Inc",
         "notes": "Working on creating Cloud services for them"

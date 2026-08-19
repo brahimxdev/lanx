@@ -15,6 +15,8 @@ export type UpdateClientInput = {
   [K in keyof CreateClientInput]?: CreateClientInput[K] | undefined;
 };
 
+export type archivedResult = Pick<Client, "id">;
+
 export interface IClientRepo {
   createClient(data: CreateClientInput, authUserId: string, executor?: Executor): Promise<Client>;
   findManyByAuthUserId(
@@ -29,4 +31,9 @@ export interface IClientRepo {
     authUserId: string,
     executor?: Executor
   ): Promise<Client | null>;
+  archiveClient(
+    clientId: string,
+    authUserId: string,
+    executor?: Executor
+  ): Promise<archivedResult | null>;
 }

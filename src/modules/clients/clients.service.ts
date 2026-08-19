@@ -60,4 +60,15 @@ export class ClientService {
       throw error;
     }
   }
+
+  // Archive a single client for a freelancer
+  async archiveClient(clientId: string, authUserId: string) {
+    const result = await this.clientRepo.archiveClient(clientId, authUserId);
+
+    if (!result) {
+      throw AppError.notFound("Client not found", ErrorCode.NOT_FOUND);
+    }
+
+    return { result };
+  }
 }

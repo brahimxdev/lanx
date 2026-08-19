@@ -80,7 +80,6 @@ export class ClientController {
   };
 
   // Update a client by ID for a freelancer
-
   updateClient = async (req: TypedRequest<unknown, IUpdateClient, IGetClient>, res: Response) => {
     //* Validation middleware already validated data!
     this.assertUser(req);
@@ -95,6 +94,22 @@ export class ClientController {
     res.status(HttpStatus.OK).json({
       status: true,
       data: { clientRecord },
+    });
+  };
+
+  // Archive a single client for a freelancer
+  archiveClient = async (req: TypedParamsRequest<IGetClient>, res: Response) => {
+    //* Validation middleware already validated data!
+    this.assertUser(req);
+
+    const authUserId = req.user.id;
+    const { clientId } = req.validated.params;
+
+    // Service layer to handle logic
+    await this.clientService.archiveClient(clientId, authUserId);
+
+    res.status(HttpStatus.NoContent).json({
+      status: true,
     });
   };
 }

@@ -4,6 +4,7 @@ import type {
   Client,
   CreateClientInput,
   UpdateClientInput,
+  archivedResult,
 } from "./clientsRepo.Interface.js";
 import { db } from "@/db/client.js";
 import { clients } from "@/db/schema/index.js";
@@ -119,6 +120,27 @@ export class ClientRepo implements IClientRepo {
       .returning();
 
     return clientRecord ?? null;
+  }
+
+  // Archive a single client per freelancer
+  async archiveClient(
+    clientId: string,
+    authUserId: string,
+    executor: Executor = db
+  ): Promise<archivedResult | null> {
+    const [result] = await executor
+      .update(clients)
+      .set({ archivedAt: new Date() })
+      .where(
+        and(
+          eq(clients.id, clientId),
+          eq(clients.authUserId, authUserId),
+          isNull(clients.archivedAt)
+        )
+      )
+      .returning({ id: clients.id });
+
+    return result ?? null;
   }
 }
 
