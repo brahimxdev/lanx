@@ -1,5 +1,5 @@
 info:
-  name: Update Clients
+  name: Update Client
   type: http
   seq: 4
 

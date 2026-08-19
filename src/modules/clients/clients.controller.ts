@@ -7,7 +7,12 @@ import type {
   TypedRequest,
 } from "@/types/typed-request.js";
 import { AppError, ErrorCode, HttpStatus } from "@/errors/index.js";
-import type { ICreateClient, IGetClient, IListClients } from "./clients.validation.js";
+import type {
+  ICreateClient,
+  IGetClient,
+  IListClients,
+  IUpdateClient,
+} from "./clients.validation.js";
 import type { Response } from "express";
 
 export class ClientController {
@@ -71,6 +76,25 @@ export class ClientController {
     res.status(HttpStatus.OK).json({
       status: true,
       data: { client },
+    });
+  };
+
+  // Update a client by ID for a freelancer
+
+  updateClient = async (req: TypedRequest<unknown, IUpdateClient, IGetClient>, res: Response) => {
+    //* Validation middleware already validated data!
+    this.assertUser(req);
+
+    const authUserId = req.user.id;
+    const { clientId } = req.validated.params;
+    const input = req.validated.body;
+
+    // Service layer to handle logic
+    const { clientRecord } = await this.clientService.updateClient(input, clientId, authUserId);
+
+    res.status(HttpStatus.OK).json({
+      status: true,
+      data: { clientRecord },
     });
   };
 }

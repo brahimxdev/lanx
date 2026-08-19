@@ -1,5 +1,5 @@
 import { isUniqueViolation } from "@/utils/isUniqueViolation.js";
-import type { ICreateClient, IListClients } from "./clients.validation.js";
+import type { ICreateClient, IListClients, IUpdateClient } from "./clients.validation.js";
 import type { IClientRepo, Client } from "./clientsRepo.Interface.js";
 import { AppError } from "@/errors/AppError.js";
 import { ErrorCode } from "@/errors/error-codes.js";
@@ -41,5 +41,23 @@ export class ClientService {
     }
 
     return { client };
+  }
+
+  // Update a client by ID for a freelancer
+  async updateClient(input: IUpdateClient, clientId: string, authUserId: string) {
+    try {
+      const clientRecord = await this.clientRepo.updateClient(input, clientId, authUserId);
+
+      return { clientRecord };
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        throw AppError.conflict(
+          "A client with the same email already exist",
+          ErrorCode.ALREADY_EXISTS
+        );
+      }
+
+      throw error;
+    }
   }
 }

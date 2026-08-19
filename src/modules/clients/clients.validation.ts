@@ -37,6 +37,19 @@ export const getClientSchema = z.object({
   clientId: z.uuid("Invalid client ID"),
 });
 
+export const updateClientSchema = z
+  .object({
+    firstName: z.string().trim().min(1).max(100).optional(),
+    lastName: z.string().trim().min(1).max(100).optional(),
+    email: emailSchema.optional(),
+    companyName: z.string().trim().max(150).nullable().optional(),
+    notes: z.string().trim().nullable().optional(),
+  })
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "Atleast one field must be provided to update",
+  });
+
 export type ICreateClient = z.infer<typeof createClientSchema>;
 export type IListClients = z.infer<typeof listclientsSchema>;
 export type IGetClient = z.infer<typeof getClientSchema>;
+export type IUpdateClient = z.infer<typeof updateClientSchema>;

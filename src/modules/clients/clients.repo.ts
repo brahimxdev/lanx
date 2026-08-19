@@ -1,5 +1,10 @@
 import type { Executor } from "@/db/executor.js";
-import type { IClientRepo, Client, CreateClientInput } from "./clientsRepo.Interface.js";
+import type {
+  IClientRepo,
+  Client,
+  CreateClientInput,
+  UpdateClientInput,
+} from "./clientsRepo.Interface.js";
 import { db } from "@/db/client.js";
 import { clients } from "@/db/schema/index.js";
 import { AppError } from "@/errors/AppError.js";
@@ -86,6 +91,32 @@ export class ClientRepo implements IClientRepo {
       .select()
       .from(clients)
       .where(and(eq(clients.id, clientId), eq(clients.authUserId, authUserId)));
+
+    return clientRecord ?? null;
+  }
+
+  // Update a single client per freelancer, if client not found return null
+  async updateClient(
+    data: UpdateClientInput,
+    clientId: string,
+    authUserId: string,
+    executor: Executor = db
+  ): Promise<Client | null> {
+    if (Object.keys(data).length === 0) {
+      throw AppError.badRequest("At leat one field must be provided to update");
+    }
+
+    const [clientRecord] = await executor
+      .update(clients)
+      .set(data)
+      .where(
+        and(
+          eq(clients.id, clientId),
+          eq(clients.authUserId, authUserId),
+          isNull(clients.archivedAt)
+        )
+      )
+      .returning();
 
     return clientRecord ?? null;
   }

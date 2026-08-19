@@ -11,6 +11,10 @@ export type CreateClientInput = Pick<
   "firstName" | "lastName" | "email" | "companyName" | "notes"
 >;
 
+export type UpdateClientInput = {
+  [K in keyof CreateClientInput]?: CreateClientInput[K] | undefined;
+};
+
 export interface IClientRepo {
   createClient(data: CreateClientInput, authUserId: string, executor?: Executor): Promise<Client>;
   findManyByAuthUserId(
@@ -19,4 +23,10 @@ export interface IClientRepo {
     executor?: Executor
   ): Promise<Paginated<Client>>;
   findById(clientId: string, authUserId: string, executor?: Executor): Promise<Client | null>;
+  updateClient(
+    data: UpdateClientInput,
+    clientId: string,
+    authUserId: string,
+    executor?: Executor
+  ): Promise<Client | null>;
 }

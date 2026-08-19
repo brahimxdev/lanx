@@ -1,8 +1,18 @@
 import { requireAuth } from "@/middlewares/requireAuth.js";
 import { validateRequest } from "@/middlewares/validateRequest.js";
 import { Router } from "express";
-import { createClientSchema, getClientSchema, listclientsSchema } from "./clients.validation.js";
-import { asyncBodyHandler, asyncParamsHandler, asyncQueryHandler } from "@/utils/asyncHandler.js";
+import {
+  createClientSchema,
+  getClientSchema,
+  listclientsSchema,
+  updateClientSchema,
+} from "./clients.validation.js";
+import {
+  asyncBodyHandler,
+  asyncParamsAndBodyHandler,
+  asyncParamsHandler,
+  asyncQueryHandler,
+} from "@/utils/asyncHandler.js";
 import { clientController } from "./clients.module.js";
 
 export const clientsRouter = Router();
@@ -31,4 +41,11 @@ clientsRouter.get(
   "/:clientId",
   validateRequest({ params: getClientSchema }),
   asyncParamsHandler(clientController.getClientById)
+);
+
+// Route for updating a single client
+clientsRouter.patch(
+  "/:clientId",
+  validateRequest({ params: getClientSchema, body: updateClientSchema }),
+  asyncParamsAndBodyHandler(clientController.updateClient)
 );

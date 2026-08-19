@@ -27,3 +27,7 @@ export const asyncQueryHandler = <TQuery>(fn: AsyncHandlerFn<TQuery>): RequestHa
 export const asyncParamsHandler = <TParams>(
   fn: AsyncHandlerFn<unknown, unknown, TParams>
 ): RequestHandler => asyncHandler<unknown, unknown, TParams>(fn);
+
+export const asyncParamsAndBodyHandler = <TParams, TBody>(
+  fn: AsyncHandlerFn<unknown, TBody, TParams>
+): RequestHandler => asyncHandler<unknown, TBody, TParams>(fn);
