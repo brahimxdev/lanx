@@ -6,10 +6,12 @@ info:
 http:
   method: GET
   url: "{{baseUrl}}/clients/{{clientId}}"
-  auth: inherit
+  auth:
+    type: bearer
 
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true

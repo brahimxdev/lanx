@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/clients?page=1&limit=30&sortBy=createdAt&sortOrder=desc&isIncludedArchived=false&search=johnrrr"
+  url: "{{baseUrl}}/clients?page=1&limit=30&sortBy=firstName&sortOrder=asc&isIncludedArchived=true"
   params:
     - name: page
       value: "1"
@@ -14,21 +14,25 @@ http:
       value: "30"
       type: query
     - name: sortBy
-      value: createdAt
+      value: firstName
       type: query
     - name: sortOrder
-      value: desc
+      value: asc
       type: query
     - name: isIncludedArchived
-      value: "false"
+      value: "true"
       type: query
     - name: search
-      value: johnrrr
+      value: jane.doe@example.com
       type: query
-  auth: inherit
+      disabled: true
+  auth:
+    type: bearer
+    token: ""
 
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true

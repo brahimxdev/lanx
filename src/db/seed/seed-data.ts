@@ -1,5 +1,3 @@
-import "@/config/load-env.js";
-
 import { sql, eq } from "drizzle-orm";
 import { countries, currencies, professions, profiles, authUsers } from "../schema/index.js";
 import currenciesData from "../seed-data/currencies.json" with { type: "json" };

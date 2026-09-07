@@ -24,5 +24,6 @@ export const clients = pgTable(
       .on(pgTable.authUserId, pgTable.email)
       .where(sql`${pgTable.archivedAt} IS NULL`),
     index("idx_clients_auth_user_id").on(pgTable.authUserId),
+    index("idx_clients_created_at").on(pgTable.createdAt),
   ]
 );

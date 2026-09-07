@@ -1,5 +1,4 @@
 import type { IAuthUserRepo, IEmailConfirmationRepo, ISessionRepo } from "@/shared/repo/index.js";
-import type { EmailService } from "../email/email.service.js";
 import type { ITokenService } from "./token.service.js";
 import type {
   ISignup,
@@ -19,20 +18,29 @@ import {
 import { db } from "@/db/client.js";
 import { authConfig, redisConfig } from "@/config/index.js";
 import type { IRequestMeta } from "@/modules/auth/index.js";
-import { tempEmailDomain } from "@/shared/constants/tempEmail.js";
 import { sanitizeUser } from "@/utils/sanitizeUser.js";
 import type { ICacheService } from "@/shared/services/cache.service.js";
 import { isUniqueViolation } from "@/utils/isUniqueViolation.js";
+import type { IEmailQueueProducer } from "./jobs/emailQueue.js";
 
 export class AuthService {
   constructor(
     private readonly authUserRepo: IAuthUserRepo,
     private readonly emailConfirmationRepo: IEmailConfirmationRepo,
     private readonly sessionRepo: ISessionRepo,
-    private readonly emailService: EmailService,
+    private readonly emailQueue: IEmailQueueProducer,
     private readonly tokenService: ITokenService,
     private readonly cacheService: ICacheService
   ) {}
+
+  // Helper to func for enqueing jobs
+  private async enqueueEmail(send: () => Promise<void>, context: string): Promise<void> {
+    try {
+      await send();
+    } catch (err) {
+      console.error(`Failed to enqueue ${context} email:`, (err as Error).message);
+    }
+  }
 
   // Create new user
   async createUser(input: ISignup) {
@@ -71,8 +79,11 @@ export class AuthService {
 
       const newUser = sanitizeUser(user);
 
-      // Send code to user via email
-      void this.emailService.sendConfirmationCode(tempEmailDomain, confirmationCode);
+      // enqueue sending code via email to email job
+      await this.enqueueEmail(
+        () => this.emailQueue.sendConfirmationCode(newUser.email, confirmationCode),
+        "confirmation code"
+      );
 
       return { newUser };
     } catch (error) {
@@ -188,7 +199,7 @@ export class AuthService {
     // Sanitized user to return to client
     const newUser = sanitizeUser(updatedUser);
 
-    void this.emailService.sendWelcomeEmailPro(tempEmailDomain, { email: newUser.email });
+    await this.enqueueEmail(() => this.emailQueue.sendWelcomeEmail(newUser.email), "welcome email");
     return { newUser, accessToken, refreshToken };
   }
 
@@ -232,9 +243,12 @@ export class AuthService {
       );
     });
 
-    // 4. Send code to user via email
+    // 4. Send code to the user's real email address
     await this.cacheService.resetConfirmAttempts(existingUser.id, "sign_up");
-    void this.emailService.sendConfirmationCode(tempEmailDomain, confirmationCode);
+    await this.enqueueEmail(
+      () => this.emailQueue.sendConfirmationCode(existingUser.email, confirmationCode),
+      "confirmation code"
+    );
 
     return {
       message: "If an account exist, a code has been sent!",
@@ -391,7 +405,10 @@ export class AuthService {
 
     await this.cacheService.resetConfirmAttempts(existingUser.id, "password_reset");
 
-    void this.emailService.sendPasswordResetCode(tempEmailDomain, confirmationCode);
+    await this.enqueueEmail(
+      () => this.emailQueue.sendPasswordResetCode(existingUser.email, confirmationCode),
+      "password reset code"
+    );
 
     return {
       message: "If an account exist, a code has been sent!",
@@ -490,8 +507,11 @@ export class AuthService {
       )
     );
 
-    // Send password reset notification
-    void this.emailService.sendPasswordResetNotification(tempEmailDomain);
+    // Send password reset notification to the real user email
+    await this.enqueueEmail(
+      () => this.emailQueue.sendPasswordResetNotification(existingUser.email),
+      "password reset"
+    );
 
     return {
       message: "Your password has been reset",

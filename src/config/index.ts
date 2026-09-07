@@ -21,6 +21,7 @@ export const dbConfig = {
 
 export const redisConfig = {
   redisUrl: appEnv.REDIS_URL,
+  jobsRedisUrl: appEnv.JOBS_REDIS_URL,
 
   ttl: {
     accessToken: ms(appEnv.JWT_EXPIRES_IN as StringValue), // 15 mins

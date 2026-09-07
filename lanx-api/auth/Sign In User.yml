@@ -14,20 +14,20 @@ http:
       //   "password": "DevPassword123!"
       // }
 
-      {
-        "email": "amara@lanx.dev",
-        "password": "DevPassword123!"
-      }
+      // {
+      //   "email": "amara@lanx.dev",
+      //   "password": "DevPassword123!"
+      // }
 
       // {
       //   "email": "john@lanx.dev",
       //   "password": "DevPassword123!"
       // }
 
-      // {
-      //   "email": "lekxy@lanx.dev",
-      //   "password": "DevPassword123!"
-      // }
+      {
+        "email": "lekxy@lanx.dev",
+        "password": "DevPassword123!"
+      }
   auth: inherit
 
 runtime:
@@ -55,3 +55,4 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true

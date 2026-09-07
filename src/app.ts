@@ -12,6 +12,7 @@ import { profileRouter } from "@/modules/profile/profile.routes.js";
 import { ensureDeviceId } from "./middlewares/ensureDeviceId.js";
 import { rateLimiter } from "./middlewares/rateLimiter.js";
 import { clientsRouter } from "@/modules/clients/clients.routes.js";
+import { healthRouter } from "./health/health.routes.js";
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use(cookieParser());
 app.use(ensureDeviceId);
 
 // Mounting Routes
+app.use("/api/v1/health", healthRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/account", accountRouter);
 app.use("/api/v1/lookup", lookupRouter);

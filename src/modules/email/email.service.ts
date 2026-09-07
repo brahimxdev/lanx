@@ -8,7 +8,7 @@ import { NotificationEmail } from "@/emails/templates/NotificationEmail.js";
 export class EmailService {
   private async send({ to, subject, react, context }: ISendEmailParams): Promise<void> {
     const { data, error } = await resend.emails.send({
-      from: emailConfig.from,
+      from: `Lanx <${emailConfig.from}>`,
       to,
       subject,
       react,
@@ -25,10 +25,10 @@ export class EmailService {
   async sendConfirmationCode(to: string, code: string): Promise<void> {
     return this.send({
       to,
-      subject: "Your temporary Lanx verification code",
+      subject: "Your Lanx verification code",
       react: ConfirmationCodeEmail({
-        preview: "Your temporary Lanx verification code",
-        description: "Enter this temporary verification code to continue. It expires in 10 minutes",
+        preview: "Your Lanx verification code",
+        description: "Enter this verification code to continue. It expires in 10 minutes.",
         code,
       }),
       context: "confirmation code",

@@ -15,10 +15,12 @@ http:
         "companyName": "Jane Inc",
         "notes": "Working on creating Cloud services for them"
       }
-  auth: inherit
+  auth:
+    type: bearer
 
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true

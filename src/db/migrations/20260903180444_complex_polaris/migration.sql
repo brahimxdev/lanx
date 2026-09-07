@@ -42,8 +42,7 @@ CREATE TABLE "sessions" (
 );
 --> statement-breakpoint
 CREATE TABLE "profiles" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-	"auth_user_id" uuid NOT NULL,
+	"auth_user_id" uuid PRIMARY KEY,
 	"first_name" text NOT NULL,
 	"last_name" text NOT NULL,
 	"business_name" text,
@@ -88,6 +87,18 @@ CREATE TABLE "clients" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "job_failures" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"queue_name" text NOT NULL,
+	"job_id" text NOT NULL,
+	"job_name" text NOT NULL,
+	"payload" jsonb NOT NULL,
+	"error_message" text NOT NULL,
+	"error_stack" text,
+	"attempts_made" integer NOT NULL,
+	"failed_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE UNIQUE INDEX "auth_users_email_unique_active" ON "auth_users" ("email") WHERE "deleted_at" IS NULL;--> statement-breakpoint
 CREATE INDEX "idx_email_confirmations_auth_user_id" ON "email_confirmations" ("auth_user_id");--> statement-breakpoint
 CREATE INDEX "idx_email_confirmations_expires-at" ON "email_confirmations" ("expires_at");--> statement-breakpoint
@@ -104,6 +115,9 @@ CREATE UNIQUE INDEX "professions_name_unique" ON "professions" (lower("name"));-
 CREATE INDEX "idx_professions_name" ON "professions" ("name");--> statement-breakpoint
 CREATE UNIQUE INDEX "idx_clients_auth_user_id_email" ON "clients" ("auth_user_id","email") WHERE "archived_at" IS NULL;--> statement-breakpoint
 CREATE INDEX "idx_clients_auth_user_id" ON "clients" ("auth_user_id");--> statement-breakpoint
+CREATE INDEX "idx_clients_created_at" ON "clients" ("created_at");--> statement-breakpoint
+CREATE INDEX "idx_job_failures_queue_name" ON "job_failures" ("queue_name");--> statement-breakpoint
+CREATE UNIQUE INDEX "idx_job_failures_queue_job_unique" ON "job_failures" ("queue_name","job_id");--> statement-breakpoint
 ALTER TABLE "email_confirmations" ADD CONSTRAINT "email_confirmations_auth_user_id_auth_users_id_fkey" FOREIGN KEY ("auth_user_id") REFERENCES "auth_users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_auth_user_id_auth_users_id_fkey" FOREIGN KEY ("auth_user_id") REFERENCES "auth_users"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "profiles" ADD CONSTRAINT "profiles_auth_user_id_auth_users_id_fkey" FOREIGN KEY ("auth_user_id") REFERENCES "auth_users"("id") ON DELETE CASCADE;--> statement-breakpoint

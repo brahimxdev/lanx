@@ -11,7 +11,7 @@ import { clients } from "@/db/schema/index.js";
 import { AppError } from "@/errors/AppError.js";
 import type { IListClients } from "./clients.validation.js";
 import { paginate, toOffset, type Paginated } from "@/shared/pagination/index.js";
-import { and, asc, desc, eq, ilike, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, isNull, sql, or } from "drizzle-orm";
 
 export class ClientRepo implements IClientRepo {
   // Create client record, if email already exist don't duplicate per freelancer
@@ -48,16 +48,25 @@ export class ClientRepo implements IClientRepo {
     }
 
     if (search) {
-      conditions.push(
-        sql`(${ilike(clients.firstName, `%${search}%`)} OR ${ilike(clients.lastName, `%${search}%`)} OR ${ilike(clients.email, `%${search}%`)} OR ${ilike(clients.companyName, `%${search}%`)})`
+      const searchCondition = or(
+        ilike(clients.firstName, `%${search}%`),
+        ilike(clients.lastName, `%${search}%`),
+        ilike(clients.email, `%${search}%`),
+        ilike(clients.companyName, `%${search}%`)
       );
+
+      if (searchCondition) {
+        conditions.push(searchCondition);
+      }
     }
 
     const whereCondition = and(...conditions);
 
-    const sortColumnMap: Record<IListClients["sortBy"], typeof clients.createdAt> = {
+    const sortColumnMap = {
       createdAt: clients.createdAt,
-    };
+      firstName: clients.firstName,
+      lastName: clients.lastName,
+    } as const;
 
     const sortColumn = sortColumnMap[sortBy];
     const orderFn = sortOrder === "asc" ? asc : desc;

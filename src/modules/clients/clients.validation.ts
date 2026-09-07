@@ -2,7 +2,7 @@ import { paginationSchema, createSortSchema } from "@/shared/pagination/index.js
 import { z } from "zod";
 
 // Reusable sort schema
-const clientsSortSchema = createSortSchema(["createdAt"] as const);
+const clientsSortSchema = createSortSchema(["createdAt", "firstName", "lastName"] as const);
 
 // Reusable email schema
 const emailSchema = z

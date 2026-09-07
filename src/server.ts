@@ -7,6 +7,7 @@ const shutDown = async (signal: string) => {
 
   try {
     await redisClient.close();
+
     console.info("Redis connection closed");
   } catch (err) {
     console.error("Error closing Redis:", err);

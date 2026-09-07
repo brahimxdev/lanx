@@ -12,7 +12,6 @@ import { AppError, ErrorCode } from "@/errors/index.js";
 import bcrypt from "bcryptjs";
 import { authConfig, redisConfig } from "@/config/index.js";
 import { db } from "@/db/client.js";
-import { tempEmailDomain } from "@/shared/constants/tempEmail.js";
 import {
   generateConfirmationCode,
   hashConfirmationCode,
@@ -109,8 +108,8 @@ export class AccountService {
     // sanitize user to return to client
     const sanitizedUser = sanitizeUser(user);
 
-    // Send password reset notification to email
-    void this.emailService.sendPasswordResetNotification(tempEmailDomain);
+    // Send password reset notification to the authenticated user's email
+    void this.emailService.sendPasswordResetNotification(existingUser.email);
 
     return { sanitizedUser, accessToken, refreshToken };
   }
@@ -182,7 +181,7 @@ export class AccountService {
     });
 
     await this.cacheService.resetConfirmAttempts(existingUser.id, "change_email");
-    void this.emailService.sendConfirmationCode(tempEmailDomain, confirmationCode);
+    void this.emailService.sendConfirmationCode(input.newEmail, confirmationCode);
 
     return { message: "Confirmation code sent to your new email" };
   }
@@ -352,6 +351,6 @@ export class AccountService {
       )
     );
 
-    void this.emailService.sendAccountDeletedNotification(tempEmailDomain);
+    void this.emailService.sendAccountDeletedNotification(existingUser.email);
   }
 }

@@ -2,9 +2,26 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile # uses production Dockerfile
+      dockerfile: Dockerfile
+
+    command: node dist/server.js
+
     ports:
       - "3000:3000"
+
     env_file:
       - .env.production
+
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    command: node dist/worker.js
+
+    env_file:
+      - .env.production
+
     restart: unless-stopped

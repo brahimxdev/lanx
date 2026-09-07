@@ -36,6 +36,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
 
     // --- Types ---
     "types": ["node"],

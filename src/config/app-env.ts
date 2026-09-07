@@ -18,6 +18,7 @@ const appEnvSchema = z.object({
 
   // Redis
   REDIS_URL: z.url(),
+  JOBS_REDIS_URL: z.url(),
 
   // Auth
   JWT_SECRET: z.string().min(32),

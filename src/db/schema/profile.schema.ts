@@ -5,9 +5,8 @@ import { authUsers, professions, countries, currencies } from "@/db/schema/index
 export const profiles = pgTable(
   "profiles",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
     authUserId: uuid("auth_user_id")
-      .notNull()
+      .primaryKey()
       .references(() => authUsers.id, { onDelete: "cascade" }),
     firstName: text("first_name").notNull(),
     lastName: text("last_name").notNull(),

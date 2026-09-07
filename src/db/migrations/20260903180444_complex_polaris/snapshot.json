@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "96b54bc2-427d-4370-8399-95ca695bac6c",
+  "id": "4c007871-ce77-4b67-9e16-55921fa871b8",
   "prevIds": ["00000000-0000-0000-0000-000000000000"],
   "ddl": [
     {
@@ -61,6 +61,12 @@
     {
       "isRlsEnabled": false,
       "name": "clients",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "job_failures",
       "entityType": "tables",
       "schema": "public"
     },
@@ -472,19 +478,6 @@
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
-      "default": "gen_random_uuid()",
-      "generated": null,
-      "identity": null,
-      "name": "id",
-      "entityType": "columns",
-      "schema": "public",
-      "table": "profiles"
-    },
-    {
-      "type": "uuid",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
       "default": null,
       "generated": null,
       "identity": null,
@@ -884,6 +877,123 @@
       "table": "clients"
     },
     {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "job_failures"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "queue_name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "job_failures"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "job_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "job_failures"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "job_name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "job_failures"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "payload",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "job_failures"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "error_message",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "job_failures"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "error_stack",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "job_failures"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "attempts_made",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "job_failures"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "failed_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "job_failures"
+    },
+    {
       "nameExplicit": true,
       "columns": [
         {
@@ -1255,6 +1365,76 @@
       "table": "clients"
     },
     {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "created_at",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "idx_clients_created_at",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "clients"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "queue_name",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "idx_job_failures_queue_name",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "job_failures"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "queue_name",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "job_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "idx_job_failures_queue_job_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "job_failures"
+    },
+    {
       "nameExplicit": false,
       "columns": ["auth_user_id"],
       "schemaTo": "public",
@@ -1383,7 +1563,7 @@
       "entityType": "pks"
     },
     {
-      "columns": ["id"],
+      "columns": ["auth_user_id"],
       "nameExplicit": false,
       "name": "profiles_pkey",
       "schema": "public",
@@ -1420,6 +1600,14 @@
       "name": "clients_pkey",
       "schema": "public",
       "table": "clients",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "job_failures_pkey",
+      "schema": "public",
+      "table": "job_failures",
       "entityType": "pks"
     },
     {
