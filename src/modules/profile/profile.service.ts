@@ -3,8 +3,6 @@ import type { IProfileRepo } from "./profile.repo.js";
 import type { ICreateProfile, IUpdateProfile } from "./profile.validation.js";
 import { mapForeignKeyError } from "./profile.util.js";
 import type { StorageService } from "../storage/storage.service.js";
-import { randomUUID } from "crypto";
-import { sanitizeFilename } from "@/utils/sanitizeFilename.js";
 import type { ICacheService } from "@/shared/services/cache.service.js";
 
 export class ProfileService {
@@ -68,7 +66,8 @@ export class ProfileService {
 
   // Upload logo
   async uploadLogo(authUserId: string, file: Express.Multer.File) {
-    const key = `logos/${authUserId}/${randomUUID()}-${sanitizeFilename(file.originalname)}`;
+    const key = `avatars/${authUserId}/avatar.webp`;
+
     const logoUrl = await this.storageService.uploadPublic(key, file.buffer, file.mimetype);
 
     const existingProfile = await this.profileRepo.findByAuthUserId(authUserId);
@@ -76,11 +75,6 @@ export class ProfileService {
     // No profile row yet. Client holds the URL until POST /profile.
     if (!existingProfile) {
       return { logoUrl };
-    }
-
-    // Clean up the old logo now that the new one is safely uploaded
-    if (existingProfile.logoUrl) {
-      await this.storageService.deletePublic(existingProfile.logoUrl);
     }
 
     const updatedProfile = await this.profileRepo.updateLogoUrl(authUserId, logoUrl);

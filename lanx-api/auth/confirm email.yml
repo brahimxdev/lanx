@@ -11,7 +11,7 @@ http:
     data: |-
       {
         "email": "ibrahim.techresources@proton.me",
-        "confirmationCode": "241600"
+        "confirmationCode": "345961"
       }
   auth: inherit
 
@@ -36,3 +36,4 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+  forwardAuthorizationHeader: true

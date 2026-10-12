@@ -155,7 +155,6 @@ export class AuthController {
     const refreshToken = this.tokenService.getRefreshTokenFromCookie(req);
 
     const { message } = await this.authService.logout(refreshToken);
-
     this.tokenService.clearRefreshTokenCookie(res);
 
     res.status(HttpStatus.OK).json({

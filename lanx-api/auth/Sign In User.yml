@@ -25,9 +25,14 @@ http:
       // }
 
       {
-        "email": "lekxy@lanx.dev",
-        "password": "DevPassword123!"
+        "email": "ibrahim.techresources@proton.me",
+        "password": "IBRahim123!!!"
       }
+
+      // {
+      //   "email": "lekxy@lanx.dev",
+      //   "password": "DevPassword123!"
+      // }
   auth: inherit
 
 runtime:

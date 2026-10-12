@@ -12,6 +12,7 @@ interface IRecordJobFailureInput {
   attemptsMade: number;
 }
 
+// Job failure for the initializing background job from job queue
 export const recordJobFailure = async (input: IRecordJobFailureInput): Promise<void> => {
   await db
     .insert(jobFailures)
