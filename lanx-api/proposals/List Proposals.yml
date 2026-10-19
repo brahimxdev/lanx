@@ -1,0 +1,94 @@
+info:
+  name: List Proposals
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseUrl}}/proposals?status[]=draft&status[]=sent&status[]=viewed"
+  params:
+    - name: page
+      value: "1"
+      type: query
+      disabled: true
+    - name: limit
+      value: "30"
+      type: query
+      disabled: true
+    - name: sortBy
+      value: totalAmount
+      type: query
+      disabled: true
+    - name: sortOrder
+      value: desc
+      type: query
+      disabled: true
+    - name: search
+      value: web development
+      type: query
+      disabled: true
+    - name: isIncludedArchived
+      value: "false"
+      type: query
+      description: filter proposas based on text passed
+      disabled: true
+    - name: status[]
+      value: draft
+      type: query
+    - name: status[]
+      value: sent
+      type: query
+    - name: status[]
+      value: viewed
+      type: query
+    - name: currencyCode[]
+      value: USD
+      type: query
+      disabled: true
+    - name: currencyCode
+      value: CAD
+      type: query
+      disabled: true
+    - name: expiresWithin
+      value: 7d
+      type: query
+      disabled: true
+    - name: expiresFrom
+      value: 2026-10-16
+      type: query
+      disabled: true
+    - name: expiresTo
+      value: 2026-10-29
+      type: query
+      disabled: true
+    - name: discountType[]
+      value: fixed
+      type: query
+      disabled: true
+    - name: discountType[]
+      value: percentage
+      type: query
+      disabled: true
+    - name: minAmount
+      value: "100"
+      type: query
+      disabled: true
+    - name: maxAmount
+      value: "400"
+      type: query
+      disabled: true
+    - name: totalAmount
+      value: "900"
+      type: query
+      disabled: true
+  body:
+    type: json
+    data: ""
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

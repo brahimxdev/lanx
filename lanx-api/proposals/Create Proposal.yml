@@ -10,27 +10,28 @@ http:
     type: json
     data: |-
       {
-        "clientId": "4d66008e-3b84-48ec-a429-42b21d56913f",
+        "clientId": "{{clientId}}",
         "title": "Website Development Proposal",
         "description": "Proposal for designing and developing a company website.",
         "currencyCode": "USD",
         "discountType": "percentage",
-        "discountPercentageValue": 10,
+      //   "discountFixedValue": 20,
+        "discountPercentageValue": 20,
         "lineItems": [
           {
             "description": "UI/UX Design",
-            "quantity": 1,
-            "unitPrice": 150000
+            "quantity": 4,
+            "unitPrice": 100
           },
           {
             "description": "Frontend Development",
-            "quantity": 1,
-            "unitPrice": 300000
+            "quantity": 2,
+            "unitPrice": 100
           },
           {
             "description": "Backend Development",
-            "quantity": 1,
-            "unitPrice": 250000
+            "quantity": 3,
+            "unitPrice": 100
           }
         ]
       }

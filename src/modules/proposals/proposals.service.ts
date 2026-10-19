@@ -26,7 +26,7 @@ export class ProposalService {
     );
 
     if (!clientRecord) {
-      throw AppError.notFound("Client not found", ErrorCode.NOT_FOUND);
+      throw AppError.forbidden("Client not found", ErrorCode.FORBIDDEN);
     }
 
     // Compute line items

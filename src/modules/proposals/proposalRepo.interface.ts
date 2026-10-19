@@ -1,5 +1,7 @@
 import type { Executor } from "@/db/executor.js";
 import type { proposals, proposalLineItems } from "@/db/schema/index.js";
+import type { IListProposals } from "./proposals.validation.js";
+import type { Paginated } from "@/shared/pagination/index.js";
 
 export type Proposal = typeof proposals.$inferSelect;
 export type NewProposal = typeof proposals.$inferInsert;
@@ -31,4 +33,9 @@ export interface IProposalRepo {
     authUserId: string,
     executor?: Executor
   ): Promise<ProposalWithLineItems>;
+  findManyByAuthUserId(
+    queryParams: IListProposals,
+    authUserId: string,
+    executor?: Executor
+  ): Promise<Paginated<Proposal>>;
 }
