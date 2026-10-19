@@ -47,12 +47,24 @@ export const proposals = pgTable(
     expiresAt: timestamp("expires_at", { withTimezone: true }),
     publicTokenHash: text("public_token_hash"),
 
-    subTotal: decimal("sub_total", { precision: 10, scale: 2 }).notNull().default("0.00"),
+    subTotal: decimal("sub_total", { precision: 10, scale: 2, mode: "number" })
+      .notNull()
+      .default(0.0),
     discountType: discountTypeEnum("discount_type"),
-    discountFixedValue: decimal("discount_fixed_value", { precision: 10, scale: 2 }),
-    discountPercentageValue: decimal("discount_percentage_value", { precision: 5, scale: 2 }),
-    discountAmount: decimal("discount_amount", { precision: 10, scale: 2 }),
-    totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull().default("0.00"),
+    discountFixedValue: decimal("discount_fixed_value", {
+      precision: 10,
+      scale: 2,
+      mode: "number",
+    }),
+    discountPercentageValue: decimal("discount_percentage_value", {
+      precision: 5,
+      scale: 2,
+      mode: "number",
+    }),
+    discountAmount: decimal("discount_amount", { precision: 10, scale: 2, mode: "number" }),
+    totalAmount: decimal("total_amount", { precision: 10, scale: 2, mode: "number" })
+      .notNull()
+      .default(0.0),
 
     sentAt: timestamp("sent_at", { withTimezone: true }),
     lastSentAt: timestamp("last_sent_at", { withTimezone: true }),
@@ -147,9 +159,15 @@ export const proposalLineItems = pgTable(
       .references(() => proposals.id, { onDelete: "restrict" }),
 
     description: text("description").notNull(),
-    quantity: decimal("quantity", { precision: 10, scale: 2 }).notNull().default("1.00"),
-    unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull().default("0.00"),
-    totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull().default("0.00"),
+    quantity: decimal("quantity", { precision: 10, scale: 2, mode: "number" })
+      .notNull()
+      .default(1.0),
+    unitPrice: decimal("unit_price", { precision: 10, scale: 2, mode: "number" })
+      .notNull()
+      .default(0.0),
+    totalAmount: decimal("total_amount", { precision: 10, scale: 2, mode: "number" })
+      .notNull()
+      .default(0.0),
 
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

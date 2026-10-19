@@ -1,0 +1,44 @@
+info:
+  name: Create Proposal
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/proposals"
+  body:
+    type: json
+    data: |-
+      {
+        "clientId": "4d66008e-3b84-48ec-a429-42b21d56913f",
+        "title": "Website Development Proposal",
+        "description": "Proposal for designing and developing a company website.",
+        "currencyCode": "USD",
+        "discountType": "percentage",
+        "discountPercentageValue": 10,
+        "lineItems": [
+          {
+            "description": "UI/UX Design",
+            "quantity": 1,
+            "unitPrice": 150000
+          },
+          {
+            "description": "Frontend Development",
+            "quantity": 1,
+            "unitPrice": 300000
+          },
+          {
+            "description": "Backend Development",
+            "quantity": 1,
+            "unitPrice": 250000
+          }
+        ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

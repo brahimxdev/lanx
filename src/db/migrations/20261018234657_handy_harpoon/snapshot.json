@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "4c007871-ce77-4b67-9e16-55921fa871b8",
+  "id": "9eab2e55-5021-4e4a-862e-0a13a558c87b",
   "prevIds": ["00000000-0000-0000-0000-000000000000"],
   "ddl": [
     {
@@ -13,6 +13,27 @@
     {
       "values": ["seed", "admin"],
       "name": "profession_source_enum",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": ["fixed", "percentage"],
+      "name": "discount_type",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "values": [
+        "draft",
+        "sent",
+        "viewed",
+        "accepted",
+        "changes_requested",
+        "declined",
+        "expired",
+        "cancelled"
+      ],
+      "name": "proposal_status",
       "entityType": "enums",
       "schema": "public"
     },
@@ -67,6 +88,18 @@
     {
       "isRlsEnabled": false,
       "name": "job_failures",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "proposal_line_items",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "proposals",
       "entityType": "tables",
       "schema": "public"
     },
@@ -994,6 +1027,448 @@
       "table": "job_failures"
     },
     {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposal_line_items"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "proposal_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposal_line_items"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "description",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposal_line_items"
+    },
+    {
+      "type": "numeric(10,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'1'",
+      "generated": null,
+      "identity": null,
+      "name": "quantity",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposal_line_items"
+    },
+    {
+      "type": "numeric(10,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "unit_price",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposal_line_items"
+    },
+    {
+      "type": "numeric(10,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "total_amount",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposal_line_items"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposal_line_items"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposal_line_items"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "archived_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposal_line_items"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "auth_user_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "client_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "title",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "description",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "proposal_status",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'draft'",
+      "generated": null,
+      "identity": null,
+      "name": "status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "char(3)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "currency_code",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "expires_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "public_token_hash",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "numeric(10,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "sub_total",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "discount_type",
+      "typeSchema": "public",
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "discount_type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "numeric(10,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "discount_fixed_value",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "numeric(5,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "discount_percentage_value",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "numeric(10,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "discount_amount",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "numeric(10,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "total_amount",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "sent_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "last_sent_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "viewed_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "changes_requested_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "accepted_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "declined_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "archived_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "canelled_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
       "nameExplicit": true,
       "columns": [
         {
@@ -1435,6 +1910,90 @@
       "table": "job_failures"
     },
     {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "auth_user_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "idx_proposals_auth_user_id",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "client_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "idx_proposals_client_id",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "status",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "idx_proposals_status",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "public_token_hash",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "proposals_public_token_hash_unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
       "nameExplicit": false,
       "columns": ["auth_user_id"],
       "schemaTo": "public",
@@ -1539,6 +2098,45 @@
       "table": "clients"
     },
     {
+      "nameExplicit": false,
+      "columns": ["proposal_id"],
+      "schemaTo": "public",
+      "tableTo": "proposals",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "proposal_line_items_proposal_id_proposals_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "proposal_line_items"
+    },
+    {
+      "nameExplicit": false,
+      "columns": ["auth_user_id"],
+      "schemaTo": "public",
+      "tableTo": "auth_users",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "proposals_auth_user_id_auth_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "nameExplicit": false,
+      "columns": ["client_id"],
+      "schemaTo": "public",
+      "tableTo": "clients",
+      "columnsTo": ["id"],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "proposals_client_id_clients_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
       "columns": ["id"],
       "nameExplicit": false,
       "name": "auth_users_pkey",
@@ -1611,11 +2209,118 @@
       "entityType": "pks"
     },
     {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "proposal_line_items_pkey",
+      "schema": "public",
+      "table": "proposal_line_items",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "proposals_pkey",
+      "schema": "public",
+      "table": "proposals",
+      "entityType": "pks"
+    },
+    {
       "value": "\"attempt_count\" >= 0",
       "name": "attempt_count_check",
       "entityType": "checks",
       "schema": "public",
       "table": "email_confirmations"
+    },
+    {
+      "value": "\"quantity\" >= 1.00",
+      "name": "quantity_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "proposal_line_items"
+    },
+    {
+      "value": "\"unit_price\" >= 0.00",
+      "name": "unit_price_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "proposal_line_items"
+    },
+    {
+      "value": "\"total_amount\" >= 0.00",
+      "name": "total_amount_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "proposal_line_items"
+    },
+    {
+      "value": "\"total_amount\" = ROUND(\"quantity\" * \"unit_price\", 2)",
+      "name": "line_item_total_amount_consistency_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "proposal_line_items"
+    },
+    {
+      "value": "\"sub_total\" >= 0.00",
+      "name": "sub_total_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "value": "\"total_amount\" >= 0.00",
+      "name": "total_amount_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "value": "(\"discount_type\" = 'fixed'\n             AND \"discount_fixed_value\" IS NOT NULL\n             AND \"discount_percentage_value\" IS NULL)\n          OR (\"discount_type\" = 'percentage'\n             AND \"discount_percentage_value\" IS NOT NULL\n             AND \"discount_fixed_value\" IS NULL)\n          OR (\"discount_type\" IS NULL\n             AND \"discount_fixed_value\" IS NULL\n             AND \"discount_percentage_value\" IS NULL)",
+      "name": "discount_value_exclusivity_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "value": "(\"discount_type\" IS NULL AND \"discount_amount\" IS NULL)\n          OR (\"discount_type\" IS NOT NULL AND \"discount_amount\" IS NOT NULL)",
+      "name": "discount_amount_presence_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "value": "\"discount_fixed_value\" IS NULL\n          OR (\"discount_fixed_value\" >= 0.00 AND \"discount_fixed_value\" <= \"sub_total\")",
+      "name": "discount_fixed_value_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "value": "\"discount_percentage_value\" IS NULL\n          OR (\"discount_percentage_value\" >= 0.00 AND \"discount_percentage_value\" <= 100.00)",
+      "name": "discount_percentage_value_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "value": "\"discount_amount\" IS NULL\n          OR (\"discount_amount\" >= 0.00 AND \"discount_amount\" <= \"sub_total\")",
+      "name": "discount_amount_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "value": "\"discount_type\" IS DISTINCT FROM 'fixed'\n          OR \"discount_amount\" = \"discount_fixed_value\"",
+      "name": "discount_amount_fixed_consistency_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "proposals"
+    },
+    {
+      "value": "\"total_amount\" = \"sub_total\" - COALESCE(\"discount_amount\", 0.00)",
+      "name": "total_amount_consistency_check",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "proposals"
     }
   ],
   "renames": []

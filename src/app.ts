@@ -12,7 +12,8 @@ import { profileRouter } from "@/modules/profile/profile.routes.js";
 import { ensureDeviceId } from "./middlewares/ensureDeviceId.js";
 import { rateLimiter } from "./middlewares/rateLimiter.js";
 import { clientsRouter } from "@/modules/clients/clients.routes.js";
-import { healthRouter } from "./health/health.routes.js";
+import { healthRouter } from "@/health/health.routes.js";
+import { proposalsRouter } from "@/modules/proposals/proposals.routes.js";
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use("/api/v1/account", accountRouter);
 app.use("/api/v1/lookup", lookupRouter);
 app.use("/api/v1/profile", profileRouter);
 app.use("/api/v1/clients", clientsRouter);
+app.use("/api/v1/proposals", proposalsRouter);
 
 // Catch all routes and display 404 for not matched route
 app.use((req: Request, _res: Response, _next: NextFunction) => {
