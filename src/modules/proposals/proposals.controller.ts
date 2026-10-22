@@ -1,8 +1,8 @@
-import type { TypedBodyRequest, TypedRequest } from "@/types/typed-request.js";
+import type { TypedBodyRequest, TypedQueryRequest, TypedRequest } from "@/types/typed-request.js";
 import type { ProposalService } from "./proposals.service.js";
 import { AppError, ErrorCode, HttpStatus } from "@/errors/index.js";
 import type { IAuthenticatedUser } from "@/modules/auth/auth.types.js";
-import type { ICreateProposal } from "./proposals.validation.js";
+import type { ICreateProposal, IListProposals } from "./proposals.validation.js";
 import type { Response } from "express";
 
 export class ProposalController {
@@ -32,6 +32,23 @@ export class ProposalController {
     res.status(HttpStatus.Created).json({
       status: true,
       data: { newProposal },
+    });
+  };
+
+  // list proposals - (need auth access)
+  listProposals = async (req: TypedQueryRequest<IListProposals>, res: Response) => {
+    this.assertUser(req);
+
+    const authUserId = req.user.id;
+
+    const input = req.validated.query;
+
+    // Service layer to handle logic
+    const { data: proposals, meta } = await this.proposalService.listProposals(input, authUserId);
+
+    res.status(HttpStatus.OK).json({
+      status: true,
+      data: { proposals, pagination: meta },
     });
   };
 }

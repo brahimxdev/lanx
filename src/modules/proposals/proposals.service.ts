@@ -1,6 +1,10 @@
 import { AppError, ErrorCode } from "@/errors/index.js";
-import { sanitizeProposal, type IClientOwnershipChecker } from "./proposals.util.js";
-import type { ICreateProposal } from "./proposals.validation.js";
+import {
+  resolveExpiryDate,
+  sanitizeProposal,
+  type IClientOwnershipChecker,
+} from "./proposals.util.js";
+import type { ICreateProposal, IListProposals } from "./proposals.validation.js";
 import {
   computeDiscountAmount,
   computeLineItemTotal,
@@ -77,5 +81,18 @@ export class ProposalService {
 
     const newProposal = sanitizeProposal(proposal);
     return { newProposal };
+  }
+
+  // List proposals
+  async listProposals(queryParams: IListProposals, authUserId: string) {
+    const now = new Date();
+    const expiry = resolveExpiryDate(queryParams, now);
+
+    const { data, meta } = await this.proposalRepo.findManyByAuthUserId(queryParams, authUserId, {
+      now,
+      expiry,
+    });
+
+    return { data, meta };
   }
 }

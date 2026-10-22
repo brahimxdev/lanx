@@ -41,11 +41,11 @@ http:
     - name: status[]
       value: viewed
       type: query
-    - name: currencyCode[]
+    - name: currency[]
       value: USD
       type: query
       disabled: true
-    - name: currencyCode
+    - name: currency
       value: CAD
       type: query
       disabled: true

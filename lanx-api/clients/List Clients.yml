@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/clients?page=1&limit=30&sortBy=firstName&sortOrder=asc&isIncludedArchived=true"
+  url: "{{baseUrl}}/clients?page=1&limit=30&sortBy=firstName&sortOrder=asc&isIncludedArchived=true&sortBy=lastName"
   params:
     - name: page
       value: "1"
@@ -26,6 +26,9 @@ http:
       value: jane.doe@example.com
       type: query
       disabled: true
+    - name: sortBy
+      value: lastName
+      type: query
   auth:
     type: bearer
     token: ""

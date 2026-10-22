@@ -1,20 +1,10 @@
 import { z } from "zod";
 import { paginationSchema, createSortSchema } from "@/shared/pagination/index.js";
 import { proposalStatusEnum, discountTypeEnum } from "@/db/schema/index.js";
-
-export const PROPOSAL_SORT_FIELDS = [
-  "createdAt",
-  "totalAmount",
-  "viewedAt",
-  "acceptedAt",
-  "declinedAt",
-  "updatedAt",
-] as const ;
-
-export type ProposalSortField = (typeof PROPOSAL_SORT_FIELDS)[number]
+import { PROPOSAL_SORT_FIELDS, SUPPORTED_CURRENCIES } from "./proposals.constants.js";
 
 // Reusable sort schema
-const proposalsSortSchema = createSortSchema(PROPOSAL_SORT_FIELDS)
+const proposalsSortSchema = createSortSchema(PROPOSAL_SORT_FIELDS);
 
 const hasAtMostTwoDecimals = (input: number) =>
   Math.abs(input * 100 - Math.round(input * 100)) < 1e-6;
@@ -24,8 +14,6 @@ const TWO_DP = "must have at most 2 decimal places";
 const MAX_VALUE = 10_000_000;
 
 const MAX_AMOUNT = 1_000_000_000_000;
-
-export const SUPPORTED_CURRENCIES = ["USD", "GBP", "EUR", "NGN", "CAD"] as const;
 
 const lineItemInputSchema = z.object({
   description: z.string().trim().min(1).max(2000),
@@ -81,11 +69,28 @@ export const listproposalsSchema = paginationSchema
       .trim()
       .optional(),
     isIncludedArchived: z.enum(["true", "false"]).default("false"),
-    status: z.enum(proposalStatusEnum.enumValues).optional(),
-    currency: z.enum(SUPPORTED_CURRENCIES).optional(),
+    status: z.preprocess(
+      (value) => (value === undefined || Array.isArray(value) ? value : [value]),
+      z
+        .array(z.enum(proposalStatusEnum.enumValues))
+        .min(1)
+        .transform((statuses) => [...new Set(statuses)])
+        .optional()
+    ),
+
+    currency: z.preprocess(
+      (value) => (value === undefined || Array.isArray(value) ? value : [value]),
+      z
+        .array(z.enum(SUPPORTED_CURRENCIES))
+        .min(1)
+        .transform((currencies) => [...new Set(currencies)])
+        .optional()
+    ),
     expiresWithin: z
       .string()
       .regex(/^[1-9]\d{0,2}d$/, "Expected a duration like '7d'")
+      .transform((s) => Number(s.slice(0, -1)))
+      .pipe(z.number().max(365, "expiresWithin cannot exceed 365d"))
       .optional(),
     expiresFrom: z.iso
       .date()
@@ -96,14 +101,21 @@ export const listproposalsSchema = paginationSchema
       .transform((s) => new Date(s))
       .optional(),
 
-    discountType: z.enum(discountTypeEnum.enumValues).optional(),
+    discountType: z.preprocess(
+      (value) => (value === undefined || Array.isArray(value) ? value : [value]),
+      z
+        .array(z.enum(discountTypeEnum.enumValues))
+        .min(1)
+        .transform((currencies) => [...new Set(currencies)])
+        .optional()
+    ),
 
     minAmount: z.coerce.number().min(0).max(MAX_AMOUNT).optional(),
     maxAmount: z.coerce.number().min(0).max(MAX_AMOUNT).optional(),
     totalAmount: z.coerce.number().min(0).max(MAX_AMOUNT).optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.expiresWithin && (data.expiresFrom || data.expiresTo)) {
+    if (data.expiresWithin !== undefined && (data.expiresFrom || data.expiresTo)) {
       ctx.addIssue({
         code: "custom",
         path: ["expiresWithin"],

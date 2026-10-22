@@ -5,14 +5,35 @@ import type {
   CreateLineItemInput,
   ProposalWithLineItems,
   Proposal,
+  IListProposalsContext,
 } from "./proposalRepo.interface.js";
 import { db } from "@/db/client.js";
-import { proposals, proposalLineItems } from "@/db/schema/index.js";
+import { proposals, proposalLineItems, clients } from "@/db/schema/index.js";
 import { AppError } from "@/errors/index.js";
-import type { IListProposals, ProposalSortField } from "./proposals.validation.js";
-import { toOffset, type Paginated } from "@/shared/pagination/index.js";
-import { asc, desc, eq, isNull, and, sql } from "drizzle-orm";
+import type { IListProposals } from "./proposals.validation.js";
+import { paginate, toOffset, type Paginated } from "@/shared/pagination/index.js";
+import {
+  ilike,
+  lte,
+  desc,
+  eq,
+  isNull,
+  and,
+  sql,
+  inArray,
+  type SQL,
+  lt,
+  or,
+  gte,
+  getColumns,
+} from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
+import {
+  EXPIRABLE_STATUSES,
+  isExpirable,
+  type ProposalStatus,
+  type ProposalSortField,
+} from "./proposals.constants.js";
 
 export class ProposalRepo implements IProposalRepo {
   async createProposalWithLineItems(
@@ -73,15 +94,12 @@ export class ProposalRepo implements IProposalRepo {
   async findManyByAuthUserId(
     queryParams: IListProposals,
     authUserId: string,
+    { now, expiry }: IListProposalsContext,
     executor: Executor = db
   ): Promise<Paginated<Proposal>> {
     const offset = toOffset(queryParams.page, queryParams.limit);
 
-    const conditions = [eq(proposals.authUserId, authUserId)];
-
-    if (queryParams.isIncludedArchived === "false") {
-      conditions.push(isNull(proposals.archivedAt));
-    }
+    // Status condition
 
     const PROPOSAL_SORT_COLUMNS = {
       createdAt: proposals.createdAt,
@@ -90,6 +108,7 @@ export class ProposalRepo implements IProposalRepo {
       acceptedAt: proposals.acceptedAt,
       declinedAt: proposals.declinedAt,
       updatedAt: proposals.updatedAt,
+      expiresAt: proposals.expiresAt,
     } as const satisfies Record<ProposalSortField, AnyPgColumn>;
 
     const sortColumn = PROPOSAL_SORT_COLUMNS[queryParams.sortBy];
@@ -101,17 +120,112 @@ export class ProposalRepo implements IProposalRepo {
       desc(proposals.id),
     ];
 
+    const buildStatusCondition = (statuses: ProposalStatus[], now: Date): SQL | undefined => {
+      const parts: (SQL | undefined)[] = [];
+
+      if (statuses.includes("expired")) {
+        parts.push(
+          eq(proposals.status, "expired"),
+          and(inArray(proposals.status, [...EXPIRABLE_STATUSES]), lt(proposals.expiresAt, now))
+        );
+      }
+
+      const rest = statuses.filter((status) => status !== "expired");
+      const expirable = rest.filter(isExpirable);
+      const stable = rest.filter((status) => !isExpirable(status));
+
+      if (stable.length) {
+        parts.push(inArray(proposals.status, stable));
+      }
+
+      if (expirable.length) {
+        parts.push(
+          and(
+            inArray(proposals.status, expirable),
+            or(isNull(proposals.expiresAt), gte(proposals.expiresAt, now))
+          )
+        );
+      }
+
+      return or(...parts);
+    };
+
+    const conditions: (SQL | undefined)[] = [eq(proposals.authUserId, authUserId)];
+
+    // Push conditions if provided
+    if (queryParams.isIncludedArchived === "false") {
+      conditions.push(isNull(proposals.archivedAt));
+    }
+
+    if (queryParams.status?.length) {
+      conditions.push(buildStatusCondition(queryParams.status, now));
+    }
+
+    if (queryParams.currency?.length) {
+      conditions.push(inArray(proposals.currencyCode, queryParams.currency));
+    }
+
+    if (expiry) {
+      if (expiry.from) conditions.push(gte(proposals.expiresAt, expiry.from));
+      if (expiry.to) conditions.push(lt(proposals.expiresAt, expiry.to));
+      if (expiry.pendingOnly) conditions.push(inArray(proposals.status, [...EXPIRABLE_STATUSES]));
+    }
+
+    if (queryParams.discountType?.length) {
+      conditions.push(inArray(proposals.discountType, queryParams.discountType));
+    }
+
+    if (queryParams.minAmount) {
+      conditions.push(gte(proposals.totalAmount, queryParams.minAmount));
+    }
+    if (queryParams.maxAmount) {
+      conditions.push(lte(proposals.totalAmount, queryParams.maxAmount));
+    }
+
+    if (queryParams.totalAmount) {
+      conditions.push(eq(proposals.totalAmount, queryParams.totalAmount));
+    }
+
+    const escapeLike = (s: string) => s.replace(/[\\%_]/g, "\\$&");
+
+    if (queryParams.search) {
+      const pattern = `%${escapeLike(queryParams.search)}%`;
+
+      const searchCondition = or(
+        ilike(proposals.title, pattern),
+        ilike(proposals.description, pattern),
+        ilike(clients.firstName, pattern),
+        ilike(clients.lastName, pattern),
+        ilike(clients.email, pattern),
+        ilike(clients.companyName, pattern)
+      );
+
+      if (searchCondition) conditions.push(searchCondition);
+    }
+
     const whereCondition = and(...conditions);
 
+    // Query the databse
     const [data, countResult] = await Promise.all([
       executor
-        .select()
+        .select(getColumns(proposals))
         .from(proposals)
+        .innerJoin(clients, eq(proposals.clientId, clients.id))
         .where(whereCondition)
         .orderBy(...orderBy)
         .limit(queryParams.limit)
         .offset(offset),
+
+      executor
+        .select({ count: sql<number>`count(*)::int` })
+        .from(proposals)
+        .innerJoin(clients, eq(proposals.clientId, clients.id))
+        .where(whereCondition),
     ]);
+
+    const total = countResult[0]?.count ?? 0;
+
+    return paginate(data, queryParams.page, queryParams.limit, total);
   }
 }
 
