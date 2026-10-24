@@ -4,8 +4,8 @@ import type {
   CreateProposalInput,
   CreateLineItemInput,
   ProposalWithLineItems,
-  Proposal,
   IListProposalsContext,
+  ProposalListItem,
 } from "./proposalRepo.interface.js";
 import { db } from "@/db/client.js";
 import { proposals, proposalLineItems, clients } from "@/db/schema/index.js";
@@ -25,7 +25,6 @@ import {
   lt,
   or,
   gte,
-  getColumns,
 } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import {
@@ -96,7 +95,7 @@ export class ProposalRepo implements IProposalRepo {
     authUserId: string,
     { now, expiry }: IListProposalsContext,
     executor: Executor = db
-  ): Promise<Paginated<Proposal>> {
+  ): Promise<Paginated<ProposalListItem>> {
     const offset = toOffset(queryParams.page, queryParams.limit);
 
     // Status condition
@@ -208,9 +207,35 @@ export class ProposalRepo implements IProposalRepo {
     // Query the databse
     const [data, countResult] = await Promise.all([
       executor
-        .select(getColumns(proposals))
+        .select({
+          // Proposal
+          id: proposals.id,
+          title: proposals.title,
+          status: proposals.status,
+          totalAmount: proposals.totalAmount,
+          currencyCode: proposals.currencyCode,
+          expiresAt: proposals.expiresAt,
+          viewedAt: proposals.viewedAt,
+          acceptedAt: proposals.acceptedAt,
+          declinedAt: proposals.declinedAt,
+          createdAt: proposals.createdAt,
+          updatedAt: proposals.updatedAt,
+          archivedAt: proposals.archivedAt,
+
+          // Client
+          client: {
+            id: clients.id,
+            firstName: clients.firstName,
+            lastName: clients.lastName,
+            companyName: clients.companyName,
+            email: clients.email,
+          },
+        })
         .from(proposals)
-        .innerJoin(clients, eq(proposals.clientId, clients.id))
+        .innerJoin(
+          clients,
+          and(eq(proposals.clientId, clients.id), eq(clients.authUserId, authUserId))
+        )
         .where(whereCondition)
         .orderBy(...orderBy)
         .limit(queryParams.limit)
@@ -219,7 +244,10 @@ export class ProposalRepo implements IProposalRepo {
       executor
         .select({ count: sql<number>`count(*)::int` })
         .from(proposals)
-        .innerJoin(clients, eq(proposals.clientId, clients.id))
+        .innerJoin(
+          clients,
+          and(eq(proposals.clientId, clients.id), eq(clients.authUserId, authUserId))
+        )
         .where(whereCondition),
     ]);
 

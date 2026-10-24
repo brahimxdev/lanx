@@ -11,28 +11,23 @@ http:
     data: |-
       {
         "clientId": "{{clientId}}",
-        "title": "Website Development Proposal",
-        "description": "Proposal for designing and developing a company website.",
-        "currencyCode": "USD",
-        "discountType": "percentage",
-      //   "discountFixedValue": 20,
+        "title": "Cloud Management",
+        "description": "Proposal for managing cloud",
+        "currencyCode": "CAD",
+        "discountType": "fixed",
+        "discountFixedValue": 20,
         "discountPercentageValue": 20,
         "lineItems": [
           {
-            "description": "UI/UX Design",
-            "quantity": 4,
-            "unitPrice": 100
-          },
-          {
-            "description": "Frontend Development",
+            "description": "AWS",
             "quantity": 2,
-            "unitPrice": 100
+            "unitPrice": 400
           },
           {
-            "description": "Backend Development",
-            "quantity": 3,
-            "unitPrice": 100
-          }
+            "description": "Google Cloud",
+            "quantity": 4,
+            "unitPrice": 1000
+          },
         ]
       }
   auth: inherit

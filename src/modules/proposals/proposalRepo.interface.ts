@@ -1,5 +1,5 @@
 import type { Executor } from "@/db/executor.js";
-import type { proposals, proposalLineItems } from "@/db/schema/index.js";
+import type { proposals, proposalLineItems, clients } from "@/db/schema/index.js";
 import type { IListProposals } from "./proposals.validation.js";
 import type { Paginated } from "@/shared/pagination/index.js";
 import type { IExpiryRange } from "./proposals.util.js";
@@ -27,10 +27,30 @@ export type CreateLineItemInput = Pick<NewLineItem, "description"> &
 
 export type ProposalWithLineItems = Proposal & { lineItems: LineItem[] };
 
+type Client = typeof clients.$inferInsert;
+
 export interface IListProposalsContext {
   now: Date;
   expiry?: IExpiryRange | undefined;
 }
+
+export type ProposalListItem = Pick<
+  Proposal,
+  | "id"
+  | "title"
+  | "status"
+  | "totalAmount"
+  | "currencyCode"
+  | "expiresAt"
+  | "viewedAt"
+  | "acceptedAt"
+  | "declinedAt"
+  | "createdAt"
+  | "updatedAt"
+  | "archivedAt"
+> & {
+  client: Pick<Client, "id" | "firstName" | "lastName" | "companyName" | "email">;
+};
 
 export interface IProposalRepo {
   createProposalWithLineItems(
@@ -44,5 +64,5 @@ export interface IProposalRepo {
     authUserId: string,
     context: IListProposalsContext,
     executor?: Executor
-  ): Promise<Paginated<Proposal>>;
+  ): Promise<Paginated<ProposalListItem>>;
 }
