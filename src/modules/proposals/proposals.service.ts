@@ -95,4 +95,15 @@ export class ProposalService {
 
     return { data, meta };
   }
+
+  // Get proposal by ID
+  async getProposalById(proposalId: string, authUserId: string) {
+    const proposal = await this.proposalRepo.findProposalById(proposalId, authUserId);
+
+    if (!proposal) {
+      throw AppError.notFound("Proposal not found", ErrorCode.NOT_FOUND);
+    }
+
+    return { proposal };
+  }
 }

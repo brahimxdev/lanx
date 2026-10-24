@@ -6,9 +6,10 @@ import type {
   ProposalWithLineItems,
   IListProposalsContext,
   ProposalListItem,
+  ProposalGetItem,
 } from "./proposalRepo.interface.js";
 import { db } from "@/db/client.js";
-import { proposals, proposalLineItems, clients } from "@/db/schema/index.js";
+import { proposals, proposalLineItems, clients, authUsers, profiles } from "@/db/schema/index.js";
 import { AppError } from "@/errors/index.js";
 import type { IListProposals } from "./proposals.validation.js";
 import { paginate, toOffset, type Paginated } from "@/shared/pagination/index.js";
@@ -25,6 +26,7 @@ import {
   lt,
   or,
   gte,
+  asc,
 } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import {
@@ -255,6 +257,91 @@ export class ProposalRepo implements IProposalRepo {
 
     return paginate(data, queryParams.page, queryParams.limit, total);
   }
-}
 
+  // Get a proposal by id for a freelancer, including the proposalLineItems, authUsers(email), profiles, clients table
+  async findProposalById(
+    proposalId: string,
+    authUserId: string,
+    executor: Executor = db
+  ): Promise<ProposalGetItem | undefined> {
+    const [proposalRecord] = await executor
+      .select({
+        id: proposals.id,
+        title: proposals.title,
+        description: proposals.description,
+        status: proposals.status,
+        currencyCode: proposals.currencyCode,
+        expiresAt: proposals.expiresAt,
+        subTotal: proposals.subTotal,
+        discountType: proposals.discountType,
+        discountFixedValue: proposals.discountFixedValue,
+        discountPercentageValue: proposals.discountPercentageValue,
+        discountAmount: proposals.discountAmount,
+        totalAmount: proposals.totalAmount,
+        sentAt: proposals.sentAt,
+        lastSentAt: proposals.lastSentAt,
+        viewedAt: proposals.viewedAt,
+        changesRequestedAt: proposals.changesRequestedAt,
+        acceptedAt: proposals.acceptedAt,
+        declinedAt: proposals.declinedAt,
+        createdAt: proposals.createdAt,
+        updatedAt: proposals.updatedAt,
+        cancelledAt: proposals.cancelledAt,
+
+        freelancer: { email: authUsers.email },
+        profile: {
+          firstName: profiles.firstName,
+          lastName: profiles.lastName,
+          businessName: profiles.businessName,
+          logoUrl: profiles.logoUrl,
+        },
+        client: {
+          firstName: clients.firstName,
+          lastName: clients.lastName,
+          email: clients.email,
+          companyName: clients.companyName,
+        },
+      })
+      .from(proposals)
+      .innerJoin(authUsers, eq(authUsers.id, proposals.authUserId))
+      .innerJoin(profiles, eq(profiles.authUserId, proposals.authUserId))
+      .innerJoin(
+        clients,
+        and(eq(clients.id, proposals.clientId), eq(clients.authUserId, authUserId))
+      )
+      .where(
+        and(
+          eq(proposals.id, proposalId),
+          eq(proposals.authUserId, authUserId),
+          isNull(proposals.archivedAt)
+        )
+      )
+      .limit(1);
+
+    // Not found, not yours, or archived: callers can't tell which, and shouldn't.
+    if (!proposalRecord) return undefined;
+
+    const lineItems = await executor
+      .select({
+        id: proposalLineItems.id,
+        proposalId: proposalLineItems.proposalId,
+        description: proposalLineItems.description,
+        quantity: proposalLineItems.quantity,
+        unitPrice: proposalLineItems.unitPrice,
+        totalAmount: proposalLineItems.totalAmount,
+        createdAt: proposalLineItems.createdAt,
+        updatedAt: proposalLineItems.updatedAt,
+      })
+      .from(proposalLineItems)
+      .where(
+        and(
+          eq(proposalLineItems.proposalId, proposalRecord.id),
+          isNull(proposalLineItems.archivedAt)
+        )
+      )
+      .orderBy(asc(proposalLineItems.createdAt), asc(proposalLineItems.id));
+
+    return { ...proposalRecord, proposalLineItems: lineItems };
+  }
+}
 export const proposalRepo = new ProposalRepo();

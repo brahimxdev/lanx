@@ -1,8 +1,12 @@
 import { requireAuth } from "@/middlewares/requireAuth.js";
 import { validateRequest } from "@/middlewares/validateRequest.js";
 import { Router } from "express";
-import { createProposalSchema, listproposalsSchema } from "./proposals.validation.js";
-import { asyncBodyHandler, asyncQueryHandler } from "@/utils/asyncHandler.js";
+import {
+  createProposalSchema,
+  getProposalSchema,
+  listproposalsSchema,
+} from "./proposals.validation.js";
+import { asyncBodyHandler, asyncParamsHandler, asyncQueryHandler } from "@/utils/asyncHandler.js";
 import { proposalController } from "./proposals.module.js";
 
 export const proposalsRouter = Router();
@@ -24,4 +28,11 @@ proposalsRouter.get(
   "/",
   validateRequest({ query: listproposalsSchema }),
   asyncQueryHandler(proposalController.listProposals)
+);
+
+// Route for viewing a single proposal
+proposalsRouter.get(
+  "/:proposalId",
+  validateRequest({ params: getProposalSchema }),
+  asyncParamsHandler(proposalController.getProposalById)
 );

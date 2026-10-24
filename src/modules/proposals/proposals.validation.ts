@@ -144,5 +144,10 @@ export const listproposalsSchema = paginationSchema
     }
   });
 
+export const getProposalSchema = z.object({
+  proposalId: z.uuid("Invalid proposal Id"),
+});
+
 export type ICreateProposal = z.infer<typeof createProposalSchema>;
 export type IListProposals = z.infer<typeof listproposalsSchema>;
+export type IGetProposal = z.infer<typeof getProposalSchema>;

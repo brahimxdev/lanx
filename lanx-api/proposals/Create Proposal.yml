@@ -16,7 +16,7 @@ http:
         "currencyCode": "CAD",
         "discountType": "fixed",
         "discountFixedValue": 20,
-        "discountPercentageValue": 20,
+      //   "discountPercentageValue": 20,
         "lineItems": [
           {
             "description": "AWS",
@@ -27,10 +27,23 @@ http:
             "description": "Google Cloud",
             "quantity": 4,
             "unitPrice": 1000
-          },
+          }
         ]
       }
   auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const body = res.getBody();
+        const proposalId = body?.data?.newProposal?.id;
+
+        if (proposalId) {
+          bru.setEnvVar("proposalId", proposalId);
+        } else {
+          console.log("proposalId setting failed");
+        }
 
 settings:
   encodeUrl: true
