@@ -9,8 +9,30 @@ variables:
   - name: accessTokenExpiry
     value:
       type: number
-      data: "1792864104000"
+      data: "1793555625000"
   - name: clientId
-    value: 0e70ec89-b6a8-4ad3-901f-bebf3bb6f728
+    value: a1c0bda0-8529-4f8f-a49b-8c45ba7293b8
   - name: proposalId
-    value: 1512976c-5aee-484f-ab6d-78dd27da9977
+    value: b23875f7-8665-4d29-b8a6-647924ff629c
+  - name: lineItemId1
+    value: 52006a54-2364-40b6-a45f-984a7f9b6cda
+  - name: lineItemId2
+    value: a545b7e2-15b9-4c73-84b2-fb21a8152dc2
+  - name: lineItemId3
+    value: ""
+  - name: lineItemId4
+    value: ""
+  - name: lineItemId5
+    value: ""
+  - name: lineItemId6
+    value: ""
+  - name: lineItemId7
+    value: ""
+  - name: lineItemId8
+    value: ""
+  - name: lineItemId9
+    value: ""
+  - name: lineItemId10
+    value: ""
+  - name: lineItemIds
+    value: '["52006a54-2364-40b6-a45f-984a7f9b6cda","a545b7e2-15b9-4c73-84b2-fb21a8152dc2"]'

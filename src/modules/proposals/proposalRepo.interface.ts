@@ -1,8 +1,8 @@
 import type { Executor } from "@/db/executor.js";
-import {
-  type proposals,
-  type proposalLineItems,
-  type clients,
+import type {
+  proposals,
+  proposalLineItems,
+  clients,
   authUsers,
   profiles,
 } from "@/db/schema/index.js";
@@ -103,6 +103,40 @@ export type ProposalGetItem = Pick<
   client: Pick<Client, "firstName" | "lastName" | "email" | "companyName">;
 };
 
+export type UpdateProposalInput = Partial<
+  Pick<
+    NewProposal,
+    | "title"
+    | "description"
+    | "currencyCode"
+    | "discountType"
+    | "discountFixedValue"
+    | "discountPercentageValue"
+    | "subTotal"
+    | "discountAmount"
+    | "totalAmount"
+    | "status"
+    | "viewedAt"
+    | "updatedAt"
+  >
+>;
+
+export type UpdateLineItemInput = Partial<
+  Pick<NewLineItem, "description" | "quantity" | "unitPrice" | "totalAmount" | "updatedAt">
+>;
+
+// What the service needs from the locked row to decide and to recompute.
+export type ProposalLockRow = Pick<
+  Proposal,
+  | "id"
+  | "status"
+  | "expiresAt"
+  | "discountType"
+  | "discountFixedValue"
+  | "discountPercentageValue"
+  | "updatedAt"
+>;
+
 export interface IProposalRepo {
   createProposalWithLineItems(
     proposalData: CreateProposalInput,
@@ -110,15 +144,39 @@ export interface IProposalRepo {
     authUserId: string,
     executor?: Executor
   ): Promise<ProposalWithLineItems>;
+
   findManyByAuthUserId(
     queryParams: IListProposals,
     authUserId: string,
     context: IListProposalsContext,
     executor?: Executor
   ): Promise<Paginated<ProposalListItem>>;
+
   findProposalById(
     proposalId: string,
     authUserId: string,
     executor?: Executor
   ): Promise<ProposalGetItem | undefined>;
+
+  findByIdForUpdate(
+    proposalId: string,
+    authUserId: string,
+    executor?: Executor
+  ): Promise<ProposalLockRow | undefined>;
+
+  findActiveLineItems(proposalId: string, executor?: Executor): Promise<LineItem[]>;
+
+  updateLineItem(
+    proposalId: string,
+    lineItemId: string,
+    data: UpdateLineItemInput,
+    executor?: Executor
+  ): Promise<LineItem[] | undefined>;
+
+  updateProposalById(
+    proposalId: string,
+    authUserId: string,
+    data: UpdateProposalInput,
+    executor?: Executor
+  ): Promise<Proposal | undefined>;
 }

@@ -7,8 +7,14 @@ import type {
 import type { ProposalService } from "./proposals.service.js";
 import { AppError, ErrorCode, HttpStatus } from "@/errors/index.js";
 import type { IAuthenticatedUser } from "@/modules/auth/auth.types.js";
-import type { ICreateProposal, IGetProposal, IListProposals } from "./proposals.validation.js";
+import type {
+  ICreateProposal,
+  IGetProposal,
+  IListProposals,
+  IUpdateProposal,
+} from "./proposals.validation.js";
 import type { Response } from "express";
+import { sanitizeProposal } from "./proposals.util.js";
 
 export class ProposalController {
   constructor(private readonly proposalService: ProposalService) {}
@@ -36,7 +42,7 @@ export class ProposalController {
 
     res.status(HttpStatus.Created).json({
       status: true,
-      data: { newProposal },
+      data: { newProposal: sanitizeProposal(newProposal) },
     });
   };
 
@@ -72,6 +78,28 @@ export class ProposalController {
     res.status(HttpStatus.OK).json({
       status: true,
       data: { proposal },
+    });
+  };
+
+  // Update proposal by ID for a freelancer
+  updateProposal = async (
+    req: TypedRequest<unknown, IUpdateProposal, IGetProposal>,
+    res: Response
+  ) => {
+    //* Validation middleware already validated data!
+
+    this.assertUser(req);
+
+    const authUserId = req.user.id;
+    const { proposalId } = req.validated.params;
+    const input = req.validated.body;
+
+    // Service layer to handle request
+    const proposal = await this.proposalService.updateProposal(input, proposalId, authUserId);
+
+    res.status(HttpStatus.OK).json({
+      status: true,
+      data: { proposal: sanitizeProposal(proposal) },
     });
   };
 }

@@ -5,8 +5,14 @@ import {
   createProposalSchema,
   getProposalSchema,
   listproposalsSchema,
+  updateProposalSchema,
 } from "./proposals.validation.js";
-import { asyncBodyHandler, asyncParamsHandler, asyncQueryHandler } from "@/utils/asyncHandler.js";
+import {
+  asyncBodyHandler,
+  asyncParamsAndBodyHandler,
+  asyncParamsHandler,
+  asyncQueryHandler,
+} from "@/utils/asyncHandler.js";
 import { proposalController } from "./proposals.module.js";
 
 export const proposalsRouter = Router();
@@ -35,4 +41,11 @@ proposalsRouter.get(
   "/:proposalId",
   validateRequest({ params: getProposalSchema }),
   asyncParamsHandler(proposalController.getProposalById)
+);
+
+// Route for updating a single proposal
+proposalsRouter.patch(
+  "/:proposalId",
+  validateRequest({ params: getProposalSchema, body: updateProposalSchema }),
+  asyncParamsAndBodyHandler(proposalController.updateProposal)
 );

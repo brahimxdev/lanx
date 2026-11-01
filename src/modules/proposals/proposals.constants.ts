@@ -23,7 +23,20 @@ export const PROPOSAL_SORT_FIELDS = [
   "updatedAt",
   "expiresAt",
 ] as const;
+
+// Statuses in which a freelancer may still edit content. Everything else is locked.
+export const EDITABLE_STATUSES = [
+  "draft",
+  "sent",
+  "viewed",
+  "changes_requested",
+] as const satisfies readonly ProposalStatus[];
+
+export const isEditable = (status: ProposalStatus): boolean =>
+  (EDITABLE_STATUSES as readonly string[]).includes(status);
+
 export const SUPPORTED_CURRENCIES = ["USD", "GBP", "EUR", "NGN", "CAD"] as const;
+
 
 export type ProposalSortField = (typeof PROPOSAL_SORT_FIELDS)[number];
 export type SupportedCurrencies = (typeof SUPPORTED_CURRENCIES)[number];

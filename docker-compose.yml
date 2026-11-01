@@ -1,5 +1,5 @@
 services:
-  appdd:
+  app:
     build:
       context: .
       dockerfile: Dockerfile.dev
@@ -98,3 +98,4 @@ volumes:
   pgdata:
   redisdata:
   redis-jobs-data:
+

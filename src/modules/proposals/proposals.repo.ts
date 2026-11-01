@@ -7,6 +7,11 @@ import type {
   IListProposalsContext,
   ProposalListItem,
   ProposalGetItem,
+  ProposalLockRow,
+  LineItem,
+  UpdateLineItemInput,
+  UpdateProposalInput,
+  Proposal,
 } from "./proposalRepo.interface.js";
 import { db } from "@/db/client.js";
 import { proposals, proposalLineItems, clients, authUsers, profiles } from "@/db/schema/index.js";
@@ -342,6 +347,91 @@ export class ProposalRepo implements IProposalRepo {
       .orderBy(asc(proposalLineItems.createdAt), asc(proposalLineItems.id));
 
     return { ...proposalRecord, proposalLineItems: lineItems };
+  }
+
+  // Find active proposal for editing and lock it until the transaction is completed
+  async findByIdForUpdate(
+    proposalId: string,
+    authUserId: string,
+    executor: Executor = db
+  ): Promise<ProposalLockRow | undefined> {
+    const [proposalRecordToLock] = await executor
+      .select({
+        id: proposals.id,
+        status: proposals.status,
+        expiresAt: proposals.expiresAt,
+        discountType: proposals.discountType,
+        discountFixedValue: proposals.discountFixedValue,
+        discountPercentageValue: proposals.discountPercentageValue,
+        updatedAt: proposals.updatedAt,
+      })
+      .from(proposals)
+      .where(
+        and(
+          eq(proposals.id, proposalId),
+          eq(proposals.authUserId, authUserId),
+          isNull(proposals.archivedAt)
+        )
+      )
+      .limit(1)
+      .for("update");
+
+    return proposalRecordToLock;
+  }
+
+  // Find active line items for a proposal
+  async findActiveLineItems(proposalId: string, executor: Executor = db): Promise<LineItem[]> {
+    const activeLineItemsRecord = await executor
+      .select()
+      .from(proposalLineItems)
+      .where(
+        and(eq(proposalLineItems.proposalId, proposalId), isNull(proposalLineItems.archivedAt))
+      )
+      .orderBy(asc(proposalLineItems.createdAt), asc(proposalLineItems.id));
+
+    return activeLineItemsRecord;
+  }
+
+  // Update line items for a proposal
+  async updateLineItem(
+    proposalId: string,
+    lineItemId: string,
+    data: UpdateLineItemInput,
+    executor: Executor
+  ): Promise<LineItem[] | undefined> {
+    const lineItems = await executor
+      .update(proposalLineItems)
+      .set(data)
+      .where(
+        and(
+          eq(proposalLineItems.id, lineItemId),
+          eq(proposalLineItems.proposalId, proposalId),
+          isNull(proposalLineItems.archivedAt)
+        )
+      )
+      .returning();
+    return lineItems;
+  }
+
+  // Update proposal by id
+  async updateProposalById(
+    proposalId: string,
+    authUserId: string,
+    data: UpdateProposalInput,
+    executor: Executor
+  ): Promise<Proposal | undefined> {
+    const [proposalRecord] = await executor
+      .update(proposals)
+      .set(data)
+      .where(
+        and(
+          eq(proposals.id, proposalId),
+          eq(proposals.authUserId, authUserId),
+          isNull(proposals.archivedAt)
+        )
+      )
+      .returning();
+    return proposalRecord;
   }
 }
 export const proposalRepo = new ProposalRepo();
