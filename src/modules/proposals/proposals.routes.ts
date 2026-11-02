@@ -49,3 +49,10 @@ proposalsRouter.patch(
   validateRequest({ params: getProposalSchema, body: updateProposalSchema }),
   asyncParamsAndBodyHandler(proposalController.updateProposal)
 );
+
+// Route for deleting (archive) a single proposal
+proposalsRouter.delete(
+  "/:proposalId",
+  validateRequest({ params: getProposalSchema }),
+  asyncParamsHandler(proposalController.archiveProposal)
+);  

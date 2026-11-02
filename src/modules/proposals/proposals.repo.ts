@@ -314,13 +314,7 @@ export class ProposalRepo implements IProposalRepo {
         clients,
         and(eq(clients.id, proposals.clientId), eq(clients.authUserId, authUserId))
       )
-      .where(
-        and(
-          eq(proposals.id, proposalId),
-          eq(proposals.authUserId, authUserId),
-          isNull(proposals.archivedAt)
-        )
-      )
+      .where(and(eq(proposals.id, proposalId), eq(proposals.authUserId, authUserId)))
       .limit(1);
 
     // Not found, not yours, or archived: callers can't tell which, and shouldn't.
@@ -423,6 +417,26 @@ export class ProposalRepo implements IProposalRepo {
     const [proposalRecord] = await executor
       .update(proposals)
       .set(data)
+      .where(
+        and(
+          eq(proposals.id, proposalId),
+          eq(proposals.authUserId, authUserId),
+          isNull(proposals.archivedAt)
+        )
+      )
+      .returning();
+    return proposalRecord;
+  }
+
+  // Archive proposal by id
+  async archiveProposalById(
+    proposalId: string,
+    authUserId: string,
+    executor: Executor = db
+  ): Promise<Proposal | undefined> {
+    const [proposalRecord] = await executor
+      .update(proposals)
+      .set({ archivedAt: new Date() })
       .where(
         and(
           eq(proposals.id, proposalId),

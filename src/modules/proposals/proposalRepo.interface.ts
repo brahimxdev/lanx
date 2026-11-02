@@ -179,4 +179,10 @@ export interface IProposalRepo {
     data: UpdateProposalInput,
     executor?: Executor
   ): Promise<Proposal | undefined>;
+
+  archiveProposalById(
+    proposalId: string,
+    authUserId: string,
+    executor?: Executor
+  ): Promise<Proposal | undefined>;
 }

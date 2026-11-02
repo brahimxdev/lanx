@@ -116,7 +116,11 @@ export class ProposalService {
   }
 
   // Update proposal by Id
-  async updateProposal(input: IUpdateProposal, proposalId: string, authUserId: string): Promise<ProposalWithLineItems> {
+  async updateProposal(
+    input: IUpdateProposal,
+    proposalId: string,
+    authUserId: string
+  ): Promise<ProposalWithLineItems> {
     const now = new Date();
 
     return db.transaction(async (tx) => {
@@ -251,5 +255,16 @@ export class ProposalService {
 
       return { ...updatedProposal, lineItems };
     });
+  }
+
+  // Archive proposal by Id
+  async archiveProposal(proposalId: string, authUserId: string) {
+    const result = await this.proposalRepo.archiveProposalById(proposalId, authUserId);
+
+    if (!result) {
+      throw AppError.notFound("Proposal not found", ErrorCode.NOT_FOUND);
+    }
+
+    return { result };
   }
 }

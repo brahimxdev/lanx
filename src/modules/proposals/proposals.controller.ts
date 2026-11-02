@@ -102,4 +102,20 @@ export class ProposalController {
       data: { proposal: sanitizeProposal(proposal) },
     });
   };
+
+  // Archive proposal by ID for a freelancer
+  archiveProposal = async (req: TypedParamsRequest<IGetProposal>, res: Response) => {
+    //* Validation middleware already validated data!
+    this.assertUser(req);
+
+    const authUserId = req.user.id;
+    const { proposalId } = req.validated.params;
+
+    // Service layer to handle request
+    await this.proposalService.archiveProposal(proposalId, authUserId);
+
+    res.status(HttpStatus.NoContent).json({
+      status: true,
+    });
+  };
 }
